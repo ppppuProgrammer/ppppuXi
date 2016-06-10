@@ -253,8 +253,13 @@ package
 				mainStage.TransitionDiamondBG.gotoAndPlay(animationFrame);
 				mainStage.BacklightBG.gotoAndPlay(animationFrame);
 			}
+			if (animationFrame >= 119)
+				{
+					var bp:int = 5;
+				}
 			if(frameNum % 120 == flashStartFrame) //Add character clip
 			{
+				
 			//frameNum != 7 is so Peach is the first character displayed on start
 				//RemoveCurrentCharacterClips();
 				if(characterManager.GetCharSwitchStatus())
@@ -424,11 +429,11 @@ package
 					//characterManager.SetCurrentMusicForAllCharacters();
 					characterManager.MusicForEachOrAll();
 				}
-				/*else if(keyPressed == keyBindings.Activate.main || keyPressed == keyBindings.Activate.alt)
+				else if(keyPressed == keyBindings.Activate.main || keyPressed == keyBindings.Activate.alt)
 				{
 					//characterManager.SetCurrentMusicForAllCharacters();
 					characterManager.ActivateAnimationChange();
-				}*/
+				}
 				/*else if(keyPressed == Keyboard.E)
 				{
 					characterManager.DEBUG_TestMusicLoop();

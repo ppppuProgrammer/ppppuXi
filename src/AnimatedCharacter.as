@@ -32,8 +32,9 @@
 		protected var m_name:String = null;
 		
 		//private var m_numOfLockedAnimations:int = 0;
-		//private var frameToTransitionToLinkedAnimation:int = -1;
-		//private var queuedLinkedAnimationNumber:int = -1;
+		
+		private var frameToTransitionToLinkedAnimation:int = -1;
+		private var queuedLinkedAnimationNumber:int = -1;
 		public function AnimatedCharacter()
 		{
 			//m_charAnimations.x = -227.3;
@@ -72,6 +73,14 @@
 		public function GetCharacterAnimations():MovieClip
 		{
 			return m_charAnimations;
+		}
+		
+		/*Function that should only be called by the animated character mod base class. This stops all movieclips contained
+		 * in m_charAnimations, preventing performance issues due to all the animations playing by default when a new MovieClip is created.
+		*/
+		public function InitializeAfterLoad():void
+		{
+			m_charAnimations.stopAllMovieClips();
 		}
 		
 		public function GetName():String
@@ -349,15 +358,23 @@
 		{
 			if (m_charAnimations)
 			{
-				m_charAnimations.stopAllMovieClips();
+				if (m_charAnimations.isPlaying)
+				{
+					m_charAnimations.stop();
+				}
+				(m_charAnimations.getChildAt(0) as MovieClip).stop();
 			}
 		}
 		
-		/*public function CheckAndSetupLinkedTransition():Boolean
+		public function CheckAndSetupLinkedTransition():Boolean
 		{
 			var linkedAnimationNumber:int = -1;
 			var currLabel:String = m_charAnimations.currentFrameLabel;
-			if (currLabel.indexOf("Into_") == -1) { return false;}
+			if (currLabel == null || currLabel.indexOf("Into_") == -1) 
+			{ 
+				return false;
+			}
+			
 			var labelSearchingFor:String = currLabel.replace("Into_", "");
 			var labelsArray:Array = m_charAnimations.currentLabels;
 			for (var x:int = 0, y:int = labelsArray.length; x < y; ++x )
@@ -369,10 +386,10 @@
 					break;
 				}
 			}
-			if (linkedAnimationNumber) { return false; }
+			if (linkedAnimationNumber == -1) { return false; }
 		
 			//Now to check the linked animation to do things
-			var currentAnimation:MovieClip = (m_charAnimations.getChildAt(m_playAnimationFrame) as MovieClip);
+			var currentAnimation:MovieClip = (m_charAnimations.getChildAt(0) as MovieClip);
 			var frameLabels:Array = currentAnimation.currentLabels;
 			var startFrame:int = -1, endFrame:int = -1;
 			for (var i:int = 0, l:int = labelsArray.length; i < l; ++i )
@@ -409,9 +426,9 @@
 				}
 			}
 			return false;
-		}*/
+		}
 		
-		/*private function TryChangingToQueuedAnimation(e:Event):void
+		private function TryChangingToQueuedAnimation(e:Event):void
 		{
 			if (e.target.currentFrame == this.frameToTransitionToLinkedAnimation)
 			{
@@ -427,7 +444,7 @@
 				queuedLinkedAnimationNumber = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 			}
-		}*/
+		}
 		/*public function GetParentMovieClip():MovieClip
 		{
 			var parentMC:MovieClip = m_CharMC.parent as MovieClip;

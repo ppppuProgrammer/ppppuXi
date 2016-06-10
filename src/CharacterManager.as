@@ -345,7 +345,7 @@
 		 * to accomplish a cum transition, one frame would be labeled "Into_Scene" and another would simple be labeled "Scene".
 		 * In the actual animation movie clip, a frame label named "ActivateWindow" is expected. This indicates how many frames
 		 * the user has to input the Activate command. The frame after the end of the ActivateWindow is when the transition will happen.*/
-		/*public function ActivateAnimationChange():void
+		public function ActivateAnimationChange():void
 		{
 			var animationQueued:Boolean = GetCurrentCharacter().CheckAndSetupLinkedTransition();
 			if (animationQueued == true)
@@ -353,7 +353,7 @@
 				//Do something here to lock character changes.
 				//this.can
 			}
-		}*/
+		}
 		
 		//The logic for the normal switch that happens every 120 frames
 		public function CharacterSwitchLogic():void
