@@ -16,16 +16,12 @@ package
 			m_backgroundColor = CreateColorTransformFromHex(0x494E62);
 			m_backlightColor = new ColorTransform(0, 0, 0, 0);
 			m_charAnimations = new FioraAnimations();
-			m_charAnimations.x = -99.15;
-			m_charAnimations.y = 173.8;
+			m_charAnimations.x = -226.8;
+			m_charAnimations.y = 213.6;
 			m_menuButton = new FioraButton();
 			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
 			m_name = "Fiora";
-			m_musicClassName = "HildaBGM";
-			m_musicTitle = "Miror B. Battle - Pokemon XD";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(871773) + m_musicStartPoint;
-			m_musicLoopEndPoint= (ConvertSamplesToMilliseconds(2989939) + m_musicStartPoint);
+			m_defaultMusicName = "Gaur Plain";
 		}
 		
 	}

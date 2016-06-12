@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="..\..\bin\AC_Fiora.swf" />
+    <movie path="..\..\bin\ACHAR_Fiora.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />

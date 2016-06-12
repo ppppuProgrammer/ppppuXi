@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="..\..\bin\AC_Piranhagirls.swf" />
+    <movie path="..\..\bin\ACHAR_Piranhagirls.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />

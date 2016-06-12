@@ -23,11 +23,7 @@ package
 			m_menuButton = new LucinaButton();
 			m_menuButton.SetHitArea(new SquareBtnHitArea(101.15,87.75));
 			m_name = "Lucina";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "Main Theme (Spa) - Fire Emblem 13";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(680646) + m_musicStartPoint;
-			m_musicLoopEndPoint = (ConvertSamplesToMilliseconds(1740226) + m_musicStartPoint);
+			m_defaultMusicName = " FE Spa";
 		}
 		
 	}

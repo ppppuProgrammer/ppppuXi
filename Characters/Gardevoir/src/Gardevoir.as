@@ -23,11 +23,8 @@ package
 			m_menuButton = new GardevoirButton();
 			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
 			m_name = "Gardevoir";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "Route 1 - Pokemon Anime";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(1066558) + m_musicStartPoint;
-			m_musicLoopEndPoint= (ConvertSamplesToMilliseconds(2123951) + m_musicStartPoint);
+			m_defaultMusicName = "Route 1";
+
 		}
 		
 	}

@@ -54,6 +54,8 @@
 		private var m_defaultLightColor:ColorTransform = new ColorTransform(.62,1.0,1.0,.5, -59, 22, 102,0); //For anything that needs to reset back to its default color
 		private var m_charLockButton:CharLockButton = new CharLockButton();
 		
+		//"global" character and animation switch lock. Meant to be used for linked animation transitions so that they happen uninterrupted.
+		private var transitionLockout:Boolean = false;
 		
 		private const CHARMENUCOMMAND_CHANGECHAR:String = "CharChange";
 		private const CHARMENUCOMMAND_RANDOMCHAR:String = "RandomChar";
@@ -166,7 +168,7 @@
 				{
 					userSettings.characterSettings[charName].animationLocked[i.toString()] = false;
 				}
-				userSettings.characterSettings[charName].playMusicTitle = character.GetMusicTitle();
+				userSettings.characterSettings[charName].playMusicTitle = character.GetDefaultMusicName();
 				userSettings.characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation
 			}
 		}
@@ -202,15 +204,15 @@
 			}
 		}
 		
-		public function SetupMusicForCharacters():void
+		/*public function SetupMusicForCharacters():void
 		{
 			for each(var character:AnimatedCharacter in m_Characters)
 			{
 				AddMusicForCharacter(character);
 			}
-		}
+		}*/
 		
-		public function AddMusicForCharacter(character:AnimatedCharacter):void
+		/*public function AddMusicForCharacter(character:AnimatedCharacter):void
 		{
 			var charId:int; 
 			var characterName:String = character.GetName();
@@ -226,7 +228,7 @@
 			if (characterBGM == null)
 			{
 				//Get the as3 class for the Sound. Tries to get high quality version first
-				var musicClass:Class;// = m_hqMusicDomain.getDefinition(musicClassName /*+ "_High"*/) as Class;
+				var musicClass:Class;
 				var musicName:String = character.GetMusicTitle();
 				if (musicName == null || musicName.length == 0) { musicName = "Unknown"; }
 				
@@ -261,7 +263,7 @@
 						character.GetMusicLoopEndPoint(), character.GetMusicStartPoint());
 				}
 			}
-		}
+		}*/
 		public function InitializeMusicManager(movieclipWithMusic:MovieClip, frameRate:Number):void
 		{
 			var menuContainingMovieclip:MovieClip = m_mainStage.MenuLayer;
@@ -334,7 +336,7 @@
 		
 		public function UseDefaultMusicForCurrentCharacter():void
 		{
-			ChangeMusicForCharacter(m_currentCharacterId, GetCurrentCharacter().GetMusicTitle());
+			ChangeMusicForCharacter(m_currentCharacterId, GetCurrentCharacter().GetDefaultMusicName());
 			musicManager.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
 			//ToggleMusicSelectionMode(m_currentCharacterId, GetTargetFrameNumberForAnimation());
 			UpdateDefaultMusicButton();
@@ -350,6 +352,7 @@
 			var animationQueued:Boolean = GetCurrentCharacter().CheckAndSetupLinkedTransition();
 			if (animationQueued == true)
 			{
+				transitionLockout = true;
 				//Do something here to lock character changes.
 				//this.can
 			}
@@ -358,6 +361,10 @@
 		//The logic for the normal switch that happens every 120 frames
 		public function CharacterSwitchLogic():void
 		{
+			if (transitionLockout == true)
+			{
+				return;
+			}
 			if(!m_selectRandomChar)
 			{
 				if(m_currentCharacterId + 1 >= m_Characters.length)
@@ -734,8 +741,8 @@
 					SetRandomSelectStatus(false);
 				}
 			}
-			
 		}
+		
 		private function MouseDownHandler(event:MouseEvent):void
 		{
 			var button:MenuButton = event.target as MenuButton;
@@ -939,6 +946,10 @@
 		}
 		public function ChangeAnimForCurrentCharacter(characterAnimFrame:int):void
 		{
+			if (transitionLockout == true)
+			{
+				return;
+			}
 			var currChar:AnimatedCharacter = GetCurrentCharacter();
 			if(currChar.GetNumberOfAnimations() < characterAnimFrame)
 			{
@@ -1318,7 +1329,7 @@
 		}
 		private function UpdateDefaultMusicButton():void
 		{
-			var currentCharMusicTitle:String = GetCurrentCharacter().GetMusicTitle();
+			var currentCharMusicTitle:String = GetCurrentCharacter().GetDefaultMusicName();
 			if(currentCharMusicTitle == musicManager.GetCurrentlyPlayingMusicTitle() /*|| currentCharMusicTitle == undefined*/)
 			{
 				m_dynamicMusicButton.transform.colorTransform = m_lockedButtonColor;

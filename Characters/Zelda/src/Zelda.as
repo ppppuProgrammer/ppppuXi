@@ -23,11 +23,7 @@ package
 			m_menuButton = new ZeldaButton();
 			m_menuButton.SetHitArea(new TriangleBtnHitArea);
 			m_name = "Zelda";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "Gerudo Valley (Remix) - Smash 4";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(723190+576);
-			m_musicLoopEndPoint= -(ConvertSamplesToMilliseconds(647) + m_musicStartPoint);
+			m_defaultMusicName = "Gerudo Valley";
 		}
 		
 	}

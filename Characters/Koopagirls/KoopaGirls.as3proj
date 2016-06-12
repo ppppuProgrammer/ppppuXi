@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="..\..\bin\AC_Koopagirls.swf" />
+    <movie path="..\..\bin\ACHAR_Koopagirls.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />

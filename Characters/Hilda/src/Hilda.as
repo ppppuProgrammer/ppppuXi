@@ -22,11 +22,7 @@ package
 			m_menuButton = new HildaButton();
 			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
 			m_name = "Hilda";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "Miror B. Battle - Pokemon XD";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(871773) + m_musicStartPoint;
-			m_musicLoopEndPoint= (ConvertSamplesToMilliseconds(2989939) + m_musicStartPoint);
+			m_defaultMusicName = "Miror B";
 		}
 		
 	}

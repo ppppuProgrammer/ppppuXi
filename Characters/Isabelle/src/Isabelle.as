@@ -24,11 +24,7 @@ package
 			var isabelleHitArea:SquareBtnHitArea = new SquareBtnHitArea(79, 75);
 			m_menuButton.SetHitArea(isabelleHitArea);
 			m_name = "Isabelle";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "2:00 A.M. - Super Smash Bros. Brawl";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(190538+576);
-			m_musicLoopEndPoint = -(ConvertSamplesToMilliseconds(618) + m_musicStartPoint);
+			m_defaultMusicName = "2 AM";
 		}
 		
 	}

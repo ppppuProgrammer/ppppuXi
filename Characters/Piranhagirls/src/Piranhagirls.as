@@ -25,11 +25,7 @@ package
 			m_menuButton = new PiranhagirlsButton();
 			m_menuButton.SetHitArea(new SquareBtnHitArea(110, 70));
 			m_name = "Piranhagirls";
-			m_musicClassName = "WiiFitBGM";
-			m_musicTitle = "Training Menu - Wii Fit";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(1415850) + m_musicStartPoint;
-			m_musicLoopEndPoint = (ConvertSamplesToMilliseconds(3527735) + m_musicStartPoint);
+			//m_defaultMusicName = "";
 		}
 		
 	}

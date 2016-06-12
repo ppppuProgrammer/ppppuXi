@@ -23,11 +23,7 @@ package
 			m_menuButton = new SamusButton();
 			m_menuButton.SetHitArea(new CircleBtnHitArea);
 			m_name = "Samus";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "Mission Final - Metroid Prime";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(90252+576);
-			m_musicLoopEndPoint = (ConvertSamplesToMilliseconds(3967612+576) /*+ m_musicStartPoint*/);
+			m_defaultMusicName = "Mission Final";
 		}
 		
 	}

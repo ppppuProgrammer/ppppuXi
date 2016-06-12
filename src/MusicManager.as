@@ -17,7 +17,7 @@
 		//private var m_characterMusic:Vector.<Sound>; //Holds the various Sound objects that are used as a character's background music.
 		
 		//Holds various, unique Music objects that contain a character's background music and the logic needed to play it.
-		private var m_characterMusic:Vector.<BackgroundMusic>; 
+		private var m_characterMusic:Vector.<Music>; 
 		private var m_globalMusicId:int = -1;
 		private var m_characterDefaultMusicId:Vector.<int>;
 		private var m_playGlobalMusic:Boolean = false;
@@ -42,7 +42,7 @@
 		public function SetupMusicManager(numberOfCharacters:int, clip:MovieClip, flashFrameRate:Number, playMusicInfoDisplay:TextField):void
 		{
 			FLASHFRAMERATE = flashFrameRate;
-			m_characterMusic = new Vector.<BackgroundMusic>();
+			m_characterMusic = new Vector.<Music>();
 			m_syncingSoundChannels = new Vector.<SoundChannel>();
 			m_characterDefaultMusicId = new Vector.<int>(numberOfCharacters, true);
 			m_selectedMusicForCharacter = new Vector.<int>(numberOfCharacters, true);
@@ -69,7 +69,7 @@
 				{
 					loopEndTimeMs = characterBGM.length + loopEndTimeMs;
 				}
-				var MusicObj:BackgroundMusic = new BackgroundMusic(characterBGM, musicTitle, loopStartTimeMs, loopEndTimeMs, musicStartTimeMs);
+				var MusicObj:Music = new Music(characterBGM, musicTitle, loopStartTimeMs, loopEndTimeMs, musicStartTimeMs);
 				
 				for (var i:int = 0, l:int = m_characterMusic.length; i < l; ++i) 
 				{
@@ -102,7 +102,7 @@
 			if(abruptChangeFrameOffset == 0)
 			{
 				var currentChannel:SoundChannel;
-				var musicForCurrentChannel:BackgroundMusic;
+				var musicForCurrentChannel:Music;
 				for (var i:int = 0, l:int = m_syncingSoundChannels.length; i < l; i++) 
 				{
 					currentChannel = m_syncingSoundChannels[i];
@@ -148,7 +148,7 @@
 					}
 					else
 					{
-						var currentMusic:BackgroundMusic = m_characterMusic[m_currentlyPlayingMusicId];
+						var currentMusic:Music = m_characterMusic[m_currentlyPlayingMusicId];
 						m_mainSoundChannel.stop();
 						currentMusic.Stop();
 						m_mainSoundChannel = null;
@@ -165,7 +165,7 @@
 			}
 			else if(musicId >= 0)
 			{
-				var musicToPlay:BackgroundMusic = m_characterMusic[musicId];
+				var musicToPlay:Music = m_characterMusic[musicId];
 				if(musicToPlay != null)
 				{
 					if(m_currentlyPlayingMusicId == musicId) //same song

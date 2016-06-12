@@ -23,11 +23,7 @@ package
 			m_menuButton = new AppleBloomButton();
 			m_menuButton.SetHitArea(new CircleBtnHitArea);
 			m_name = "Apple Bloom"; 
-			m_musicClassName = "CMC BGM";
-			m_musicTitle = "CMC theme";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(739524 + 576);
-			m_musicLoopEndPoint = ConvertSamplesToMilliseconds(3917226+576);
+			m_defaultMusicName = "CMC GC";
 		}
 		
 	}

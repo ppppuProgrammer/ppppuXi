@@ -18,11 +18,13 @@
 		protected var m_backgroundColor:ColorTransform = null;
 		protected var m_backlightColor:ColorTransform = null;
 		//Music
-		protected var m_musicClassName:String = null; //The class name for the music to play for the character.
-		protected var m_musicTitle:String = "Beep Block Skyway";
-		protected var m_musicStartPoint:Number = 0;
-		protected var m_musicLoopStartPoint:Number = m_musicStartPoint;
-		protected var m_musicLoopEndPoint:Number= -1;
+		//protected var m_musicClassName:String = null; 
+		//The name of the music to play for the character.
+		protected var m_defaultMusicName:String= "Beep Block Skyway";
+		//protected var m_musicTitle:String = "Beep Block Skyway";
+		//protected var m_musicStartPoint:Number = 0;
+		//protected var m_musicLoopStartPoint:Number = m_musicStartPoint;
+		//protected var m_musicLoopEndPoint:Number= -1;
 		//Animation
 		private var m_playAnimationFrame:int = 0;
 		private var m_randomizePlayAnim:Boolean = true;
@@ -91,11 +93,11 @@
 		{
 			return m_menuButton;
 		}
-		public function GetMusicTitle():String
+		public function GetDefaultMusicName():String
 		{
-			return m_musicTitle;
+			return m_defaultMusicName;
 		}
-		public function GetMusicStartPoint():Number
+		/*public function GetMusicStartPoint():Number
 		{
 			return m_musicStartPoint;
 		}
@@ -110,7 +112,7 @@
 		public function GetMusicClassName():String
 		{
 			return m_musicClassName;
-		}
+		}*/
 		public function GetTLDiamondColor():ColorTransform
 		{
 			return m_topLeftDiamondColor;
@@ -349,10 +351,6 @@
 			}
 			return ct;
 		}
-		protected function ConvertSamplesToMilliseconds(sampleNum:Number):Number
-		{
-			return (sampleNum / 44100.0) * 1000.0;
-		}
 		
 		public function StopAnimation():void
 		{
@@ -392,9 +390,9 @@
 			var currentAnimation:MovieClip = (m_charAnimations.getChildAt(0) as MovieClip);
 			var frameLabels:Array = currentAnimation.currentLabels;
 			var startFrame:int = -1, endFrame:int = -1;
-			for (var i:int = 0, l:int = labelsArray.length; i < l; ++i )
+			for (var i:int = 0, l:int = frameLabels.length; i < l; ++i )
 			{
-				var animationLabel:FrameLabel = labelsArray[i] as FrameLabel;
+				var animationLabel:FrameLabel = frameLabels[i] as FrameLabel;
 				if (animationLabel.name == "ActivateStart")
 				{
 					startFrame = animationLabel.frame;
@@ -411,6 +409,7 @@
 					if (currentAnimation.currentFrame >= startFrame && currentAnimation.currentFrame <= endFrame)
 					{
 						frameToTransitionToLinkedAnimation = endFrame;
+						queuedLinkedAnimationNumber = linkedAnimationNumber;
 						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
@@ -420,6 +419,7 @@
 					if (currentAnimation.currentFrame <= endFrame)
 					{
 						frameToTransitionToLinkedAnimation = endFrame;
+						queuedLinkedAnimationNumber = linkedAnimationNumber;
 						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
@@ -433,6 +433,7 @@
 			if (e.target.currentFrame == this.frameToTransitionToLinkedAnimation)
 			{
 				this.SetPlayAnimation(queuedLinkedAnimationNumber);
+				this.PlayAnimation(1);
 				frameToTransitionToLinkedAnimation = -1;
 				queuedLinkedAnimationNumber = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);

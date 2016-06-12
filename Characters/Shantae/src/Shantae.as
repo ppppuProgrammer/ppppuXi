@@ -22,11 +22,7 @@ package
 			m_menuButton = new ShantaeButton();
 			m_menuButton.SetHitArea(new SquareBtnHitArea(132,65));
 			m_name = "Shantae";
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "We love Burning Town";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(1013838+576);
-			m_musicLoopEndPoint = ConvertSamplesToMilliseconds(5600209);
+			m_defaultMusicName = "Burning Town PC";
 		}
 		
 	}

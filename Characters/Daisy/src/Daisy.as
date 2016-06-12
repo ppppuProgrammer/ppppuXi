@@ -24,13 +24,7 @@ package
 			m_menuButton = new DaisyButton();
 			m_menuButton.SetHitArea(new CircleBtnHitArea);
 			m_name = "Daisy"; 
-			m_musicClassName = m_name + "BGM";
-			m_musicTitle = "Mario Adventures I";
-			m_musicStartPoint = ConvertSamplesToMilliseconds(576);
-			//m_musicLoopStartPoint = ConvertSamplesToMilliseconds(792431+576);
-			//m_musicLoopEndPoint = - (ConvertSamplesToMilliseconds(1394) + m_musicStartPoint);
-			m_musicLoopStartPoint = ConvertSamplesToMilliseconds(739524 + 576);
-			m_musicLoopEndPoint = ConvertSamplesToMilliseconds(3917226+576);
+			m_defaultMusicName = "SML1_1";
 		}
 		
 	}

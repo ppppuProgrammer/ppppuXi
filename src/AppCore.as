@@ -152,7 +152,7 @@ package
 			//Creates the menus for the flash. This will also not allow any more characters to be added
 			characterManager.CreateMenus(mainStage.MenuLayer);
 			characterManager.InitializeMusicManager(mainStage, stage.frameRate);
-			characterManager.SetupMusicForCharacters();
+			//characterManager.SetupMusicForCharacters();
 			characterManager.ToggleMenu();
 			mainStage.CharacterLayer.visible = false;
 			//Movie clip initialization.
@@ -212,6 +212,14 @@ package
 			var animationFrame:int = ((frameNum -2) % 120) + 1; //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 			if(frameNum == 1)
 			{
+				if (characterManager.GetTotalNumOfCharacters() == 0)
+				{
+					mainStageMC.stopAllMovieClips();
+				}
+				else
+				{
+					mainStageMC.play();
+				}
 				/*if (userSettings.showMenu)
 				{
 					characterManager.ToggleMenu();
@@ -253,10 +261,6 @@ package
 				mainStage.TransitionDiamondBG.gotoAndPlay(animationFrame);
 				mainStage.BacklightBG.gotoAndPlay(animationFrame);
 			}
-			if (animationFrame >= 119)
-				{
-					var bp:int = 5;
-				}
 			if(frameNum % 120 == flashStartFrame) //Add character clip
 			{
 				

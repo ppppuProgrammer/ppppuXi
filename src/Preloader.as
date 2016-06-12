@@ -185,8 +185,10 @@ package
 			//Feed the mods to load array into the modLoader
 			for (var i:int = 0, l:int = rawSplitStrings.length; i < l; ++i)
 			{
-				if ((rawSplitStrings[i] as String).charAt(0) != "#")
+				var line:String = rawSplitStrings[i] as String;
+				if (line.length > 0 && line.charAt(0) != "#")
 				{
+					trace(rawSplitStrings[i] as String);
 					//modsToLoad[modsToLoad.length] = rawSplitStrings[i];
 					swfPreloader.append(new SWFLoader(rawSplitStrings[i]));
 				}

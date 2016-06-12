@@ -1,24 +1,33 @@
 # Upon start up of ppppuX interactive this file is looked at to see what mods should be loaded automatically.
 # Put the path to swf ppppu mods to be loaded in this text file. Paths are relative to the directory this file is in.
+# Lines that start with a # are ignored.
 # Start a line with # to disallow a file from being loaded. Likewise remove the # to allow it to be loaded.
-AC_Peach.swf
-AC_Rosalina.swf
-AC_Daisy.swf
-AC_Samus.swf
-AC_Shantae.swf
-AC_Zelda.swf
-AC_Midna.swf
-AC_Isabelle.swf
-AC_Lucina.swf
-AC_Gardevoir.swf
-AC_May.swf
-AC_Hilda.swf
-AC_Fiora.swf
-AC_WiiFitTrainer.swf
-AC_Iris.swf
-AC_Shygirls.swf
-AC_Koopagirls.swf
-AC_Piranhagirls.swf
-AC_AppleBloom.swf
-AC_SweetieBelle.swf
-AC_Scootaloo.swf
+
+#Animated Character mods
+ACHAR_Peach.swf
+ACHAR_Rosalina.swf
+ACHAR_Daisy.swf
+ACHAR_Samus.swf
+ACHAR_Shantae.swf
+ACHAR_Zelda.swf
+ACHAR_Midna.swf
+ACHAR_Isabelle.swf
+ACHAR_Lucina.swf
+ACHAR_Gardevoir.swf
+ACHAR_May.swf
+ACHAR_Hilda.swf
+ACHAR_Fiora.swf
+ACHAR_WiiFitTrainer.swf
+ACHAR_Iris.swf
+ACHAR_Shygirls.swf
+ACHAR_Koopagirls.swf
+ACHAR_Piranhagirls.swf
+ACHAR_AppleBloom.swf
+ACHAR_SweetieBelle.swf
+ACHAR_Scootaloo.swf
+
+#Music mods
+#M_CMCTheme.swf
+
+#Archive mods
+#A_MusicPack.swf
