@@ -11,7 +11,7 @@
 	import flash.utils.Dictionary;
 	//import ppppu.Music;
 	
-	public class MusicManager 
+	public class MusicPlayer 
 	{
 		private var m_playMusic:Boolean = true; //If music is allowed to play at all
 		//private var m_characterMusic:Vector.<Sound>; //Holds the various Sound objects that are used as a character's background music.

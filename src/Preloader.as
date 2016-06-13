@@ -188,7 +188,6 @@ package
 				var line:String = rawSplitStrings[i] as String;
 				if (line.length > 0 && line.charAt(0) != "#")
 				{
-					trace(rawSplitStrings[i] as String);
 					//modsToLoad[modsToLoad.length] = rawSplitStrings[i];
 					swfPreloader.append(new SWFLoader(rawSplitStrings[i]));
 				}

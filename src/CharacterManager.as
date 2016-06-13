@@ -1,6 +1,7 @@
 ﻿package  {
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
@@ -82,7 +83,7 @@
 		private var sm256Font:SuperMarioFont = new SuperMarioFont();
 		
 		//Music related
-		private var musicManager:MusicManager = new MusicManager();
+		private var musicPlayer:MusicPlayer = new MusicPlayer();
 		private const MISCMENUCOMMAND_NEXTMUSIC:String = "NextMusic";
 		private const MISCMENUCOMMAND_PREVMUSIC:String = "PrevMusic";
 		private var musicInfoText:TextField;
@@ -174,11 +175,11 @@
 		}
 		public function ChangeGlobalMusicForAllCharacters(musicTitle:String):void
 		{
-			var musicId:int = musicManager.GetMusicIdByTitle(musicTitle);
-			musicManager.ChangeGlobalMusic(musicId);
+			var musicId:int = musicPlayer.GetMusicIdByTitle(musicTitle);
+			musicPlayer.ChangeGlobalMusic(musicId);
 			if (musicId == -1)
 			{
-				musicTitle = musicManager.DEFAULTSONGTITLE;
+				musicTitle = musicPlayer.DEFAULTSONGTITLE;
 			}
 			userSettings.globalSongTitle = musicTitle;
 		}
@@ -186,15 +187,15 @@
 		{
 			if (charId > m_Characters.length || charId < 0) { return; }
 			//If music title isn't found, the music played returns to the default. So just make sure that the music change was successful
-			var musicId:int = musicManager.GetMusicIdByTitle(musicTitle);
-			musicManager.ChangeSelectedMusicForCharacter(charId, musicId);
+			var musicId:int = musicPlayer.GetMusicIdByTitle(musicTitle);
+			musicPlayer.ChangeSelectedMusicForCharacter(charId, musicId);
 			
 			if (musicId == -1)
 			{
-				musicTitle = musicManager.DEFAULTSONGTITLE;
+				musicTitle = musicPlayer.DEFAULTSONGTITLE;
 			}
 			
-			if (musicManager.GetGlobalSongStatus() == false)
+			if (musicPlayer.GetGlobalSongStatus() == false)
 			{
 				userSettings.characterSettings[GetCharacterById(charId).GetName()].playMusicTitle = musicTitle;
 			}
@@ -331,13 +332,13 @@
 			
 			musicInfoText.text = "stopped";
 
-			musicManager.SetupMusicManager(m_Characters.length, movieclipWithMusic, frameRate, musicInfoText);
+			musicPlayer.SetupMusicManager(m_Characters.length, movieclipWithMusic, frameRate, musicInfoText);
 		}
 		
 		public function UseDefaultMusicForCurrentCharacter():void
 		{
 			ChangeMusicForCharacter(m_currentCharacterId, GetCurrentCharacter().GetDefaultMusicName());
-			musicManager.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
+			musicPlayer.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
 			//ToggleMusicSelectionMode(m_currentCharacterId, GetTargetFrameNumberForAnimation());
 			UpdateDefaultMusicButton();
 		}
@@ -353,11 +354,16 @@
 			if (animationQueued == true)
 			{
 				transitionLockout = true;
+				
 				//Do something here to lock character changes.
 				//this.can
 			}
 		}
 		
+		private function RemoveTransitionLockout(e:Event):void
+		{
+			
+		}
 		//The logic for the normal switch that happens every 120 frames
 		public function CharacterSwitchLogic():void
 		{
@@ -657,7 +663,10 @@
 		}
 		public function AddCurrentCharacter(/*clipToAddCharTo:MovieClip, abruptCharChange:Boolean=false,*/ abruptChangeFrameOffset:int=0):void
 		{
-			
+			if (transitionLockout == true)
+			{
+				return;
+			}
 			var currentCharacter:AnimatedCharacter = GetCurrentCharacter();
 			//If the current character selected is not the latest one being displayed, there needs to be some changes to get them on screen.
 			if (m_latestCharacterIdOnStage != m_currentCharacterId)
@@ -683,7 +692,7 @@
 				
 				//Other things
 				//Play their selected music
-				musicManager.PlayMusic(GetCurrentCharID(), abruptChangeFrameOffset);
+				musicPlayer.PlayMusic(GetCurrentCharID(), abruptChangeFrameOffset);
 				//Update animation pages
 				CheckAvailableAnimationPages();
 				UpdateDefaultMusicButton();
@@ -794,27 +803,27 @@
 					{
 						if(senderCommand == MISCMENUCOMMAND_PREVMUSIC) //Previous music button
 						{
-							musicManager.ChangeToPrevMusic(GetCurrentCharID(), GetTargetFrameNumberForAnimation());
-							if (musicManager.GetGlobalSongStatus() == false)
+							musicPlayer.ChangeToPrevMusic(GetCurrentCharID(), GetTargetFrameNumberForAnimation());
+							if (musicPlayer.GetGlobalSongStatus() == false)
 							{
-								userSettings.characterSettings[GetCurrentCharacter().GetName()].playMusicTitle = musicManager.GetCurrentlyPlayingMusicTitle();
+								userSettings.characterSettings[GetCurrentCharacter().GetName()].playMusicTitle = musicPlayer.GetCurrentlyPlayingMusicTitle();
 							}
 							else
 							{
-								userSettings.globalSongTitle = musicManager.GetCurrentlyPlayingMusicTitle();
+								userSettings.globalSongTitle = musicPlayer.GetCurrentlyPlayingMusicTitle();
 							}
 							UpdateDefaultMusicButton();
 						}
 						else if(senderCommand == MISCMENUCOMMAND_NEXTMUSIC) //Next music button
 						{
-							musicManager.ChangeToNextMusic(GetCurrentCharID(), GetTargetFrameNumberForAnimation());
-							if (musicManager.GetGlobalSongStatus() == false)
+							musicPlayer.ChangeToNextMusic(GetCurrentCharID(), GetTargetFrameNumberForAnimation());
+							if (musicPlayer.GetGlobalSongStatus() == false)
 							{
-								userSettings.characterSettings[GetCurrentCharacter().GetName()].playMusicTitle = musicManager.GetCurrentlyPlayingMusicTitle();
+								userSettings.characterSettings[GetCurrentCharacter().GetName()].playMusicTitle = musicPlayer.GetCurrentlyPlayingMusicTitle();
 							}
 							else
 							{
-								userSettings.globalSongTitle = musicManager.GetCurrentlyPlayingMusicTitle();
+								userSettings.globalSongTitle = musicPlayer.GetCurrentlyPlayingMusicTitle();
 							}
 							
 							UpdateDefaultMusicButton();
@@ -1159,13 +1168,13 @@
 			}*/
 			if (nextSong == true)
 			{
-				musicManager.ChangeToNextMusic(this.GetCurrentCharID(), GetTargetFrameNumberForAnimation());
+				musicPlayer.ChangeToNextMusic(this.GetCurrentCharID(), GetTargetFrameNumberForAnimation());
 			}
 			else 
 			{
-				musicManager.ChangeToPrevMusic(this.GetCurrentCharID(), GetTargetFrameNumberForAnimation());
+				musicPlayer.ChangeToPrevMusic(this.GetCurrentCharID(), GetTargetFrameNumberForAnimation());
 			}
-			userSettings.characterSettings[GetCurrentCharacter().GetName()].playMusicTitle = musicManager.GetCurrentlyPlayingMusicTitle();
+			userSettings.characterSettings[GetCurrentCharacter().GetName()].playMusicTitle = musicPlayer.GetCurrentlyPlayingMusicTitle();
 			
 		}
 		/*//Obsolete due to the SongsForOneOrAll Function
@@ -1188,17 +1197,17 @@
 			{
 				musicForEachOrAllButton.ButtonGraphic.gotoAndStop("All");
 				//Tell the music manager that one song is to be used for all characters
-				musicManager.ChangePlayGlobalSongStatus(true);
+				musicPlayer.ChangePlayGlobalSongStatus(true);
 				userSettings.playOneSongForAllCharacters = true;
-				musicManager.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
+				musicPlayer.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
 			}
 			else if (musicForEachOrAllButton.ButtonGraphic.currentFrameLabel == "All")
 			{
 				musicForEachOrAllButton.ButtonGraphic.gotoAndStop("One");
 				//Tell the music manager that a character can play their own selected music
-				musicManager.ChangePlayGlobalSongStatus(false);
+				musicPlayer.ChangePlayGlobalSongStatus(false);
 				userSettings.playOneSongForAllCharacters = false;
-				musicManager.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
+				musicPlayer.PlayMusic(m_currentCharacterId, GetTargetFrameNumberForAnimation());
 			}
 		}
 		
@@ -1268,15 +1277,15 @@
 		public function ToggleMusicPlay():void
 		{
 			//ToggleGlobalPlayMusicStatus returns the value of m_playMusic
-			if(musicManager.ToggleGlobalPlayMusicStatus())
+			if(musicPlayer.ToggleGlobalPlayMusicStatus())
 			{
-				musicManager.ControlGlobalVolume(1.0);
+				musicPlayer.ControlGlobalVolume(1.0);
 				m_musicVolumeButton.transform.colorTransform = new ColorTransform();
 				userSettings.playMusic = true;
 			}
 			else
 			{
-				musicManager.ControlGlobalVolume(0.0);
+				musicPlayer.ControlGlobalVolume(0.0);
 				m_musicVolumeButton.transform.colorTransform = m_lockedButtonColor;
 				userSettings.playMusic = false;
 			}
@@ -1330,7 +1339,7 @@
 		private function UpdateDefaultMusicButton():void
 		{
 			var currentCharMusicTitle:String = GetCurrentCharacter().GetDefaultMusicName();
-			if(currentCharMusicTitle == musicManager.GetCurrentlyPlayingMusicTitle() /*|| currentCharMusicTitle == undefined*/)
+			if(currentCharMusicTitle == musicPlayer.GetCurrentlyPlayingMusicTitle() /*|| currentCharMusicTitle == undefined*/)
 			{
 				m_dynamicMusicButton.transform.colorTransform = m_lockedButtonColor;
 			}
