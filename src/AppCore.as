@@ -1,6 +1,7 @@
 package  
 {
 	//import Characters.*;
+	import com.bit101.components.List;
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.DataLoader;
 	import com.greensock.loading.LoaderMax;
@@ -30,6 +31,8 @@ package
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import CharacterManager;
+	import menu.GraphicList;
+	import menu.MainMenu;
 	import MenuButton;
 	import modifications.*;
 	import modifications.Mod;
@@ -80,6 +83,10 @@ package
 		
 		//Loading
 		private var contentLoader:LoaderMax = new LoaderMax({name:"Content loader"});
+		public var list:GraphicList;
+		
+		//private var musicPlayer:MusicPlayer = new MusicPlayer();
+		private var mainMenu:MainMenu;
 		
 		//Constructor
 		public function AppCore() 
@@ -138,6 +145,38 @@ package
 			characterManager = new CharacterManager(mainStage, userSettings);
 			mainStage.x = (stage.stageWidth - mainStage.CharacterLayer.width /*- characterManager.MENUBUTTONSIZE/2*/) / 2;
 			
+			
+			
+			
+			//list.
+			
+			/*var textList:List = new List(this);
+			textList.x = 50;
+			textList.listItemHeight = 30;
+			textList.setSize(50, list.listItemHeight*10);
+			for (var i:int = 0; i < 20; ++i)
+			{
+				textList.addItem( { label: String(i) } );
+			}
+			textList.alternateRows = list.alternateRows = true;*/
+			//displayWidthLimit = stage.stageWidth - this.x*2;
+			
+			//Creates the menus for the flash. This will also not allow any more characters to be added
+			characterManager.CreateMenus(mainStage.MenuLayer);
+			characterManager.InitializeMusicManager(mainStage, stage.frameRate);
+			//characterManager.SetupMusicForCharacters();
+			//characterManager.ToggleMenu();
+			
+			mainMenu = new MainMenu(characterManager, characterManager.musicPlayer, userSettings);
+			addChild(mainMenu);
+			mainMenu.Initialize();
+			
+			mainStage.CharacterLayer.visible = false;
+			//Movie clip initialization.
+			helpScreenMC = new HelpScreen();
+			//setup movie clips before we start using them.
+			SetupHelpMovieClip();
+			LoadUserSettings();
 			if (startupMods != null)
 			{
 				for (var i:int = 0, l:int = startupMods.length; i < l; ++i)
@@ -145,27 +184,14 @@ package
 					ProcessMod(startupMods[i]);
 				}
 			}
-			//displayWidthLimit = stage.stageWidth - this.x*2;
-			
-			//Initializes characters. Adds characters in this function
-			InitializeCharacters();
-			//Creates the menus for the flash. This will also not allow any more characters to be added
-			characterManager.CreateMenus(mainStage.MenuLayer);
-			characterManager.InitializeMusicManager(mainStage, stage.frameRate);
-			//characterManager.SetupMusicForCharacters();
-			characterManager.ToggleMenu();
-			mainStage.CharacterLayer.visible = false;
-			//Movie clip initialization.
-			helpScreenMC = new HelpScreen();
-			//setup movie clips before we start using them.
-			SetupHelpMovieClip();
 			
 			
-			
-			LoadUserSettings();
+			mainMenu.SetupCharacterLocks();
 			characterManager.InitializeSettingsWindow();
 			
 			mainStage.play();
+			
+			
 		}
 		
 		
@@ -182,26 +208,6 @@ package
 			helpScreenMC.x = (mainStage.HelpLayer.getRect(mainStage.HelpLayer).right - helpScreenMC.width) / 2;
 			mainStage.HelpLayer.addChild(helpScreenMC);
 			helpScreenMC.y = 0;
-		}
-
-		private function InitializeCharacters():void
-		{
-			//new way of adding characters. Instances of the Character class (or it's subclasses) are added to the character manager.
-			//The instance of the Character class  defines the attributes of a character, such as their background colors, music and more.
-			/*characterManager.AddCharacter(new Peach);
-			characterManager.AddCharacter(new Rosalina);
-			characterManager.AddCharacter(new Daisy);
-			characterManager.AddCharacter(new Samus);
-			characterManager.AddCharacter(new Shantae);
-			characterManager.AddCharacter(new Zelda);
-			characterManager.AddCharacter(new Midna);
-			characterManager.AddCharacter(new Isabelle);
-			characterManager.AddCharacter(new Lucina);
-			characterManager.AddCharacter(new WiiFitTrainer);
-			characterManager.AddCharacter(new Gardevoir);
-			characterManager.AddCharacter(new Hilda);
-			characterManager.AddCharacter(new May);*/
-			
 		}
 
 		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
@@ -368,12 +374,14 @@ package
 				else if(keyPressed == keyBindings.CharCursorPrev.main || keyPressed == keyBindings.CharCursorPrev.alt)
 				{
 					//Move menu cursor to the character above
-					characterManager.MoveMenuCursorToPrevPos();
+					//characterManager.MoveMenuCursorToPrevPos();
+					mainMenu.MoveCharacterSelector(-1);
 				}
 				else if(keyPressed == keyBindings.CharCursorNext.main || keyPressed == keyBindings.CharCursorNext.alt)
 				{
 					//Move menu cursor to the character below
-					characterManager.MoveMenuCursorToNextPos();
+					//characterManager.MoveMenuCursorToNextPos();
+					mainMenu.MoveCharacterSelector(1);
 				}
 				else if(keyPressed == keyBindings.RandomChar.main || keyPressed == keyBindings.RandomChar.alt)
 				{
@@ -608,7 +616,12 @@ package
 				var animCharacterMod:AnimatedCharacterMod = mod as AnimatedCharacterMod;
 				if (animCharacterMod)
 				{
-					characterManager.AddCharacter(animCharacterMod.GetCharacter());
+					if (characterManager.AddCharacter(animCharacterMod.GetCharacter()))
+					{
+						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetButton().getChildAt(0));
+						TryToLoadCharacterSettings(animCharacterMod.GetCharacter().GetName());
+					}
+					//list.addItem();
 					//animCharacterMod.parent = null;
 					animCharacterMod = null;
 				}
@@ -681,14 +694,24 @@ package
 				mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
 			}
 			ToggleBackLight(userSettings.backlightOn, 0);	
-			//if (userSettings.showMenu == false) { characterManager.ToggleMenu(); }
-			characterManager.SetCurrentCharID(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
+			
 			//characterManager.GotoSelectedMenuCharacter(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
 			characterManager.SetCharSwitchStatus(userSettings.allowCharacterSwitches);
 			characterManager.SetRandomSelectStatus(userSettings.randomlySelectCharacter);
 			if (!userSettings.playMusic) { characterManager.ToggleMusicPlay(); }
 			
-			for (var characterName:String in userSettings.characterSettings)
+			characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
+			if (userSettings.playOneSongForAllCharacters) { characterManager.MusicForEachOrAll();}
+			//if (userSettings.showMenu == false) { characterManager.ToggleMenu(); }
+			
+			//characterManager.
+			//if (userSettings. == false) { ; }	
+			
+		}
+		
+		private function TryToLoadCharacterSettings(characterName:String):void
+		{
+			if(characterName in userSettings.characterSettings)
 			{
 				var charId:int = characterManager.GetCharacterIdByName(characterName);
 				if (charId > -1)
@@ -701,10 +724,12 @@ package
 						var animNum:int = int(animationNumberStr);
 						characterManager.SetAnimationLockForCharacter(charId, animNum, animLockObject[animNum]);
 					}
-					if (charSettings.canSwitchTo == false)
+					if (charSettings.canSwitchTo == null) { charSettings.canSwitchTo = true; }
+					characterManager.SetLockOnCharacter(charId, charSettings.canSwitchTo);
+					/*if (charSettings.canSwitchTo == false)
 					{
 						characterManager.ToggleSelectedMenuCharacterLock(charId);
-					}
+					}*/
 					
 					var animSelect:int = charSettings.animationSelect;
 					if (animSelect == 0)
@@ -718,13 +743,14 @@ package
 					}
 				
 					characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
+					if (characterName == userSettings.currentCharacterName)
+					{
+						characterManager.SetCurrentCharID(charId);
+					}
 				}
+				
 			}
-			characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
-			if (userSettings.playOneSongForAllCharacters) { characterManager.MusicForEachOrAll();}
 			
-			//characterManager.
-			//if (userSettings. == false) { ; }	
 			
 		}
 		

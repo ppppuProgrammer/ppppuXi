@@ -6,7 +6,7 @@
     <movie input="" />
     <movie path="bin\ppppuXinteractive.swf" />
     <movie fps="30" />
-    <movie width="580" />
+    <movie width="640" />
     <movie height="720" />
     <movie version="18" />
     <movie minorVersion="0" />

@@ -83,7 +83,7 @@
 		private var sm256Font:SuperMarioFont = new SuperMarioFont();
 		
 		//Music related
-		private var musicPlayer:MusicPlayer = new MusicPlayer();
+		public var musicPlayer:MusicPlayer = new MusicPlayer();
 		private const MISCMENUCOMMAND_NEXTMUSIC:String = "NextMusic";
 		private const MISCMENUCOMMAND_PREVMUSIC:String = "PrevMusic";
 		private var musicInfoText:TextField;
@@ -132,13 +132,18 @@
 			}*/
 		}
 		
-		public function AddCharacter(character:AnimatedCharacter):void
+		/*Adds a new character to be able to be shown. Returns true if the character was added successfully. Returns false if the
+		character was missing necessary data or there was a character name conflict.*/
+		public function AddCharacter(character:AnimatedCharacter):Boolean
 		{
-			if(!m_canAddCharacters)
+			//Make sure no character with this name already exists.
+			for (var x:int = 0, y:int = m_Characters.length; x < y; ++x)
 			{
-				return;
+				if (character.GetName() == m_Characters[x].GetName())
+				{
+					return false;
+				}
 			}
-			
 			
 			if(character.HasNecessaryData() == true)
 			{
@@ -163,16 +168,31 @@
 					animationLockVector[i] = false;
 				}*/
 				var charName:String = character.GetName();
-				userSettings.characterSettings[charName] = new Object();
-				userSettings.characterSettings[charName].animationLocked = new Object();
-				for (var i:int = 0, l:int = character.GetNumberOfAnimations(); i < l;++i)
+				//userSettings.characterSettings[charName] = new Object();
+				//userSettings.characterSettings[charName].animationLocked = new Object();
+				//userSettings.characterSettings[charName].canSwitchTo = true;
+				/*for (var i:int = 0, l:int = character.GetNumberOfAnimations(); i < l;++i)
 				{
 					userSettings.characterSettings[charName].animationLocked[i.toString()] = false;
 				}
 				userSettings.characterSettings[charName].playMusicTitle = character.GetDefaultMusicName();
-				userSettings.characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation
+				userSettings.characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation*/
+				return true;
 			}
+			return false;
 		}
+		
+		public function GetCharacterLockById(id:int):Boolean
+		{
+			return m_canSwitchToCharacter[id];
+		}
+		
+		//Returns a vector of the can switch to status of all the characters
+		public function GetAllCharacterLocks():Vector.<Boolean>
+		{
+			return m_canSwitchToCharacter;
+		}
+		
 		public function ChangeGlobalMusicForAllCharacters(musicTitle:String):void
 		{
 			var musicId:int = musicPlayer.GetMusicIdByTitle(musicTitle);
@@ -185,7 +205,7 @@
 		}
 		public function ChangeMusicForCharacter(charId:int, musicTitle:String):void
 		{
-			if (charId > m_Characters.length || charId < 0) { return; }
+			/*if (charId > m_Characters.length || charId < 0) { return; }
 			//If music title isn't found, the music played returns to the default. So just make sure that the music change was successful
 			var musicId:int = musicPlayer.GetMusicIdByTitle(musicTitle);
 			musicPlayer.ChangeSelectedMusicForCharacter(charId, musicId);
@@ -202,7 +222,7 @@
 			else
 			{
 				userSettings.globalSongTitle = musicTitle;
-			}
+			}*/
 		}
 		
 		/*public function SetupMusicForCharacters():void
@@ -692,7 +712,7 @@
 				
 				//Other things
 				//Play their selected music
-				musicPlayer.PlayMusic(GetCurrentCharID(), abruptChangeFrameOffset);
+				//musicPlayer.PlayMusic(GetCurrentCharID(), abruptChangeFrameOffset);
 				//Update animation pages
 				CheckAvailableAnimationPages();
 				UpdateDefaultMusicButton();
@@ -1125,6 +1145,13 @@
 				}
 			//}
 		}
+		public function SetLockOnCharacter(id:int, canSwitch:Boolean):void
+		{
+			if (id <= -1 || id > m_canSwitchToCharacter.length) { return; }
+			
+			m_canSwitchToCharacter[id] = canSwitch;
+		}
+		
 		public function ToggleSelectedMenuCharacterLock(charIndex:int=-1):void
 		{
 			if(charIndex == -1)	{charIndex = 0;}

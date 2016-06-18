@@ -72,6 +72,24 @@ package
 			//keyBindings..main = Keyboard; keyBindings..alt = -1;
 		}
 		
+		public function ChangeCharacterLock(name:String, unlocked:Boolean):void
+		{
+			if (name in characterSettings == false)
+			{
+				CreateSettingsForNewCharacter(name);
+			}
+			characterSettings[name].canSwitchTo = unlocked;
+		}
+		
+		public function CreateSettingsForNewCharacter(charName:String):void
+		{
+			characterSettings[charName] = new Object();
+			characterSettings[charName].canSwitchTo = true;
+			characterSettings[charName].animationLocked = new Object();
+			characterSettings[charName].playMusicTitle = globalSongTitle;
+			characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation
+		}
+		
 		public function ConvertFromObject(obj:Object):void
 		{ 
 			backlightOn = obj.backlightOn;
@@ -97,7 +115,6 @@ package
 			if ("globalSongTitle" in obj) { globalSongTitle = obj.globalSongTitle;}
 			// = obj.;
 		}
-		
 	}
 
 }
