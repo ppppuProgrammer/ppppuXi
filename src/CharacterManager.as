@@ -122,7 +122,7 @@
 			m_Characters = new Vector.<AnimatedCharacter>();
 			m_canSwitchToCharacter = new Vector.<Boolean>();
 			m_characterMenuButton = new Vector.<MenuButton>();
-			musicForEachOrAllButton.ButtonGraphic.gotoAndStop("One");
+			//musicForEachOrAllButton.ButtonGraphic.gotoAndStop("One");
 			
 			MINIMUM_HORIZONTAL_SWIPE_DISTANCE = m_mainStage.stage.stageWidth * .20;
 			MINIMUM_VERTICAL_SWIPE_DISTANCE = m_mainStage.stage.stageWidth * .15;
@@ -150,12 +150,12 @@
 				//Do some processing on the menu button to make standardize it for the menu.
 				m_characterMenuButton[m_Characters.length] = character.GetButton(); 
 				
-				var characterAnimations:MovieClip = character.GetCharacterAnimations();
+				/*var characterAnimations:MovieClip = character.GetCharacterAnimations();
 				if(characterAnimations)
 				{
 					characterAnimations.mouseEnabled = false;
 					characterAnimations.mouseChildren = false;
-				}
+				}*/
 				m_charNamesDict[character.GetName()] = m_Characters.length;
 				//m_charNames[charNames.length] = name;
 				m_canSwitchToCharacter[m_Characters.length] = true;
@@ -702,7 +702,7 @@
 				{ m_mainStage.CharacterLayer.removeChildAt(m_mainStage.CharacterLayer.numChildren-1); }
 				
 				//Add the new character's animation movie clip
-				m_mainStage.CharacterLayer.addChild(currentCharacter.GetCharacterAnimations());
+				currentCharacter.AddAnimationToDisplayObject(m_mainStage.CharacterLayer);
 				//Change background stuff
 				m_mainStage.TransitionDiamondBG.TransitionDiamond.Color1.transform.colorTransform = m_mainStage.InnerDiamondBG.InnerDiamond.Color1.transform.colorTransform = currentCharacter.GetTLDiamondColor();
 				m_mainStage.TransitionDiamondBG.TransitionDiamond.Color2.transform.colorTransform = m_mainStage.InnerDiamondBG.InnerDiamond.Color2.transform.colorTransform = currentCharacter.GetCenterDiamondColor();
@@ -811,7 +811,7 @@
 							ChangeAnimForCurrentCharacter(charAnimFrame);
 						}
 						else if(senderCommand == ANIMMENUCOMMAND_RANDOMANIM) //random anim button
-						{RandomizeCurrentCharacterAnim();}
+						{/*RandomizeCurrentCharacterAnim();*/}
 						else if(senderCommand == ANIMMENUCOMMAND_MUSICVOLUME)
 						{ToggleMusicPlay();}
 						else if(senderCommand == ANIMMENUCOMMAND_DEFAULTMUSIC)
@@ -949,14 +949,15 @@
 				}
 			}
 		}
-		public function RandomizeCurrentCharacterAnim():void
+		public function RandomizeCurrentCharacterAnim(playOnThisFrame:int):void
 		{
 			var currChar:AnimatedCharacter = GetCurrentCharacter();
 			currChar.SetRandomizeAnimation(true);
 			currChar.RandomizePlayAnim();
 			userSettings.characterSettings[currChar.GetName()].animationSelect = 0;
 			
-			currChar.PlayAnimation(((m_mainStage.currentFrame - 2)% 120) + 1);
+			//currChar.PlayAnimation(((m_mainStage.currentFrame - 2) % 120) + 1);
+			currChar.PlayAnimation(playOnThisFrame);
 			randomBlock.transform.colorTransform = new ColorTransform();
 		}
 		
@@ -1298,7 +1299,7 @@
 			{
 				--m_animationPage;
 			}
-			UpdateAnimationMenuBlocks();
+			//UpdateAnimationMenuBlocks();
 		}
 		
 		public function ToggleMusicPlay():void
@@ -1448,7 +1449,7 @@
 		//Gets a number from 1-120 for any animations used (character, light, background, etc)  
 		private function GetTargetFrameNumberForAnimation():int
 		{
-			return ((m_mainStage.currentFrame - 2) % 120) + 1
+			return ((m_mainStage.currentFrame - 2) % 120) + 1;
 		}
 		
 		public function GetCharacterIdByName(name:String):int
@@ -1478,6 +1479,17 @@
 		public function InitializeSettingsWindow():void
 		{
 			keyConfig = new Config(userSettings);
+		}
+		
+		public function GetFrameTargetsForCharacter(id:int):Vector.<int>
+		{
+			var frameTargets:Vector.<int>;
+			var character:AnimatedCharacter = GetCharacterById(id);
+			if (character)
+			{
+				//character.GetCharacterAnimations
+			}
+			return frameTargets;
 		}
 		
 		/*public function DEBUG_TestMusicLoop():void

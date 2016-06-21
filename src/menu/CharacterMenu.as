@@ -13,11 +13,11 @@ package menu
 		private const MAX_LIST_ITEMS_DISPLAYED:int = 16;
 		private const LIST_WIDTH:Number = 50;
 		
-		private var characterList:LockList;
+		private var characterList:CharacterList;
 		public function CharacterMenu() 
 		{
 			name = "Character Menu";
-			characterList = new LockList(this);
+			characterList = new CharacterList(this);
 			characterList.name = "Character Select List";
 			characterList.listItemClass = LockListItem;
 			characterList.listItemHeight = MainMenu.characterIconSize;
@@ -34,8 +34,19 @@ package menu
 		public function MoveListSelector(moveCount:int):void
 		{
 			var index:int = (characterList.selectedIndex + moveCount) % characterList.items.length;
-			if (index < 0) { index = 0;}
+			if (index < 0) { index = characterList.items.length -1;}
 			characterList.selectedIndex = index;
+		}
+		
+		public function SetListSelectorPosition(index:int):void
+		{
+			if (index > characterList.items.length) { index = characterList.items.length - 1; }
+			characterList.selectedIndex = index;
+		}
+		
+		public function ForceListRedraw():void
+		{
+			characterList.ForceRedraw();
 		}
 		
 		public function SetCharacterListLocks(locks:Vector.<Boolean>):void
@@ -45,7 +56,7 @@ package menu
 		
 		public function AddIconToCharacterList(icon:DisplayObject):void
 		{
-			characterList.addItem(icon);
+			characterList.addItem({icon:icon, label:""});
 		}
 		
 	}

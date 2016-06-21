@@ -11,7 +11,7 @@ package menu
 	 * ...
 	 * @author 
 	 */
-	public class LockList extends GraphicList 
+	public class LockList extends IconList 
 	{
 		protected var _lockedColor:uint = 0x000000;
 		public function LockList(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, items:Array=null) 
@@ -113,6 +113,9 @@ package menu
 		protected override function onRightClick(event:Event):void
 		{
 			if (! (event.target is LockListItem)) return;
+			LockListItem(event.target).unlocked = !LockListItem(event.target).unlocked;
+			super.onRightClick(event);
+			/*if (! (event.target is LockListItem)) return;
 			var offset:int = _scrollbar.value;
 			
 			for(var i:int = 0; i < _itemHolder.numChildren; i++)
@@ -124,7 +127,7 @@ package menu
 				}
 			}
 			LockListItem(event.target).unlocked = !LockListItem(event.target).unlocked;
-			//dispatchEvent(new MouseEvent(MouseEvent.RIGHT_CLICK));
+			dispatchEvent(new Event(RightClickedEvent.RIGHT_CLICKED));*/
 		}
 	}
 

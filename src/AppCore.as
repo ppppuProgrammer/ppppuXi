@@ -31,7 +31,7 @@ package
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import CharacterManager;
-	import menu.GraphicList;
+	import menu.IconList;
 	import menu.MainMenu;
 	import MenuButton;
 	import modifications.*;
@@ -83,7 +83,6 @@ package
 		
 		//Loading
 		private var contentLoader:LoaderMax = new LoaderMax({name:"Content loader"});
-		public var list:GraphicList;
 		
 		//private var musicPlayer:MusicPlayer = new MusicPlayer();
 		private var mainMenu:MainMenu;
@@ -162,7 +161,7 @@ package
 			//displayWidthLimit = stage.stageWidth - this.x*2;
 			
 			//Creates the menus for the flash. This will also not allow any more characters to be added
-			characterManager.CreateMenus(mainStage.MenuLayer);
+			//characterManager.CreateMenus(mainStage.MenuLayer);
 			characterManager.InitializeMusicManager(mainStage, stage.frameRate);
 			//characterManager.SetupMusicForCharacters();
 			//characterManager.ToggleMenu();
@@ -216,6 +215,7 @@ package
 			var mainStageMC:MovieClip = (e.target as MovieClip);
 			var frameNum:int = mainStageMC.currentFrame; //The current frame that the main stage is at.
 			var animationFrame:int = ((frameNum -2) % 120) + 1; //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
+			mainMenu.UpdateFrameForAnimationCounter(GetFrameNumberToSetForAnimation());
 			if(frameNum == 1)
 			{
 				if (characterManager.GetTotalNumOfCharacters() == 0)
@@ -274,11 +274,7 @@ package
 				//RemoveCurrentCharacterClips();
 				if(characterManager.GetCharSwitchStatus())
 				{
-					if (frameNum == flashStartFrame && !characterManager.GetRandomSelectStatus())
-					{
-						
-					}
-					else
+					if (frameNum != flashStartFrame && characterManager.GetRandomSelectStatus())
 					{
 						characterManager.CharacterSwitchLogic();
 					}
@@ -324,7 +320,7 @@ package
 			{
 				if((keyPressed == 48 || keyPressed == 96))
 				{
-					characterManager.RandomizeCurrentCharacterAnim();
+					characterManager.RandomizeCurrentCharacterAnim(GetFrameNumberToSetForAnimation());
 				}
 				else if((!(49 > keyPressed) && !(keyPressed > 57)) ||  (!(97 > keyPressed) && !(keyPressed > 105)))
 				{
@@ -363,6 +359,7 @@ package
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
 					//(Un)lock the character who the menu cursor is on
+					mainMenu.
 					characterManager.ToggleSelectedMenuCharacterLock(characterManager.GetMenuCursorPosition());
 				}
 				else if(keyPressed == keyBindings.GotoChar.main || keyPressed == keyBindings.GotoChar.alt)
@@ -745,7 +742,7 @@ package
 					characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
 					if (characterName == userSettings.currentCharacterName)
 					{
-						characterManager.SetCurrentCharID(charId);
+						mainMenu.SetCharacterSelectorAndUpdate(charId);
 					}
 				}
 				
@@ -904,6 +901,14 @@ package
 				f.size = int(f.size) - 1;
 				txt.setTextFormat(f);
 			}
+		}
+		
+		/*Most animations run for 120 frames / 4 seconds. The mainstage movie clip has over 120 frames though, so some calculations
+		 * are necessary to derive the frame number that an animation should be set to.*/
+		[inline]
+		private function GetFrameNumberToSetForAnimation():int
+		{
+			return ((mainStage.currentFrame - 2) % 120) + 1;
 		}
 	}
 }

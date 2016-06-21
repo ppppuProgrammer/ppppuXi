@@ -1,4 +1,5 @@
 ﻿package  {
+	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
@@ -65,6 +66,8 @@
 			if(m_charAnimations && m_charAnimations.totalFrames > 1 && m_name != null && m_menuButton != null)
 			{
 				m_lockedAnimation = new Vector.<Boolean>(GetNumberOfAnimations());
+				m_charAnimations.mouseEnabled = false;
+				m_charAnimations.mouseChildren = false;
 				return true;
 			}
 			else
@@ -72,10 +75,10 @@
 				return false;
 			}
 		}
-		public function GetCharacterAnimations():MovieClip
+		/*public function GetCharacterAnimations():MovieClip
 		{
 			return m_charAnimations;
-		}
+		}*/
 		
 		/*Function that should only be called by the animated character mod base class. This stops all movieclips contained
 		 * in m_charAnimations, preventing performance issues due to all the animations playing by default when a new MovieClip is created.
@@ -445,6 +448,37 @@
 				queuedLinkedAnimationNumber = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 			}
+		}
+		
+		public function AddAnimationToDisplayObject(parent:DisplayObjectContainer):void
+		{
+			parent.addChild(m_charAnimations);
+		}
+		
+		public function CreateAnimationFrameTargets():Vector.<int>
+		{
+			var frameTargets:Vector.<int> = new Vector.<int>();
+			var labels:Array = m_charAnimations.currentLabels;
+			var unaccessibleFrames:Array = [];
+			for (var i:int = 0, l:int = labels.length; i < l; ++i)
+			{
+				/*Labels should only be used to have an animation directly transition into another. The naming scheme for this
+				 * is "Into_(name)" and (name), with (name) being the animation that should not be normally accessible.*/
+				if ((labels[i].name as String).indexOf("Into_") == -1)
+				{
+					unaccessibleFrames[unaccessibleFrames.length] = labels[i].frame;
+				}
+			}
+			
+			//Parse through the frame labels and see what animations the user should not have access to from the menu.
+			for (var x:int = 0, y:int = m_charAnimations.totalFrames; x < y; ++x)
+			{
+				if (unaccessibleFrames.indexOf(x) == -1)
+				{
+					frameTargets[frameTargets.length] = x;
+				}
+			}
+			return frameTargets;
 		}
 		/*public function GetParentMovieClip():MovieClip
 		{
