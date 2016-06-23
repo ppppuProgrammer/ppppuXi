@@ -1,5 +1,6 @@
 package menu 
 {
+	import com.bit101.components.PushButton;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.display.Sprite;
@@ -25,6 +26,9 @@ package menu
 		 * transition to be accessed.*/
 		private var currentFrameForAnimation:int = 0;
 		
+		private var settingsButton:PushButton;
+		private var keyConfig:Config;
+		
 		//consts
 		public static const characterIconSize:Number = 35;
 		
@@ -33,6 +37,7 @@ package menu
 			characterManager = charManager;
 			musicPlayer = bgmPlayer;
 			userSettings = settings;
+			keyConfig = new Config(userSettings);
 		}
 		
 		public function Initialize():void
@@ -43,12 +48,30 @@ package menu
 			characterMenu.AddEventListenerToCharList(Event.SELECT, CharacterSelected);
 			characterMenu.AddEventListenerToCharList(RightClickedEvent.RIGHT_CLICKED, SetCharacterLock);
 			
+			settingsButton = new PushButton(this, 0, 640, "", OpenSettingsWindow);
+			settingsButton.setSize(32, 32);
+			var settingsIcon:SettingsIcon = new SettingsIcon();
+			//settingsIcon.width = settingsIcon.height = 24;
+			
+			settingsButton.addChild(settingsIcon);
+			
 			animationMenu = new AnimationMenu(this,550);
 			//characterMenu
 		}
 		
 		/* Character Menu*/
 		//{
+		
+		public function ToggleSelectedCharacterLock():void
+		{
+			var index:int = characterMenu.ToggleLockOnSelected();
+			characterManager.ToggleLockOnCharacter(index);
+		}
+		
+		public function SwitchToSelectedCharacter():void
+		{
+			characterManager.SwitchToCharacter(characterMenu.GetSelectedIndex());
+		}
 		
 		//Positive number moves downward, negative moves upward.
 		public function MoveCharacterSelector(indexMove:int):void
@@ -61,7 +84,7 @@ package menu
 			if (index < characterManager.GetTotalNumOfCharacters())
 			{
 				characterMenu.SetListSelectorPosition(index);
-				characterManager.GotoSelectedMenuCharacter(index);
+				characterManager.SwitchToCharacter(index);
 				animationMenu.SetAnimationList(characterManager.GetFrameTargetsForCharacter(index));
 			}
 		}
@@ -85,7 +108,7 @@ package menu
 		 * the character has changed.*/
 		private function CharacterSelected(e:Event):void
 		{
-			characterManager.GotoSelectedMenuCharacter(e.target.selectedIndex);
+			characterManager.SwitchToCharacter(e.target.selectedIndex);
 			animationMenu.SetAnimationList(characterManager.GetFrameTargetsForCharacter(e.target.selectedIndex));
 			
 		}
@@ -98,7 +121,7 @@ package menu
 			{ 
 				return;
 			}
-			characterManager.ToggleSelectedMenuCharacterLock(e.target.rightClickedIndex);
+			characterManager.ToggleLockOnCharacter(e.target.rightClickedIndex);
 			userSettings.ChangeCharacterLock(characterManager.GetCharacterById(e.target.rightClickedIndex).GetName(), 
 				characterManager.GetCharacterLockById(e.currentTarget.rightClickedIndex));
 		}
@@ -106,6 +129,11 @@ package menu
 		public function UpdateFrameForAnimationCounter(frame:int):void
 		{
 			currentFrameForAnimation = frame;
+		}
+		
+		public function OpenSettingsWindow(e:MouseEvent):void
+		{
+			addChild(keyConfig);
 		}
 		//}
 		

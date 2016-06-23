@@ -144,7 +144,7 @@ package
 			/*Changes the focus from the exit button. This is done because if the exit button has the stage's focus when the ppppuConfig instance
 			removes itself from its parent, the stage completely loses focus and requires the user to click anywhere to regain focus.*/
 			stage.focus = this;
-			this.parent.getChildByName("HelpLayer").visible = true;
+			//this.parent.getChildByName("HelpLayer").visible = true;
 			dispatchEvent(new SaveRequestEvent(SaveRequestEvent.SAVE_SHARED_OBJECT));
 			this.parent.removeChild(this);
 			

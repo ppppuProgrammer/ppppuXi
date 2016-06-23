@@ -802,7 +802,7 @@
 						else if(senderCommand == CHARMENUCOMMAND_RANDOMCHAR) //random button
 						{SetRandomSelectStatus(!GetRandomSelectStatus());}
 						else if(senderCommand == CHARMENUCOMMAND_CHANGECHAR)//characters
-						{GotoSelectedMenuCharacter(menuIndex);}
+						{SwitchToCharacter(menuIndex);}
 					}
 					else if (buttonType == MenuButton.TYPE_ANIMATION)
 					{
@@ -866,7 +866,7 @@
 					{
 						if (senderCommand == CHARMENUCOMMAND_CHANGECHAR && event.stageX > initialButtonDown.x + MINIMUM_HORIZONTAL_SWIPE_DISTANCE)
 						{
-							ToggleSelectedMenuCharacterLock(menuIndex);
+							ToggleLockOnCharacter(menuIndex);
 						}
 					}
 					//The animation menu swipe test. Up/Down changes the selectable animations and towards center (un)locks the animation.
@@ -940,7 +940,7 @@
 				var menuIndex:int = ppppuButton.GetMenuIndex();
 				if (senderCommand == CHARMENUCOMMAND_CHANGECHAR)//characters
 				{
-					ToggleSelectedMenuCharacterLock(menuIndex);
+					ToggleLockOnCharacter(menuIndex);
 				}
 				else if (senderCommand == ANIMMENUCOMMAND_CHANGEANIM)
 				{
@@ -1067,7 +1067,7 @@
 			m_menuCursor.y = m_characterMenuButton[m_menuCursorPos].y;
 		}
 		
-		public function GotoSelectedMenuCharacter(charIndex:int=-1):void
+		public function SwitchToCharacter(charIndex:int=-1):void
 		{
 			//if(m_menuEnabled)
 			//{
@@ -1153,7 +1153,7 @@
 			m_canSwitchToCharacter[id] = canSwitch;
 		}
 		
-		public function ToggleSelectedMenuCharacterLock(charIndex:int=-1):void
+		public function ToggleLockOnCharacter(charIndex:int=-1):void
 		{
 			if(charIndex == -1)	{charIndex = 0;}
 			//Test if setting this character to be unselectable will result in no character being selectable

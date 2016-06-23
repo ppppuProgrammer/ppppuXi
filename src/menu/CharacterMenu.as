@@ -31,6 +31,23 @@ package menu
 			characterList.addEventListener(eventType, func);
 		}
 		
+		/*Toggles the lock on the currently selected character on the menu. Used when the Keyboard is the input device.
+		 * Returns the selected index of the character list.*/
+		
+		public function ToggleLockOnSelected():int
+		{
+			if (characterList.selectedIndex > -1)
+			{
+				characterList.ToggleItemLock(characterList.selectedIndex);
+			}
+			return characterList.selectedIndex;
+		}
+		
+		public function GetSelectedIndex():int
+		{
+			return characterList.selectedIndex;
+		}
+		
 		public function MoveListSelector(moveCount:int):void
 		{
 			var index:int = (characterList.selectedIndex + moveCount) % characterList.items.length;

@@ -359,13 +359,14 @@ package
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
 					//(Un)lock the character who the menu cursor is on
-					mainMenu.
-					characterManager.ToggleSelectedMenuCharacterLock(characterManager.GetMenuCursorPosition());
+					mainMenu.ToggleSelectedCharacterLock();
+					//characterManager.ToggleLockOnCharacter(characterManager.GetMenuCursorPosition());
 				}
 				else if(keyPressed == keyBindings.GotoChar.main || keyPressed == keyBindings.GotoChar.alt)
 				{
 					//Go to the character who the menu cursor is on
-					characterManager.GotoSelectedMenuCharacter(characterManager.GetMenuCursorPosition());
+					mainMenu.SwitchToSelectedCharacter();
+					//characterManager.GotoSelectedMenuCharacter(characterManager.GetMenuCursorPosition());
 					//settingsSaveFile.flush();
 				}
 				else if(keyPressed == keyBindings.CharCursorPrev.main || keyPressed == keyBindings.CharCursorPrev.alt)
@@ -387,7 +388,8 @@ package
 				}
 				else if(keyPressed == keyBindings.Menu.main || keyPressed == keyBindings.Menu.alt)
 				{
-					characterManager.ToggleMenu();
+					//characterManager.ToggleMenu();
+					mainMenu.visible = !mainMenu.visible;
 				}
 				else if(keyPressed == keyBindings.Help.main || keyPressed == keyBindings.Help.alt)
 				{	

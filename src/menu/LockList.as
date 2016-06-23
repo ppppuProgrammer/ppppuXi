@@ -33,6 +33,16 @@ package menu
             fillItems();
 		}
 		
+		//locks/unlocks an item of a specified index. Returns the new unlocked value for the item.
+		public function ToggleItemLock(index:int):void
+		{
+			if (index > -1 && index < _itemHolder.numChildren)
+			{
+				var item:LockListItem = (_itemHolder.getChildAt(index) as LockListItem);
+				item.unlocked = !item.unlocked;
+			}
+		}
+		
 		public function SetItemLocks(locks:Vector.<Boolean>):void
 		{
 			var numItems:int = Math.ceil(_height / _listItemHeight);
@@ -93,6 +103,7 @@ package menu
 			
 			var offset:int = _scrollbar.value;
 			
+			var originalSelectedIndex:int = selectedIndex;
 			for(var i:int = 0; i < _itemHolder.numChildren; i++)
 			{
 				if (_itemHolder.getChildAt(i) == event.target) 
@@ -100,6 +111,8 @@ package menu
 					//Locked items can not be selected
 					if (event.target is LockListItem && (event.target as LockListItem).unlocked == false)
 					{
+						//Restore the selected status for the original selected index. 
+						ListItem(_itemHolder.getChildAt(selectedIndex)).selected =true;
 						return;
 					}
 					_selectedIndex = i + offset;
