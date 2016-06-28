@@ -24,7 +24,7 @@
 	import flash.display.InteractiveObject;
 	import flash.utils.getDefinitionByName;
 	
-	public class CharacterManager
+	public class CharacterManager /*extends EventDispatcher*/
 	{
 		private var m_charNamesDict:Dictionary; //Maps the character's name to an id number(int) (ie. "Peach" has an id of 0)
 		private var m_Characters:Vector.<AnimatedCharacter>;
@@ -44,7 +44,7 @@
 		private var m_allowCharSwitches:Boolean = true;
 		private var m_selectRandomChar:Boolean = false;
 		private var m_canSwitchToCharacter:Vector.<Boolean>;
-		private var m_characterMenuButton:Vector.<MenuButton>;
+		//private var m_characterMenuButton:Vector.<MenuButton>;
 		public const MENUBUTTONSIZE:int = 32;
 		private const MENUBUTTONMAXPOS_Y:int = 720;
 		private var m_unswitchableCharactersNum:int = 0;
@@ -111,6 +111,7 @@
 		private var MINIMUM_VERTICAL_SWIPE_DISTANCE:Number;
 		public function CharacterManager(mainClip:MainStage, settings:UserSettings) :void
 		{
+			super();
 			m_mainStage = mainClip;
 			if(m_mainStage == null)
 			{
@@ -121,7 +122,7 @@
 			m_charNamesDict = new Dictionary();
 			m_Characters = new Vector.<AnimatedCharacter>();
 			m_canSwitchToCharacter = new Vector.<Boolean>();
-			m_characterMenuButton = new Vector.<MenuButton>();
+			//m_characterMenuButton = new Vector.<MenuButton>();
 			//musicForEachOrAllButton.ButtonGraphic.gotoAndStop("One");
 			
 			MINIMUM_HORIZONTAL_SWIPE_DISTANCE = m_mainStage.stage.stageWidth * .20;
@@ -148,7 +149,7 @@
 			if(character.HasNecessaryData() == true)
 			{
 				//Do some processing on the menu button to make standardize it for the menu.
-				m_characterMenuButton[m_Characters.length] = character.GetButton(); 
+				//m_characterMenuButton[m_Characters.length] = character.GetButton(); 
 				
 				/*var characterAnimations:MovieClip = character.GetCharacterAnimations();
 				if(characterAnimations)
@@ -225,66 +226,7 @@
 			}*/
 		}
 		
-		/*public function SetupMusicForCharacters():void
-		{
-			for each(var character:AnimatedCharacter in m_Characters)
-			{
-				AddMusicForCharacter(character);
-			}
-		}*/
 		
-		/*public function AddMusicForCharacter(character:AnimatedCharacter):void
-		{
-			var charId:int; 
-			var characterName:String = character.GetName();
-			var musicClassName:String = character.GetMusicClassName();
-			
-			if (musicClassName == null || musicClassName.length == 0) { return;}
-			
-			var characterBGM:Sound = null;
-			if (musicClassName in m_musicClassDictionary)
-			{
-				characterBGM = m_musicClassDictionary[musicClassName];
-			}
-			if (characterBGM == null)
-			{
-				//Get the as3 class for the Sound. Tries to get high quality version first
-				var musicClass:Class;
-				var musicName:String = character.GetMusicTitle();
-				if (musicName == null || musicName.length == 0) { musicName = "Unknown"; }
-				
-				try
-				{
-					musicClass = getDefinitionByName(musicClassName) as Class;
-				}
-				catch (e:ReferenceError)
-				{
-					musicClass = null;
-					trace("An error occured when attempting to access Class \"" + musicClassName + "\" for character \"" + character.GetName() + "\".\n Check that the Class was compiled into the swf and try again.");
-				}
-				if (musicClass)
-				{
-					characterBGM = new musicClass();
-				}
-			}
-			if (characterBGM != null)
-			{
-				m_musicClassDictionary[musicClassName] = characterBGM;
-				if(m_charNamesDict[characterName] != null)
-				{
-					charId = m_charNamesDict[characterName]
-				}
-				else
-				{
-					charId = -1;
-				}
-				if(characterBGM != null && charId >= 0)
-				{
-					musicManager.AddMusic(charId, characterBGM, musicName, character.GetMusicLoopStartPoint(), 
-						character.GetMusicLoopEndPoint(), character.GetMusicStartPoint());
-				}
-			}
-		}*/
 		public function InitializeMusicManager(movieclipWithMusic:MovieClip, frameRate:Number):void
 		{
 			var menuContainingMovieclip:MovieClip = m_mainStage.MenuLayer;
@@ -295,7 +237,7 @@
 			prevMusicChangeButton.width = MENUBUTTONSIZE;
 			prevMusicChangeButton.height = MENUBUTTONSIZE;
 			prevMusicChangeButton.SetButtonFunction(MenuButton.TYPE_MISC, MISCMENUCOMMAND_PREVMUSIC);
-			PrepareMenuButton(prevMusicChangeButton);
+			//PrepareMenuButton(prevMusicChangeButton);
 			//var buttonPoint:Point = new Point((prevMusicChangeButton.width/2), stageHeight-(prevMusicChangeButton.height/2));
 			//ConvertGlobalToLocalPoint(clip, buttonPoint);
 			//prevMusicChangeButton.x = distanceFromStageEdge+(prevMusicChangeButton.width/2);
@@ -310,7 +252,7 @@
 			nextMusicChangeButton.width = MENUBUTTONSIZE;
 			nextMusicChangeButton.height = MENUBUTTONSIZE;
 			nextMusicChangeButton.SetButtonFunction(MenuButton.TYPE_MISC, MISCMENUCOMMAND_NEXTMUSIC);
-			PrepareMenuButton(nextMusicChangeButton);
+			//PrepareMenuButton(nextMusicChangeButton);
 			nextMusicChangeButton.x = menuContainingMovieclip.stage.stageWidth - (nextMusicChangeButton.width / 2);
 			nextMusicChangeButton.y = stageHeight - (nextMusicChangeButton.height / 2);
 			nextMusicChangeButton.SetHitArea(new SquareBtnHitArea(nextMusicChangeButton.width, nextMusicChangeButton.height, -(nextMusicChangeButton.width/2), -(nextMusicChangeButton.height/2)));
@@ -375,6 +317,7 @@
 			{
 				transitionLockout = true;
 				
+				//addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, RemoveTransitionLockout);
 				//Do something here to lock character changes.
 				//this.can
 			}
@@ -382,7 +325,8 @@
 		
 		private function RemoveTransitionLockout(e:Event):void
 		{
-			
+			//removeEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, RemoveTransitionLockout);
+			transitionLockout = false;
 		}
 		//The logic for the normal switch that happens every 120 frames
 		public function CharacterSwitchLogic():void
@@ -458,7 +402,7 @@
 		}
 		
 		//Creates the character menu and animation select/lock menu. Also locks the character manager from being able to add additional characters.
-		public function CreateMenus(parentMC:MovieClip):void
+		/*public function CreateMenus(parentMC:MovieClip):void
 		{
 			m_mainStage.MenuLayer.addEventListener(MouseEvent.MOUSE_DOWN, MouseDownHandler, true);
 			m_mainStage.addEventListener(MouseEvent.MOUSE_UP, MouseUpHandler, true);
@@ -470,7 +414,6 @@
 			//Character Menu
 			//Create the menu cursor
 			m_menuCursor = new Sprite();
-			//m_menuCursor = new MenuCursorSprite(); /* comment out the line that creates menuCursor as a sprite and uncomment this line if you want to use the menu cursor sprite that is in the library */
 			
 			//Draw a cursor using graphics functions
 			m_menuCursor.graphics.lineStyle(MENUBUTTONSIZE/16,0xffffff, .75, true);
@@ -498,20 +441,11 @@
 			var buttonRow:int = 0;
 			var buttonPoint:Point;
 			var charBtnIndex:int=0;
-			for(var l:int = m_characterMenuButton.length; charBtnIndex < l; ++charBtnIndex)
-			{
-				if(m_characterMenuButton[charBtnIndex] != null)
-				{
-					AddCharacterMenuButton(charBtnIndex, null, parentMC);			
-					m_characterMenuButton[charBtnIndex].SetButtonFunction(MenuButton.TYPE_CHARACTER, CHARMENUCOMMAND_CHANGECHAR, charBtnIndex);
-					PrepareMenuButton(m_characterMenuButton[charBtnIndex]);
-				}
-			}
 
 			m_randomButton.transform.colorTransform = m_lockedButtonColor;
 			m_randomButton.SetButtonFunction(MenuButton.TYPE_CHARACTER, CHARMENUCOMMAND_RANDOMCHAR);
-			AddCharacterMenuButton(charBtnIndex, m_randomButton, parentMC);
-			PrepareMenuButton(m_randomButton);
+			//AddCharacterMenuButton(charBtnIndex, m_randomButton, parentMC);
+			//PrepareMenuButton(m_randomButton);
 			m_randomButton.SetHitArea(new CircleBtnHitArea());
 			++charBtnIndex;
 			if(!m_selectRandomChar)
@@ -523,8 +457,8 @@
 			//++charBtnIndex;
 			//m_characterMenuButton[m_characterMenuButton.length] = m_charLockButton;
 			m_charLockButton.SetButtonFunction(MenuButton.TYPE_CHARACTER, CHARMENUCOMMAND_NOSWITCH);
-			AddCharacterMenuButton(charBtnIndex, m_charLockButton, parentMC);
-			PrepareMenuButton(m_charLockButton);
+			//AddCharacterMenuButton(charBtnIndex, m_charLockButton, parentMC);
+			//PrepareMenuButton(m_charLockButton);
 			m_charLockButton.SetHitArea(new CircleBtnHitArea());
 			++charBtnIndex
 			if(m_allowCharSwitches)
@@ -624,10 +558,10 @@
 				PrepareMenuButton(m_animationMenu[buttonIndex]);
 				++buttonIndex;
 			}
-		}
+		}*/
 		
 		//Updates the menus so they stay on top of the other display objects in the flash
-		public function SetMenusOnTop(parentMC:MovieClip):void
+		/*public function SetMenusOnTop(parentMC:MovieClip):void
 		{
 			var topIndex:int = parentMC.numChildren - 1;
 			//character menu
@@ -648,7 +582,7 @@
 					parentMC.setChildIndex(m_animationMenu[blockIndex], topIndex);
 				}
 			}
-		}
+		}*/
 		
 		private function ValidateCharacterId(characterId:int):Boolean
 		{
@@ -723,9 +657,10 @@
 			}
 			currentCharacter.RandomizePlayAnim();
 			currentCharacter.PlayingLockedAnimCheck();
-			currentCharacter.PlayAnimation(((m_mainStage.currentFrame - 2)% 120) + 1);
+			currentCharacter.GotoFrameAndPlayForCurrentAnimation(((m_mainStage.currentFrame - 2)% 120) + 1);
 		}
 		
+		[inline]
 		public function GetCurrentCharacter():AnimatedCharacter
 		{
 			return GetCharacterById(m_currentCharacterId);
@@ -772,7 +707,7 @@
 			}
 		}
 		
-		private function MouseDownHandler(event:MouseEvent):void
+		/*private function MouseDownHandler(event:MouseEvent):void
 		{
 			var button:MenuButton = event.target as MenuButton;
 			if (button)
@@ -811,7 +746,7 @@
 							ChangeAnimForCurrentCharacter(charAnimFrame);
 						}
 						else if(senderCommand == ANIMMENUCOMMAND_RANDOMANIM) //random anim button
-						{/*RandomizeCurrentCharacterAnim();*/}
+						{RandomizeCurrentCharacterAnim();}
 						else if(senderCommand == ANIMMENUCOMMAND_MUSICVOLUME)
 						{ToggleMusicPlay();}
 						else if(senderCommand == ANIMMENUCOMMAND_DEFAULTMUSIC)
@@ -922,7 +857,7 @@
 					}
 				}
 			}
-		}
+		}*/
 		/*private function SomeListenerOver(event:MouseEvent):void
 		{
 			var button:MenuButton = event.relatedObject as MenuButton;
@@ -931,7 +866,7 @@
 				m_latestButtonOver = button;
 			}
 		}*/
-		private function MouseRightClickHandler(event:MouseEvent):void
+		/*private function MouseRightClickHandler(event:MouseEvent):void
 		{
 			var ppppuButton:MenuButton = event.target as MenuButton;
 			if (ppppuButton)
@@ -948,7 +883,7 @@
 					LockAnimForCurrentCharacter(charAnimFrame);
 				}
 			}
-		}
+		}*/
 		public function RandomizeCurrentCharacterAnim(playOnThisFrame:int):void
 		{
 			var currChar:AnimatedCharacter = GetCurrentCharacter();
@@ -957,7 +892,7 @@
 			userSettings.characterSettings[currChar.GetName()].animationSelect = 0;
 			
 			//currChar.PlayAnimation(((m_mainStage.currentFrame - 2) % 120) + 1);
-			currChar.PlayAnimation(playOnThisFrame);
+			currChar.GotoFrameAndPlayForCurrentAnimation(playOnThisFrame);
 			randomBlock.transform.colorTransform = new ColorTransform();
 		}
 		
@@ -990,11 +925,11 @@
 				return;
 			}
 			currChar.SetRandomizeAnimation(false);
-			currChar.SetPlayAnimation(characterAnimFrame);
+			currChar.ChangeAnimationNumberToPlay(characterAnimFrame);
 			userSettings.characterSettings[currChar.GetName()].animationSelect = characterAnimFrame;
 			
-			currChar.PlayAnimation(((m_mainStage.currentFrame - 2)% 120) + 1);
-			randomBlock.transform.colorTransform = m_lockedButtonColor;
+			//currChar.GotoFrameAndPlayForCurrentAnimation(((m_mainStage.currentFrame - 2)% 120) + 1);
+			//randomBlock.transform.colorTransform = m_lockedButtonColor;
 		}
 		
 		public function LockAnimForCurrentCharacter(characterAnimFrame:int):void
@@ -1045,7 +980,7 @@
 			
 		}
 		
-		public function MoveMenuCursorToPrevPos():void
+		/*public function MoveMenuCursorToPrevPos():void
 		{
 			--m_menuCursorPos;
 			if(m_menuCursorPos < 0)
@@ -1065,7 +1000,7 @@
 			}
 			m_menuCursor.x = m_characterMenuButton[m_menuCursorPos].x;
 			m_menuCursor.y = m_characterMenuButton[m_menuCursorPos].y;
-		}
+		}*/
 		
 		public function SwitchToCharacter(charIndex:int=-1):void
 		{
@@ -1153,27 +1088,25 @@
 			m_canSwitchToCharacter[id] = canSwitch;
 		}
 		
-		public function ToggleLockOnCharacter(charIndex:int=-1):void
+		public function ToggleLockOnCharacter(charIndex:int=-1):Boolean
 		{
 			if(charIndex == -1)	{charIndex = 0;}
 			//Test if setting this character to be unselectable will result in no character being selectable
 			if (m_canSwitchToCharacter[charIndex] && m_unswitchableCharactersNum + 1 >= m_Characters.length)
 			{
-				return; //Need to exit the function immediantly
+				return false; //Need to exit the function immediantly
 			}
 			m_canSwitchToCharacter[charIndex] = !m_canSwitchToCharacter[charIndex];
 			userSettings.characterSettings[m_Characters[charIndex].GetName()].canSwitchTo = m_canSwitchToCharacter[charIndex];
 			if (!m_canSwitchToCharacter[charIndex])
 			{
-				m_characterMenuButton[charIndex].transform.colorTransform = m_lockedButtonColor;
 				++m_unswitchableCharactersNum;
 			}
 			else
 			{
-				m_characterMenuButton[charIndex].transform.colorTransform = new ColorTransform();
 				--m_unswitchableCharactersNum;
 			}
-			
+			return m_canSwitchToCharacter[charIndex];
 		}
 		
 		public function ToggleAnimationLockMode():void
@@ -1272,7 +1205,7 @@
 			//}
 			
 		}
-		public function ToggleMenu():void
+		/*public function ToggleMenu():void
 		{
 			m_menuEnabled = !m_menuEnabled;
 			userSettings.showMenu = m_menuEnabled;
@@ -1292,7 +1225,7 @@
 			
 			m_menuCursor.visible = m_menuEnabled;
 			
-		}
+		}*/
 		public function CheckAvailableAnimationPages():void
 		{
 			while(m_animationPage > 0 && (GetCurrentCharacter().GetNumberOfAnimations() < MAXANIMATIONSELECTBOXES*m_animationPage+1))
@@ -1401,13 +1334,13 @@
 			}
 		}
 		
-		private function PrepareMenuButton(button:MenuButton):void
+		/*private function PrepareMenuButton(button:MenuButton):void
 		{
 			button.mouseEnabled = true;
 			button.mouseChildren = false;
-		}
+		}*/
 		
-		private function AddCharacterMenuButton(buttonIndex:int, button:MenuButton, mainMC:MovieClip):void
+		/*private function AddCharacterMenuButton(buttonIndex:int, button:MenuButton, mainMC:MovieClip):void
 		{
 			var buttonColumn:int = 0;
 			var buttonRow:int = buttonIndex;
@@ -1429,9 +1362,9 @@
 			m_characterMenuButton[buttonIndex].mouseEnabled = true;
 			m_characterMenuButton[buttonIndex].mouseChildren = false;
 			mainMC.addChild(m_characterMenuButton[buttonIndex]);
-		}
+		}*/
 		
-		private function AddNewAnimationMenuButton(buttonIndex:int, button:MenuButton, mainMC:MovieClip):void
+		/*private function AddNewAnimationMenuButton(buttonIndex:int, button:MenuButton, mainMC:MovieClip):void
 		{
 			if(button != null)
 			{
@@ -1445,7 +1378,7 @@
 			m_animationMenu[buttonIndex].x = blockPoint.x;
 			m_animationMenu[buttonIndex].y = blockPoint.y;
 			mainMC.addChild(m_animationMenu[buttonIndex]);
-		}
+		}*/
 		//Gets a number from 1-120 for any animations used (character, light, background, etc)  
 		private function GetTargetFrameNumberForAnimation():int
 		{
@@ -1481,7 +1414,7 @@
 			keyConfig = new Config(userSettings);
 		}
 		
-		public function GetFrameTargetsForCharacter(id:int):Vector.<int>
+		/*public function GetFrameTargetsForCharacter(id:int):Vector.<int>
 		{
 			var frameTargets:Vector.<int>;
 			var character:AnimatedCharacter = GetCharacterById(id);
@@ -1490,6 +1423,11 @@
 				//character.GetCharacterAnimations
 			}
 			return frameTargets;
+		}*/
+		
+		public function ChangeFrameOfCurrentAnimation(frame:int):void
+		{
+			GetCurrentCharacter().GotoFrameAndPlayForCurrentAnimation(frame);
 		}
 		
 		/*public function DEBUG_TestMusicLoop():void

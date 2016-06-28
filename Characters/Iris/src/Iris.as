@@ -21,8 +21,8 @@ package
 			m_charAnimations = new IrisAnimations();
 			m_charAnimations.x = -226.8;
 			m_charAnimations.y = 213.6;
-			m_menuButton = new IrisButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new AAIcon();
+			
 			m_name = "Iris"; 
 			m_defaultMusicName = "Turnabout Sisters";
 		}

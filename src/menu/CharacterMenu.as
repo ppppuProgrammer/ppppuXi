@@ -1,5 +1,6 @@
 package menu 
 {
+	import com.bit101.components.PushButton;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.display.Sprite;
@@ -14,14 +15,16 @@ package menu
 		private const LIST_WIDTH:Number = 50;
 		
 		private var characterList:CharacterList;
+		
 		public function CharacterMenu() 
 		{
 			name = "Character Menu";
 			characterList = new CharacterList(this);
 			characterList.name = "Character Select List";
-			characterList.listItemClass = LockListItem;
+			characterList.listItemClass = CharacterListItem;
 			characterList.listItemHeight = MainMenu.characterIconSize;
 			characterList.setSize(LIST_WIDTH,  MainMenu.characterIconSize * MAX_LIST_ITEMS_DISPLAYED);
+			
 			//characterList.addEventListener(Event.SELECT, CharacterSelected);
 			//characterList.addEventListener(MouseEvent.RIGHT_CLICK, SetCharacterLock);
 		}
@@ -31,16 +34,21 @@ package menu
 			characterList.addEventListener(eventType, func);
 		}
 		
+		public function SetUnlockedStatus(index:int, unlocked:Boolean):void
+		{
+			characterList.items[index].unlocked = unlocked;
+		}
+		
 		/*Toggles the lock on the currently selected character on the menu. Used when the Keyboard is the input device.
 		 * Returns the selected index of the character list.*/
 		
-		public function ToggleLockOnSelected():int
+		public function ToggleLockOnMenuCursor():int
 		{
-			if (characterList.selectedIndex > -1)
+			if (characterList.menuCursorIndex > -1)
 			{
-				characterList.ToggleItemLock(characterList.selectedIndex);
+				characterList.ToggleItemLock(characterList.menuCursorIndex);
 			}
-			return characterList.selectedIndex;
+			return characterList.menuCursorIndex;
 		}
 		
 		public function GetSelectedIndex():int
@@ -48,23 +56,32 @@ package menu
 			return characterList.selectedIndex;
 		}
 		
+		public function GetKeyboardMenuCursorIndex():int
+		{
+			return characterList.menuCursorIndex;
+		}
+		
 		public function MoveListSelector(moveCount:int):void
 		{
-			var index:int = (characterList.selectedIndex + moveCount) % characterList.items.length;
+			var index:int = (characterList.menuCursorIndex + moveCount) % characterList.items.length;
+			trace("mouseOverIndex: " + characterList.menuCursorIndex);
+			trace("index: " + index);
 			if (index < 0) { index = characterList.items.length -1;}
-			characterList.selectedIndex = index;
+			//characterList.selectedIndex = index;
+			characterList.menuCursorIndex = index;
 		}
 		
 		public function SetListSelectorPosition(index:int):void
 		{
 			if (index > characterList.items.length) { index = characterList.items.length - 1; }
 			characterList.selectedIndex = index;
+			characterList.menuCursorIndex = index;
 		}
 		
-		public function ForceListRedraw():void
+		/*public function ForceListRedraw():void
 		{
 			characterList.ForceRedraw();
-		}
+		}*/
 		
 		public function SetCharacterListLocks(locks:Vector.<Boolean>):void
 		{

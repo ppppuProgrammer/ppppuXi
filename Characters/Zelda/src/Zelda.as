@@ -20,8 +20,8 @@ package
 			m_charAnimations = new ZeldaAnimations();
 			m_charAnimations.x = -54.75;
 			m_charAnimations.y = 94.5;
-			m_menuButton = new ZeldaButton();
-			m_menuButton.SetHitArea(new TriangleBtnHitArea);
+			m_menuIcon = new ZeldaIcon();
+			
 			m_name = "Zelda";
 			m_defaultMusicName = "Gerudo Valley";
 		}

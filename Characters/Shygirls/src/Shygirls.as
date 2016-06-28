@@ -20,8 +20,8 @@ package
 			m_charAnimations = new ShygirlsAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new ShygirlsButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(110, 70));
+			m_menuIcon = new SGIcon();
+			
 			m_name = "Shygirls";
 			//m_defaultMusicName = "";
 		}

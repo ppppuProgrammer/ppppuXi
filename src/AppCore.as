@@ -87,6 +87,9 @@ package
 		//private var musicPlayer:MusicPlayer = new MusicPlayer();
 		private var mainMenu:MainMenu;
 		
+		//Timing
+		private var totalRunFrames:int = 0;
+		
 		//Constructor
 		public function AppCore() 
 		{
@@ -96,6 +99,9 @@ package
 			addChild(mainStage);
 			
 			contentLoader.autoLoad = true;
+			
+			mainStage.mouseChildren = false;
+			mainStage.mouseEnabled = false;
 			
 			var frameLabels:Array = mainStage.currentLabels;
 			for (var i:int = 0, l:int = frameLabels.length; i < l;++i)
@@ -212,45 +218,43 @@ package
 		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
 		private function RunLoop(e:Event):void
 		{
-			var mainStageMC:MovieClip = (e.target as MovieClip);
-			var frameNum:int = mainStageMC.currentFrame; //The current frame that the main stage is at.
-			var animationFrame:int = ((frameNum -2) % 120) + 1; //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
-			mainMenu.UpdateFrameForAnimationCounter(GetFrameNumberToSetForAnimation());
-			if(frameNum == 1)
+			//var mainStageMC:MovieClip = (e.target as MovieClip);
+			var frameNum:int = totalRunFrames; //The current frame that the main stage is at.
+
+			if(frameNum == 0)
 			{
 				if (characterManager.GetTotalNumOfCharacters() == 0)
 				{
-					mainStageMC.stopAllMovieClips();
+					mainStage.stopAllMovieClips();
 				}
 				else
 				{
-					mainStageMC.play();
+					mainStage.gotoAndStop("Start");
+					PlayBackgroundAnimations();
 				}
-				/*if (userSettings.showMenu)
-				{
-					characterManager.ToggleMenu();
-				}*/
 			}
-			//if (animationFrame && animationFrame != lastPlayedFrame)
-			//{
-			if (frameNum == flashStartFrame)
+			
+			if (mainStage.currentFrame == flashStartFrame)
 			{
+				++totalRunFrames;
+				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
+				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
 				if (userSettings.firstTimeRun == true)
 				{
-					//firstTimeRun = false;
 					UpdateKeyBindsForHelpScreen();
 					ToggleHelpScreen(); //Show the help screen
-					characterManager.ToggleMenu();
+					ShowMenu(true);
+					//characterManager.ToggleMenu();
 					userSettings.firstTimeRun = false;
 					settingsSaveFile.data.ppppuSettings = userSettings;
 					settingsSaveFile.flush();
-					//userSettings.flush();
 				}
 				else
 				{
 					if (userSettings.showMenu)
 					{
-						characterManager.ToggleMenu();
+						ShowMenu(userSettings.showMenu);
+						//characterManager.ToggleMenu();
 					}
 				}
 
@@ -260,43 +264,25 @@ package
 					mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = true;
 				}
 				
-				//These movie clips exist on frame 1 of the main stage but that has them desynced. So resync them to the animation frame.
-				
-				mainStage.OuterDiamondBG.gotoAndPlay(animationFrame);
+				/*mainStage.OuterDiamondBG.gotoAndPlay(animationFrame);
 				mainStage.InnerDiamondBG.gotoAndPlay(animationFrame);
 				mainStage.TransitionDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.BacklightBG.gotoAndPlay(animationFrame);
-			}
-			if(frameNum % 120 == flashStartFrame) //Add character clip
-			{
+				mainStage.BacklightBG.gotoAndPlay(animationFrame);*/
 				
-			//frameNum != 7 is so Peach is the first character displayed on start
-				//RemoveCurrentCharacterClips();
-				if(characterManager.GetCharSwitchStatus())
+				if(frameNum % 120 == 0) //Add character clip
 				{
-					if (frameNum != flashStartFrame && characterManager.GetRandomSelectStatus())
+					
+					//frameNum != 7 is so Peach is the first character displayed on start
+					if(characterManager.GetCharSwitchStatus())
 					{
-						characterManager.CharacterSwitchLogic();
+						if (frameNum != flashStartFrame && characterManager.GetRandomSelectStatus())
+						{
+							characterManager.CharacterSwitchLogic();
+						}
 					}
-					/*else if (frameNum != flashStartFrame && !characterManager.GetRandomSelectStatus())
-					{
-						characterManager.CharacterSwitchLogic();
-					}*/
-					//()
+					characterManager.AddCurrentCharacter();
 				}
-				characterManager.AddCurrentCharacter();
 			}
-			//Make sure the background movie clips stay synced after reaching the loop end point on the main stage
-			if (frameNum == mainStageLoopStartFrame)
-			{
-				mainStage.OuterDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.InnerDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.TransitionDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.BacklightBG.gotoAndPlay(animationFrame);
-			}
-				
-			//}
-			//lastPlayedFrame = animationFrame;
 		}
 		
 		//Activated if a key is detected to be released. Sets the keys "down" status to false
@@ -329,9 +315,10 @@ package
 					{
 						keyPressed = keyPressed - 48;
 					}
-					//AnimationFrame has to be a value greater than 0
-					var animationFrame:int = keyPressed - 49 + 1; 
-					characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
+					//AnimationIndex 
+					var animationIndex:int = keyPressed - 49; 
+					mainMenu.ChangeAnimationForCurrentCharacter(animationIndex);
+					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
 				{
@@ -341,7 +328,7 @@ package
 						//characterManager.SetRandomSelectStatus(false);
 					//}
 				}
-				else if(keyPressed == keyBindings.PrevAnimPage.main || keyPressed == keyBindings.PrevAnimPage.alt)
+				/*else if(keyPressed == keyBindings.PrevAnimPage.main || keyPressed == keyBindings.PrevAnimPage.alt)
 				{
 					//Try to go to the previous page of animations
 					characterManager.GotoPrevAnimationPage();
@@ -350,7 +337,7 @@ package
 				{
 					//Try to go to the next page of animations
 					characterManager.GotoNextAnimationPage();
-				}
+				}*/
 				else if(keyPressed == keyBindings.AnimLockMode.main || keyPressed == keyBindings.AnimLockMode.alt)
 				{
 					//toggle animation lock/goto mode
@@ -359,7 +346,7 @@ package
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
 					//(Un)lock the character who the menu cursor is on
-					mainMenu.ToggleSelectedCharacterLock();
+					mainMenu.ToggleCharacterLock();
 					//characterManager.ToggleLockOnCharacter(characterManager.GetMenuCursorPosition());
 				}
 				else if(keyPressed == keyBindings.GotoChar.main || keyPressed == keyBindings.GotoChar.alt)
@@ -617,7 +604,7 @@ package
 				{
 					if (characterManager.AddCharacter(animCharacterMod.GetCharacter()))
 					{
-						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetButton().getChildAt(0));
+						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetIcon());
 						TryToLoadCharacterSettings(animCharacterMod.GetCharacter().GetName());
 					}
 					//list.addItem();
@@ -724,7 +711,12 @@ package
 						characterManager.SetAnimationLockForCharacter(charId, animNum, animLockObject[animNum]);
 					}
 					if (charSettings.canSwitchTo == null) { charSettings.canSwitchTo = true; }
-					characterManager.SetLockOnCharacter(charId, charSettings.canSwitchTo);
+					if (charSettings.canSwitchTo == false)
+					{
+						//By default the character is unlocked. So if we can't switch to them, toggle to set true to false as needed.
+						mainMenu.ToggleCharacterLock(charId);
+					}
+					//characterManager.SetLockOnCharacter(charId, charSettings.canSwitchTo);
 					/*if (charSettings.canSwitchTo == false)
 					{
 						characterManager.ToggleSelectedMenuCharacterLock(charId);
@@ -738,13 +730,14 @@ package
 					else
 					{
 						characterManager.GetCharacterById(charId).SetRandomizeAnimation(false);
-						characterManager.GetCharacterById(charId).SetPlayAnimation(animSelect);
+						characterManager.GetCharacterById(charId).ChangeAnimationNumberToPlay(animSelect);
 					}
 				
 					characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
 					if (characterName == userSettings.currentCharacterName)
 					{
 						mainMenu.SetCharacterSelectorAndUpdate(charId);
+						//mainMenu.ChangeAnimationForCurrentCharacter();
 					}
 				}
 				
@@ -910,7 +903,31 @@ package
 		[inline]
 		private function GetFrameNumberToSetForAnimation():int
 		{
-			return ((mainStage.currentFrame - 2) % 120) + 1;
+			return (totalRunFrames % 120);
+		}
+		
+		[inline]
+		private function StopBackgroundAnimations():void
+		{
+			mainStage.OuterDiamondBG.stop();
+			mainStage.InnerDiamondBG.stop();
+			mainStage.TransitionDiamondBG.stop();
+			mainStage.BacklightBG.stop();
+		}
+		
+		[inline]
+		private function PlayBackgroundAnimations(startFrame:int = 1):void
+		{
+			mainStage.OuterDiamondBG.gotoAndPlay(startFrame);
+			mainStage.InnerDiamondBG.gotoAndPlay(startFrame);
+			mainStage.TransitionDiamondBG.gotoAndPlay(startFrame);
+			mainStage.BacklightBG.gotoAndPlay(startFrame);
+		}
+		
+		[inline]
+		private function ShowMenu(visible:Boolean):void
+		{
+			mainMenu.visible = visible;
 		}
 	}
 }

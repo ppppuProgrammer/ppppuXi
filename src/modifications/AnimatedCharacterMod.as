@@ -1,7 +1,6 @@
 package modifications 
 {
 	import flash.events.Event;
-	import modifications.Mod;
 	/**
 	 * Character mod intended for use in interactive versions of ppppu. A movie clip containing all the animations that will be shown
 	 * is expected. In order to add more animations for the character, the flash document for the character must be modified.

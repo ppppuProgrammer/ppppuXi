@@ -20,8 +20,8 @@ package
 			m_charAnimations = new SamusAnimations();
 			m_charAnimations.x = -54.75;
 			m_charAnimations.y = 92;
-			m_menuButton = new SamusButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new SamusIcon();
+			
 			m_name = "Samus";
 			m_defaultMusicName = "Mission Final";
 		}

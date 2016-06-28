@@ -1,7 +1,6 @@
 package modifications 
 {
 	import flash.media.Sound;
-	import modifications.Mod;
 	/**
 	 * ...
 	 * @author 

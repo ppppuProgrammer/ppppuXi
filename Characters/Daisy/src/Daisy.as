@@ -21,8 +21,8 @@ package
 			m_charAnimations = new DaisyAnimations();
 			m_charAnimations.x = -99.4;
 			m_charAnimations.y = 173.8;
-			m_menuButton = new DaisyButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new DaisyIcon();
+			
 			m_name = "Daisy"; 
 			m_defaultMusicName = "SML1_1";
 		}

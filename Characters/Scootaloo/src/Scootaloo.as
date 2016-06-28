@@ -20,8 +20,8 @@ package
 			m_charAnimations = new ScootalooAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new ScootalooButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new ScootalooIcon();
+			
 			m_name = "Scootaloo"; 
 			m_defaultMusicName = "CMC GC";
 		}

@@ -76,6 +76,7 @@ package
 				//loaderInfo.addEventListener(IOErrorEvent.IO_ERROR, IOError);
 				
 				// TODO show loader
+				mouseEnabled = false;
 				//Add background
 				var preloaderBackground:MovieClip = new PlanetBackground();
 				preloaderBackground.x = (stage.stageWidth - 480)/2;
@@ -182,6 +183,7 @@ package
 			var modsToLoad:Array = [];
 			
 			var rawSplitStrings:Array = listText.split("\r\n");
+			var rawSplitStrings:Array = listText.split("\r\n");
 			//Feed the mods to load array into the modLoader
 			for (var i:int = 0, l:int = rawSplitStrings.length; i < l; ++i)
 			{
@@ -192,6 +194,7 @@ package
 					swfPreloader.append(new SWFLoader(rawSplitStrings[i]));
 				}
 			}
+			swfPreloader.maxConnections = 1;
 			swfPreloader.load();
 			
 		}

@@ -19,10 +19,10 @@ package
 			m_charAnimations = new PeachAnimations();
 			m_charAnimations.x = -226.8;
 			m_charAnimations.y = 213.65;
-			m_menuButton = new PeachButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new PeachIcon();
+			
 			m_name = "Peach";
-			m_menuButton.name = m_name + "_MenuButton";
+			
 		}
 		
 	}

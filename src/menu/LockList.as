@@ -93,6 +93,68 @@ package menu
 			}
 		}
 		
+		public override function addItem(item:Object):void
+		{
+			if (!("unlocked" in item))
+			{
+				item.unlocked = true;
+			}
+			super.addItem(item);
+		}
+		public override function addItemAt(item:Object, index:int):void
+		{
+			if (!("unlocked" in item))
+			{
+				item.unlocked = true;
+			}
+			super.addItemAt(item, index);
+		}
+		
+		/*protected override function fillItems():void
+        {
+            var offset:int = _scrollbar.value;
+            var numItems:int = Math.ceil(_height / _listItemHeight);
+			numItems = Math.min(numItems, _items.length);
+            for(var i:int = 0; i < numItems; i++)
+            {
+                var item:ListItem = _itemHolder.getChildAt(i) as ListItem;
+				if(offset + i < _items.length)
+				{
+	                item.data = _items[offset + i];
+				}
+				else
+				{
+					item.data = "";
+				}
+				if(_alternateRows)
+				{
+					item.defaultColor = ((offset + i) % 2 == 0) ? _defaultColor : _alternateColor;
+				}
+				else
+				{
+					item.defaultColor = _defaultColor;
+				}
+                if(offset + i == _selectedIndex)
+                {
+                    item.selected = true;
+                }
+                else
+                {
+                    item.selected = false;
+                }
+				if (item is LockListItem)
+				{
+					if(offset + i == _selectedIndex)
+					{
+						(item as LockListItem). = true;
+					}
+					else
+					{
+						(item as LockListItem).selected = false;
+					}
+				}
+            }
+        }
 
 		/**
 		 * Called when a user selects an item in the list.
@@ -112,7 +174,7 @@ package menu
 					if (event.target is LockListItem && (event.target as LockListItem).unlocked == false)
 					{
 						//Restore the selected status for the original selected index. 
-						ListItem(_itemHolder.getChildAt(selectedIndex)).selected =true;
+						ListItem(_itemHolder.getChildAt(originalSelectedIndex)).selected =true;
 						return;
 					}
 					_selectedIndex = i + offset;
@@ -142,6 +204,13 @@ package menu
 			LockListItem(event.target).unlocked = !LockListItem(event.target).unlocked;
 			dispatchEvent(new Event(RightClickedEvent.RIGHT_CLICKED));*/
 		}
+		
+		/*public function ForceRedraw():void
+		{
+			//selectedIndex = value;
+			invalidate();
+			dispatchEvent(new Event(Event.SELECT));
+		}*/
 	}
 
 }

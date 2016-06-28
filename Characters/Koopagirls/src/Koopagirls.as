@@ -22,8 +22,8 @@ package
 			m_charAnimations = new KoopagirlsAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new KoopagirlsButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(110, 70));
+			m_menuIcon = new KGIcon();
+			
 			m_name = "Koopagirls";
 			//m_defaultMusicName = "";
 		}

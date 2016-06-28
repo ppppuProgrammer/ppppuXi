@@ -19,8 +19,8 @@ package
 			m_charAnimations = new WFTAnimations();
 			m_charAnimations.x = -54.75;
 			m_charAnimations.y = 92;
-			m_menuButton = new WFTButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(110, 70));
+			m_menuIcon = new WFTIcon();
+			
 			m_name = "WiiFitTrainer";
 			m_defaultMusicName = "WF Training Menu";
 		}

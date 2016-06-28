@@ -22,8 +22,8 @@ package
 			m_charAnimations = new PiranhagirlsAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new PiranhagirlsButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(110, 70));
+			m_menuIcon = new PGIcon();
+			
 			m_name = "Piranhagirls";
 			//m_defaultMusicName = "";
 		}

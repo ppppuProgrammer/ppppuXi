@@ -19,8 +19,8 @@ package
 			m_charAnimations = new HildaAnimations();
 			m_charAnimations.x = -104.75;
 			m_charAnimations.y = 92;
-			m_menuButton = new HildaButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
+			m_menuIcon = new HildaIcon();
+			
 			m_name = "Hilda";
 			m_defaultMusicName = "Miror B";
 		}

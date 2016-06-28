@@ -19,8 +19,8 @@ package
 			m_charAnimations = new ShantaeAnimations();
 			m_charAnimations.x = -54.55;
 			m_charAnimations.y = 92.75;
-			m_menuButton = new ShantaeButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(132,65));
+			m_menuIcon = new ShantaeIcon();
+			
 			m_name = "Shantae";
 			m_defaultMusicName = "Burning Town PC";
 		}

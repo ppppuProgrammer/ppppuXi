@@ -20,9 +20,9 @@ package
 			m_charAnimations = new IsabelleAnimations();
 			m_charAnimations.x = -54.75;
 			m_charAnimations.y = 92;
-			m_menuButton = new IsabelleButton();
-			var isabelleHitArea:SquareBtnHitArea = new SquareBtnHitArea(79, 75);
-			m_menuButton.SetHitArea(isabelleHitArea);
+			m_menuIcon = new IsabelleIcon();
+
+			
 			m_name = "Isabelle";
 			m_defaultMusicName = "2 AM";
 		}

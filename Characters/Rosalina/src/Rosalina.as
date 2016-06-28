@@ -21,10 +21,10 @@ package
 			m_charAnimations = new RosalinaAnimations();
 			m_charAnimations.x = -223.8;
 			m_charAnimations.y = 216.35;
-			m_menuButton = new RosaButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new RosaIcon();
+			
 			m_name = "Rosalina";
-			m_menuButton.name = m_name + "_MenuButton";
+			
 		}
 		
 	}

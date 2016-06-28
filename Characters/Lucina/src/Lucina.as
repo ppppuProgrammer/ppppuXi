@@ -20,8 +20,8 @@ package
 			m_charAnimations = new LucinaAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new LucinaButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(101.15,87.75));
+			m_menuIcon = new LucinaIcon();
+			
 			m_name = "Lucina";
 			m_defaultMusicName = " FE Spa";
 		}

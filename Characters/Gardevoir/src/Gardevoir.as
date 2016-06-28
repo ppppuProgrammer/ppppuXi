@@ -20,8 +20,8 @@ package
 			m_charAnimations = new GardevoirAnimations();
 			m_charAnimations.x = -98.75;
 			m_charAnimations.y = 174;
-			m_menuButton = new GardevoirButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
+			m_menuIcon = new GardevoirIcon();
+			
 			m_name = "Gardevoir";
 			m_defaultMusicName = "Route 1";
 

@@ -19,8 +19,8 @@ package
 			m_charAnimations = new SweetieBelleAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new SweetieBelleButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new SweetieBelleIcon();
+			
 			m_name = "Sweetie Belle"; 
 			m_defaultMusicName = "CMC GC";
 		}

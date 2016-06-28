@@ -20,8 +20,8 @@ package
 			m_charAnimations = new AppleBloomAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new AppleBloomButton();
-			m_menuButton.SetHitArea(new CircleBtnHitArea);
+			m_menuIcon = new AppleBloomIcon();
+			
 			m_name = "Apple Bloom"; 
 			m_defaultMusicName = "CMC GC";
 		}

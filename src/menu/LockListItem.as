@@ -26,11 +26,12 @@ package menu
 			//graphics.clear();
 			if (_data)
 			{
-				var icon:DisplayObject = _data as DisplayObject || _data["icon"] as DisplayObject;
+				var icon:DisplayObject = _data["icon"] as DisplayObject;
 				if (icon is DisplayObject)
 				{
 					//var dataDispObj:DisplayObject = _data as DisplayObject;
-					if (unlocked)
+					//var unlocked:Boolean = _data.unlocked;
+					if (_data.unlocked)
 					{
 						icon.alpha = 1;
 					}
@@ -59,12 +60,26 @@ package menu
 			graphics.endFill();*/
 		}
 		
+		public override function set data(value:Object):void
+		{
+			super.data = value;
+			if (_data != null && "unlocked" in value)
+			{
+				_data.unlocked = value.unlocked;
+			}
+		}
+		
+		/*public function SetUnlocked(value:Boolean):void
+		{
+			data.unlocked = value;
+		}*/
+		
 		/**
 		 * Sets/gets whether or not this item is locked.
 		 */
 		public function set unlocked(value:Boolean):void
 		{
-			_unlocked = value;
+			_data.unlocked = _unlocked = value;
 			invalidate();
 		}
 		public function get unlocked():Boolean

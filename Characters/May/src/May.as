@@ -19,8 +19,8 @@ package
 			m_charAnimations = new MayAnimations();
 			m_charAnimations.x = -99.15;
 			m_charAnimations.y = 173.8;
-			m_menuButton = new MayButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
+			m_menuIcon = new MayIcon();
+			
 			m_name = "May";
 			m_defaultMusicName = "Miror B. Battle - Pokemon XD";
 		}

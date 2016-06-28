@@ -32,8 +32,9 @@ package
 		private const UNASSIGNED_TEXT:String = "Unassigned";
 		//Dictionary that maps keycodes to their associated names. Original code can be found at http://stackoverflow.com/a/19739892 
 		public static var keyDict:Dictionary;
-		private var keyFunctionsList:Vector.<String> = new < String > ["LockChar", "GotoChar", "AutoCharSwitch", "RandomChar", "CharCursorPrev", "CharCursorNext", "PrevAnimPage", "NextAnimPage", "AnimLockMode", "Menu", "Help", "NextHelpPage",
-		"Backlight", "Background", "DisplayLimit", "Music", "CharTheme", "PrevMusic", "NextMusic", "MusicForAll", "Activate"];
+		private var keyFunctionsList:Vector.<String> = new < String > ["LockChar", "GotoChar", "AutoCharSwitch", "RandomChar", 
+			"CharCursorPrev", "CharCursorNext", "PrevAnimPage", "NextAnimPage", "AnimLockMode", "Menu", "Help", "NextHelpPage",
+			"Backlight", "Background", "DisplayLimit", "Music", "CharTheme", "PrevMusic", "NextMusic", "MusicForAll", "Activate"];
 		
 		private var warningText:Label;
 		

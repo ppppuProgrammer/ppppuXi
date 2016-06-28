@@ -21,9 +21,8 @@ package
 			m_charAnimations = new MidnaAnimations();
 			m_charAnimations.x = -54.05;
 			m_charAnimations.y = 93;
-			m_menuButton = new MidnaButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(45.05, 81.4));
-			m_menuButton.x = 20;
+			m_menuIcon = new MidnaIcon();
+			
 			m_name = "Midna";
 			m_defaultMusicName = "Gerudo Valley";
 		}

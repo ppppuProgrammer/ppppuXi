@@ -18,8 +18,8 @@ package
 			m_charAnimations = new FioraAnimations();
 			m_charAnimations.x = -226.8;
 			m_charAnimations.y = 213.6;
-			m_menuButton = new FioraButton();
-			m_menuButton.SetHitArea(new SquareBtnHitArea(75,75));
+			m_menuIcon = new XenoIcon();
+			
 			m_name = "Fiora";
 			m_defaultMusicName = "Gaur Plain";
 		}

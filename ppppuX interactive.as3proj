@@ -12,6 +12,7 @@
     <movie minorVersion="0" />
     <movie platform="Flash Player" />
     <movie background="#FFFFFF" />
+    <movie preferredSDK="Apache Flex 4.15.0 FP20.0 AIR20.0 en_US;4.15.0;" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
@@ -43,7 +44,7 @@
     <option linkReport="" />
     <option loadExterns="" />
     <option staticLinkRSL="True" />
-    <option additional="" />
+    <option additional="-frame AppMain Main" />
     <option compilerConstants="" />
     <option minorVersion="" />
   </build>
