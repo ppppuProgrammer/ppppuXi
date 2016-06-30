@@ -5,6 +5,7 @@ package menu
 	import com.bit101.components.Label;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	/**
 	 * ...
 	 * @author 
@@ -48,10 +49,23 @@ package menu
 			anim2Button.setSize(AnimationButtonSize, AnimationButtonSize);*/
 		}
 		
+		//private function RandomAnimationButton
+		
+		//Mouse input
+		public function RandomAnimationButtonSelected(e:Event = null):void
+		{
+			
+		}
+		
 		public function AddEventListenerToAnimList(eventType:String, func:Function):void
 		{
 			animationList.addEventListener(eventType, func);
 		}
+		
+		/*public function AddEventListenerToAnimList(eventType:String, func:Function):void
+		{
+			animationList.addEventListener(eventType, func);
+		}*/
 		
 		/*public function ForceListRedraw():void
 		{

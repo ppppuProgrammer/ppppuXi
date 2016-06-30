@@ -44,7 +44,10 @@
 		private var m_frameTargets:Vector.<int> = new Vector.<int>();
 		
 		private var frameToTransitionToLinkedAnimation:int = -1;
-		private var queuedLinkedAnimationNumber:int = -1;
+		private var queuedLinkedAnimationFrame:int = -1;
+		/*Indicates if the character is still in their linked animation, which are able to be set to loop a section endlessly until the 
+		 * character or animation is switched by the user.*/
+		private var isInLinkedAnimation:Boolean = false;
 		public function AnimatedCharacter()
 		{
 			//m_charAnimations.x = -227.3;
@@ -203,12 +206,13 @@
 						randomAnimIndex = Math.floor(Math.random() * GetNumberOfAnimations());
 					}
 				}
-				ChangeAnimationNumberToPlay(randomAnimIndex);
+				ChangeAnimationIndexToPlay(randomAnimIndex);
 			}
 		}
 		
 		public function GotoFrameAndPlayForCurrentAnimation(animationFrame:int):void
 		{
+			(m_charAnimations.getChildAt(0) as MovieClip).stop();
 			//select the animation to play
 			m_charAnimations.gotoAndStop(m_playAnimationFrame);
 			//and set this animation's frame number to reflect where it would be if animations weren't changed on a whim
@@ -220,8 +224,8 @@
 			}
 		}
 		
-		//animation numbers are 0 based. however the play animation frame variable is 1 based.
-		public function ChangeAnimationNumberToPlay(animNumber:int):void
+		//animation index is 0 based. however the play animation frame variable is 1 based.
+		public function ChangeAnimationIndexToPlay(animIndex:int):void
 		{
 			/*if(animNumber < 1)
 			{
@@ -232,7 +236,8 @@
 				
 				//animNumber = GetNumberOfAnimations();
 			}*/
-			m_playAnimationFrame = animNumber + 1;
+			m_playAnimationFrame = animIndex + 1;
+			trace(m_playAnimationFrame);
 		}
 		
 		public function SetRandomizeAnimation(randomStatus:Boolean):void
@@ -249,7 +254,10 @@
 		}
 		public function GetAnimationLockedStatus(animIndex:int):Boolean
 		{
-			return m_lockedAnimation[int(animIndex)];
+			var frame:int = GetFrameTargetForIndex(animIndex);
+			if (frame == -1) { return false; }
+			else
+				return m_lockedAnimation[frame];
 		}
 		public function SetAnimationLockedStatus(animIndex:int, lockStatus:Boolean):void
 		{
@@ -261,7 +269,7 @@
 		}
 		public function GetNumberOfAnimations():int
 		{
-			return m_charAnimations.totalFrames - 1;
+			return m_frameTargets.length/* m_charAnimations.totalFrames*/ - 1;
 		}
 		/*public function GetAnimationCurrentFrame():int
 		{
@@ -282,7 +290,9 @@
 		public function PlayingLockedAnimCheck():void
 		{
 			//Only 1 animation is available, so search for it and use it.
-			if(GetAnimationLockedStatus(m_playAnimationFrame-1) && (GetNumberOfAnimations() - GetNumberOfLockedAnimations() == 1))
+			var accessibleFrame:int = GetFrameTargetForIndex(m_playAnimationFrame-1);
+			if (accessibleFrame == -1) { return;}
+			if(GetAnimationLockedStatus(accessibleFrame) && (GetNumberOfAnimations() - GetNumberOfLockedAnimations() == 1))
 			{
 				var unlockedAnimNum:int = 1;
 				for each(var locked:Boolean in m_lockedAnimation)
@@ -293,7 +303,7 @@
 					}
 					++unlockedAnimNum;
 				}
-				ChangeAnimationNumberToPlay(unlockedAnimNum);
+				ChangeAnimationIndexToPlay(unlockedAnimNum);
 			}
 		}
 		
@@ -368,7 +378,7 @@
 					if (currentAnimation.currentFrame >= startFrame && currentAnimation.currentFrame <= endFrame)
 					{
 						frameToTransitionToLinkedAnimation = endFrame;
-						queuedLinkedAnimationNumber = linkedAnimationNumber;
+						queuedLinkedAnimationFrame = linkedAnimationNumber;
 						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
@@ -378,7 +388,7 @@
 					if (currentAnimation.currentFrame <= endFrame)
 					{
 						frameToTransitionToLinkedAnimation = endFrame;
-						queuedLinkedAnimationNumber = linkedAnimationNumber;
+						queuedLinkedAnimationFrame = linkedAnimationNumber;
 						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
@@ -391,20 +401,23 @@
 		{
 			if (e.target.currentFrame == this.frameToTransitionToLinkedAnimation)
 			{
-				this.ChangeAnimationNumberToPlay(queuedLinkedAnimationNumber);
+				//Convert frame->index by subtracting 1
+				this.ChangeAnimationIndexToPlay(queuedLinkedAnimationFrame - 1);
 				this.GotoFrameAndPlayForCurrentAnimation(1);
 				frameToTransitionToLinkedAnimation = -1;
-				queuedLinkedAnimationNumber = -1;
+				queuedLinkedAnimationFrame = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
+				isInLinkedAnimation = true;
 				m_charAnimations.dispatchEvent(new Event(AnimationTransitionEvent.ANIMATION_TRANSITIONED));
 			}
 			//Makes sure that if somehow it misses the transition to abort and remove the event listener.
 			if (e.target.currentFrame == e.target.totalFrames)
 			{
 				frameToTransitionToLinkedAnimation = -1;
-				queuedLinkedAnimationNumber = -1;
+				queuedLinkedAnimationFrame = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 				m_charAnimations.dispatchEvent(new Event(AnimationTransitionEvent.ANIMATION_TRANSITIONED));
+				isInLinkedAnimation = false;
 			}
 			
 		}
@@ -438,6 +451,22 @@
 				}
 			}
 			return frameTargets;
+		}
+		
+		public function IsStillInLinkedAnimation():Boolean
+		{
+			return isInLinkedAnimation;
+		}
+		
+		public function ChangeInLinkedAnimationStatus(value:Boolean):void
+		{
+			isInLinkedAnimation = value;
+		}
+		
+		[inline]
+		private function GetFrameTargetForIndex(index:int):int
+		{
+			return m_frameTargets.indexOf(index);
 		}
 		/*public function GetParentMovieClip():MovieClip
 		{

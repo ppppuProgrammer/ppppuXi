@@ -71,6 +71,7 @@ package menu
 			if (relativeItemIndex == -1) { return; }
 			var currentCharacter:AnimatedCharacter = characterManager.GetCurrentCharacter();
 			var itemTrueIndex:int = animationMenu.GetTrueIndexOfItem(relativeItemIndex);
+			characterManager.AllowChangeOutOfLinkedAnimation();
 			ChangeAnimation(itemTrueIndex);
 			
 			//Need to update the menus since they only "auto" update when the mouse was clicked.
@@ -78,6 +79,7 @@ package menu
 			var currentAnimFrame:int = currentCharacter.GetCurrentAnimationFrame();
 			var target:int = currentCharacterFrameTargets.indexOf(currentAnimFrame);
 			animationMenu.ChangeSelectedItem(target);
+			
 			//animationMenu.ForceListRedraw();
 		}
 		/*Animation Menu Handlers (Mouse input)*/
@@ -95,6 +97,7 @@ package menu
 			if (itemIndex == -1) { return;}
 			var animationFrame:int = animationMenu.GetAnimationFrameTargetOfItem(itemIndex);
 			var currentCharacter:AnimatedCharacter = characterManager.GetCurrentCharacter();
+			characterManager.AllowChangeOutOfLinkedAnimation();
 			//convert  animation frame to animation number (frame - 1 = number)
 			characterManager.ChangeAnimForCurrentCharacter(animationFrame-1);
 			//currentCharacter.SetRandomizeAnimation(false);
@@ -122,6 +125,7 @@ package menu
 		public function SwitchToSelectedCharacter(indexOverride:int=-1):void
 		{
 			var selectedIndex:int = (indexOverride == -1) ? characterMenu.GetKeyboardMenuCursorIndex() : indexOverride;
+			characterManager.AllowChangeOutOfLinkedAnimation();
 			characterManager.SwitchToCharacter(selectedIndex);
 			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetCurrentCharacter().GetFrameTargets();
 			animationMenu.SetAnimationList(currentCharacterFrameTargets);
@@ -143,7 +147,9 @@ package menu
 		{
 			if (index < characterManager.GetTotalNumOfCharacters())
 			{
+				characterManager.AllowChangeOutOfLinkedAnimation();
 				characterMenu.SetListSelectorPosition(index);
+				
 				SwitchToSelectedCharacter(index);
 				//characterManager.SwitchToCharacter(index);
 				//animationMenu.SetAnimationList(characterManager.GetFrameTargetsForCharacter(index));

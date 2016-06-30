@@ -130,6 +130,8 @@ package
 			//Add the key listeners
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyPressCheck);
 			stage.addEventListener(KeyboardEvent.KEY_UP, KeyReleaseCheck);
+			//Used to listen for when an activate animation transition has occured, to then allow character and animation changes to occur. 
+			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, RemoveTransitionLockoutHandler, true);
 			
 			mainStage.MenuLayer.mouseEnabled = true;
 			//Disable mouse interaction for various objects
@@ -168,7 +170,7 @@ package
 			
 			//Creates the menus for the flash. This will also not allow any more characters to be added
 			//characterManager.CreateMenus(mainStage.MenuLayer);
-			characterManager.InitializeMusicManager(mainStage, stage.frameRate);
+			//characterManager.InitializeMusicManager(mainStage, stage.frameRate);
 			//characterManager.SetupMusicForCharacters();
 			//characterManager.ToggleMenu();
 			
@@ -237,6 +239,7 @@ package
 			if (mainStage.currentFrame == flashStartFrame)
 			{
 				++totalRunFrames;
+				trace("total Frames: " + totalRunFrames);
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
 				if (userSettings.firstTimeRun == true)
@@ -425,7 +428,7 @@ package
 				else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
 				{
 					//characterManager.SetCurrentMusicForAllCharacters();
-					characterManager.MusicForEachOrAll();
+					//characterManager.MusicForEachOrAll();
 				}
 				else if(keyPressed == keyBindings.Activate.main || keyPressed == keyBindings.Activate.alt)
 				{
@@ -687,7 +690,7 @@ package
 			if (!userSettings.playMusic) { characterManager.ToggleMusicPlay(); }
 			
 			characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
-			if (userSettings.playOneSongForAllCharacters) { characterManager.MusicForEachOrAll();}
+			//if (userSettings.playOneSongForAllCharacters) { characterManager.MusicForEachOrAll();}
 			//if (userSettings.showMenu == false) { characterManager.ToggleMenu(); }
 			
 			//characterManager.
@@ -730,7 +733,7 @@ package
 					else
 					{
 						characterManager.GetCharacterById(charId).SetRandomizeAnimation(false);
-						characterManager.GetCharacterById(charId).ChangeAnimationNumberToPlay(animSelect);
+						characterManager.GetCharacterById(charId).ChangeAnimationIndexToPlay(animSelect);
 					}
 				
 					characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
@@ -928,6 +931,16 @@ package
 		private function ShowMenu(visible:Boolean):void
 		{
 			mainMenu.visible = visible;
+		}
+		
+		private function AnimationTransitionHappened(e:Event):void
+		{
+			var i:int = 0;
+		}
+		
+		private function RemoveTransitionLockoutHandler(e:Event):void
+		{
+			characterManager.RemoveTransitionLockout();
 		}
 	}
 }

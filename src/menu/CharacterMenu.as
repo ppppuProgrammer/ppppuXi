@@ -15,7 +15,7 @@ package menu
 		private const LIST_WIDTH:Number = 50;
 		
 		private var characterList:CharacterList;
-		
+		private var charChangeModeButton:TogglePushButton;
 		public function CharacterMenu() 
 		{
 			name = "Character Menu";
@@ -25,6 +25,8 @@ package menu
 			characterList.listItemHeight = MainMenu.characterIconSize;
 			characterList.setSize(LIST_WIDTH,  MainMenu.characterIconSize * MAX_LIST_ITEMS_DISPLAYED);
 			
+			charChangeModeButton = new TogglePushButton(this, 0, characterList.y + characterList.height + 5);
+			charChangeModeButton.setSize(MainMenu.characterIconSize,  MainMenu.characterIconSize);
 			//characterList.addEventListener(Event.SELECT, CharacterSelected);
 			//characterList.addEventListener(MouseEvent.RIGHT_CLICK, SetCharacterLock);
 		}
