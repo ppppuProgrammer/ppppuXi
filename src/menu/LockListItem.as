@@ -65,7 +65,7 @@ package menu
 			super.data = value;
 			if (_data != null && "unlocked" in value)
 			{
-				_data.unlocked = value.unlocked;
+				unlocked = value.unlocked;
 			}
 		}
 		

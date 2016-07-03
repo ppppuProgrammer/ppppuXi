@@ -9,6 +9,9 @@ package
         public function PiranhagirlsMod()
         {
             this.characterPayload = new Piranhagirls();
+			initialAnimationContainer = new PiranhagirlsAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

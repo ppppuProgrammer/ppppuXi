@@ -9,6 +9,9 @@ package
         public function GardevoirMod()
         {
             this.characterPayload = new Gardevoir();
+			initialAnimationContainer = new GardevoirAnimations();
+			initialAnimationContainer.x = -98.75;
+			initialAnimationContainer.y = 174;
         }
     }
 }

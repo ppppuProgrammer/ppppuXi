@@ -9,6 +9,9 @@ package
         public function PeachMod()
         {
             this.characterPayload = new Peach();
+			initialAnimationContainer = new PeachAnimations();
+			initialAnimationContainer.x = -226.8;
+			initialAnimationContainer.y = 213.65;
         }
     }
 }

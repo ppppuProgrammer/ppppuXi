@@ -9,6 +9,9 @@ package
         public function MidnaMod()
         {
             this.characterPayload = new Midna();
+			initialAnimationContainer = new MidnaAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

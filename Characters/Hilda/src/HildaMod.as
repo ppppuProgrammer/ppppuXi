@@ -9,6 +9,9 @@ package
         public function HildaMod()
         {
             this.characterPayload = new Hilda();
+			initialAnimationContainer = new HildaAnimations();
+			initialAnimationContainer.x = -104.75;
+			initialAnimationContainer.y = 92;
         }
     }
 }

@@ -9,6 +9,9 @@ package
         public function DaisyMod()
         {
             this.characterPayload = new Daisy();
+			initialAnimationContainer = new DaisyAnimations();
+			initialAnimationContainer.x = -99.4;
+			initialAnimationContainer.y = 173.8;
         }
     }
 }

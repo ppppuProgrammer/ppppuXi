@@ -15,15 +15,17 @@ package modifications
 		public static const MOD_ARCHIVE:int = 0;
 		//The mod will add in a character with a fixed set of animations (used for interactive versions).  Prefix is "ACHAR"
 		public static const MOD_ANIMATEDCHARACTER:int = 1;
-		/*The mod will add in a character that has no fixed animations and instead relies on a template animation where character graphics
-		 * are swapped around (used for NX versions).  Prefix is "TCHAR"*/
-		public static const MOD_TEMPLATECHARACTER:int = 2;
+		//The mod will add animations for a specified animated character.  Prefix is "ANIM"
+		public static const MOD_ANIMATION:int = 2;
 		//The mod will add in music.  Prefix is "M"
 		public static const MOD_MUSIC:int = 3;
 		//The mod will add in new graphics, such as background, character parts, clothing, and more.  Prefix is "ASSET"
 		public static const MOD_ASSETS:int = 4;
-		//The mod will add in an animation template. Prefix is "ANIM"
-		public static const MOD_ANIMATION:int = 5;
+		/*The mod will add in a character that has no fixed animations and instead relies on a template animation where character graphics
+		 * are swapped around (used for NX versions).  Prefix is "TCHAR"*/
+		public static const MOD_TEMPLATECHARACTER:int = 5;
+		//The mod will add in an animation template. Prefix is "TANIM"
+		public static const MOD_TEMPLATEANIMATION:int = 6;
 		
 		
 		protected var modType:int = MOD_UNDEFINED;
@@ -41,7 +43,12 @@ package modifications
 			this.removeEventListener(Event.ADDED_TO_STAGE, FirstFrame);
 		}
 		
-		public function GetModType():int { return modType;}
+		public function GetModType():int { return modType; }
+	
+		public function Dispose():void
+		{
+			
+		}
 		
 	}
 

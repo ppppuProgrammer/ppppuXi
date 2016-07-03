@@ -9,6 +9,9 @@ package
         public function AppleBloomMod()
         {
             this.characterPayload = new AppleBloom();
+			initialAnimationContainer = new AppleBloomAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

@@ -77,7 +77,7 @@ package menu
 			return animationList.GetTrueAnimationIndex(relativeIndex);
 		}
 		
-		public function GetAnimationFrameTargetOfItem(itemIndex:int):int
+		public function GetAnimationIdTargetOfItem(itemIndex:int):int
 		{
 			//itemIndex parameter should be 0 - (MAX_ITEMS_DISPLAYED -1)
 			

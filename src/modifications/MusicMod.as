@@ -26,6 +26,11 @@ package modifications
 			modType = Mod.MOD_MUSIC;
 		}
 		
+		public override function Dispose():void
+		{
+			sourceSound = null;
+		}
+		
 		public function GetMusicData():Sound
 		{
 			return sourceSound;

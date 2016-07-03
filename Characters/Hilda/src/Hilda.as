@@ -14,11 +14,9 @@ package
 			m_topLeftDiamondColor = CreateColorTransformFromHex(0xFFFFFF);
 			m_centerDiamondColor = CreateColorTransformFromHex(0xCCCCCC);
 			m_bottomRightDiamondColor = CreateColorTransformFromHex(0x999999);
-			m_backgroundColor = CreateColorTransformFromHex(0xFF0000);
+			m_outerDiamondColor = CreateColorTransformFromHex(0xFF0000);
 			m_backlightColor = CreateColorTransformFromHex(0x999999);
-			m_charAnimations = new HildaAnimations();
-			m_charAnimations.x = -104.75;
-			m_charAnimations.y = 92;
+			
 			m_menuIcon = new HildaIcon();
 			
 			m_name = "Hilda";

@@ -9,6 +9,9 @@ package
         public function SweetieBelleMod()
         {
             this.characterPayload = new SweetieBelle();
+			initialAnimationContainer = new SweetieBelleAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

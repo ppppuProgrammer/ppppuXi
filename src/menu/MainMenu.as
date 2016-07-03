@@ -1,6 +1,7 @@
 package menu 
 {
 	import com.bit101.components.PushButton;
+	import events.RightClickedEvent;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.display.Sprite;
@@ -46,7 +47,7 @@ package menu
 			addChild(characterMenu);
 			
 			characterMenu.AddEventListenerToCharList(Event.SELECT, CharacterSelected);
-			characterMenu.AddEventListenerToCharList(RightClickedEvent.RIGHT_CLICKED, SetCharacterLock);
+			characterMenu.AddEventListenerToCharList(events.RightClickedEvent.RIGHT_CLICKED, SetCharacterLock);
 			
 			settingsButton = new PushButton(this, 0, 640, "", OpenSettingsWindow);
 			settingsButton.setSize(32, 32);
@@ -60,6 +61,13 @@ package menu
 			//characterMenu
 		}
 		
+		public function SetupMenusForCharacter(charId:int, characterSettings:Object)
+		{
+			characterMenu.SetCharacterLock(charId, characterSettings.canSwitchTo);
+			
+			//animationMenu.SetLockOnAnimation();
+		}
+		
 		/*Animation Menu*/
 		//{
 		/*Changes the animation to play for the current character and updates the menus
@@ -69,14 +77,13 @@ package menu
 		public function ChangeAnimationForCurrentCharacter(relativeItemIndex:int):void
 		{
 			if (relativeItemIndex == -1) { return; }
-			var currentCharacter:AnimatedCharacter = characterManager.GetCurrentCharacter();
 			var itemTrueIndex:int = animationMenu.GetTrueIndexOfItem(relativeItemIndex);
 			characterManager.AllowChangeOutOfLinkedAnimation();
 			ChangeAnimation(itemTrueIndex);
 			
 			//Need to update the menus since they only "auto" update when the mouse was clicked.
-			var currentCharacterFrameTargets:Vector.<int> = currentCharacter.GetFrameTargets();
-			var currentAnimFrame:int = currentCharacter.GetCurrentAnimationFrame();
+			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+			var currentAnimFrame:int = characterManager.GetCurrentAnimationIdOfCharacter();
 			var target:int = currentCharacterFrameTargets.indexOf(currentAnimFrame);
 			animationMenu.ChangeSelectedItem(target);
 			
@@ -95,14 +102,15 @@ package menu
 		private function ChangeAnimation(itemIndex:int):void
 		{
 			if (itemIndex == -1) { return;}
-			var animationFrame:int = animationMenu.GetAnimationFrameTargetOfItem(itemIndex);
-			var currentCharacter:AnimatedCharacter = characterManager.GetCurrentCharacter();
+			var animationId:int = animationMenu.GetAnimationIdTargetOfItem(itemIndex);
+			//var currentCharacter:AnimatedCharacter = characterManager.GetCurrentCharacter();
 			characterManager.AllowChangeOutOfLinkedAnimation();
 			//convert  animation frame to animation number (frame - 1 = number)
-			characterManager.ChangeAnimForCurrentCharacter(animationFrame-1);
+			characterManager.ChangeAnimationForCurrentCharacter(animationId);
 			//currentCharacter.SetRandomizeAnimation(false);
 			//currentCharacter.ChangeAnimationNumberToPlay();
-			currentCharacter.GotoFrameAndPlayForCurrentAnimation(currentFrameForAnimation);
+			characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
+			//currentCharacter.GotoFrameAndPlayForCurrentAnimation(currentFrameForAnimation);
 			
 		}
 		//}
@@ -127,10 +135,10 @@ package menu
 			var selectedIndex:int = (indexOverride == -1) ? characterMenu.GetKeyboardMenuCursorIndex() : indexOverride;
 			characterManager.AllowChangeOutOfLinkedAnimation();
 			characterManager.SwitchToCharacter(selectedIndex);
-			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetCurrentCharacter().GetFrameTargets();
+			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
 			animationMenu.SetAnimationList(currentCharacterFrameTargets);
 			animationMenu.ChangeSelectedItem(
-				currentCharacterFrameTargets.indexOf(characterManager.GetCurrentCharacter().GetCurrentAnimationFrame()));
+				currentCharacterFrameTargets.indexOf(characterManager.GetCurrentAnimationIdOfCharacter()));
 			//characterManager.GetCurrentCharacter()
 			characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
 		}
@@ -156,13 +164,18 @@ package menu
 			}
 		}
 		
-		public function SetupCharacterLocks():void
+		/*public function SetInitialCharacterLock(charId:int, unlocked:Boolean):void
+		{
+			characterMenu.SetCharacterLock(charId, unlocked);
+		}*/
+		
+		/*public function SetupCharacterLocks():void
 		{
 			//the get all character locks answers the question "Can I switch to this character?"
 			var locks:Vector.<Boolean> = characterManager.GetAllCharacterLocks();
 			//The lock list item answers the question "Is this character locked?"
 			characterMenu.SetCharacterListLocks(locks);
-		}
+		}*/
 		
 		public function AddIconToCharacterMenu(icon:DisplayObject):void
 		{

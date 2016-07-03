@@ -9,6 +9,9 @@ package
         public function KoopagirlsMod()
         {
             this.characterPayload = new Koopagirls();
+			initialAnimationContainer = new KoopagirlsAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

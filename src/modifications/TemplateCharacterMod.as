@@ -13,6 +13,10 @@ package modifications
 			
 		}
 		
+		public function Dispose():void
+		{
+			
+		}
 	}
 
 }

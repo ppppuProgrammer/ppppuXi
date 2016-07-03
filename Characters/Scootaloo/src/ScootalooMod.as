@@ -9,6 +9,9 @@ package
         public function ScootalooMod()
         {
             this.characterPayload = new Scootaloo();
+			initialAnimationContainer = new ScootalooAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

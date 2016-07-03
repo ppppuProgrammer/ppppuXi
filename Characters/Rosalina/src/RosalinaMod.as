@@ -9,6 +9,9 @@ package
         public function RosalinaMod()
         {
             this.characterPayload = new Rosalina();
+			initialAnimationContainer = new RosalinaAnimations();
+			initialAnimationContainer.x = -223.8;
+			initialAnimationContainer.y = 216.35;
         }
     }
 }

@@ -6,14 +6,14 @@ package modifications
 	 * This class is to be used as a base class.
 	 * @author 
 	 */
-	public class AnimationMod extends Mod
+	public class TemplateAnimationMod extends Mod
 	{
 		protected var timelinesData:Vector.<Object>;
 		protected var displayOrderList:String;
 		protected var characterName:String;
 		protected var animationName:String;
 		
-		public function AnimationMod() 
+		public function TemplateAnimationMod() 
 		{
 			modType = Mod.MOD_ANIMATION; 
 			timelinesData = new Vector.<Object>();
@@ -37,6 +37,11 @@ package modifications
 		public function GetDisplayOrderList():String
 		{
 			return displayOrderList;
+		}
+		
+		public function Dispose():void
+		{
+			
 		}
 		
 	}

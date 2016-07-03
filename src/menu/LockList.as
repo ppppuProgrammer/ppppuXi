@@ -43,6 +43,17 @@ package menu
 			}
 		}
 		
+		public function SetItemLock(lockIndex:int, value:Boolean):void
+		{
+			var numItems:int = Math.ceil(_height / _listItemHeight);
+			numItems = Math.min(numItems, _items.length);
+			if (lockIndex < numItems)
+			{
+				var item:LockListItem = _itemHolder.getChildAt(lockIndex) as LockListItem;
+				item.unlocked = value;
+			}
+		}
+		
 		public function SetItemLocks(locks:Vector.<Boolean>):void
 		{
 			var numItems:int = Math.ceil(_height / _listItemHeight);

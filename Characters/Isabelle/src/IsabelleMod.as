@@ -9,6 +9,9 @@ package
         public function IsabelleMod()
         {
             this.characterPayload = new Isabelle();
+			initialAnimationContainer = new IsabelleAnimations();
+			initialAnimationContainer.x = -54.75;
+			initialAnimationContainer.y = 92;
         }
     }
 }

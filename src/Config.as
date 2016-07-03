@@ -4,6 +4,7 @@ package
 	import com.bit101.components.Label;
 	import com.bit101.components.Panel;
 	import com.bit101.components.PushButton;
+	import events.SaveRequestEvent;
 	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -146,7 +147,7 @@ package
 			removes itself from its parent, the stage completely loses focus and requires the user to click anywhere to regain focus.*/
 			stage.focus = this;
 			//this.parent.getChildByName("HelpLayer").visible = true;
-			dispatchEvent(new SaveRequestEvent(SaveRequestEvent.SAVE_SHARED_OBJECT));
+			dispatchEvent(new events.SaveRequestEvent(events.SaveRequestEvent.SAVE_SHARED_OBJECT));
 			this.parent.removeChild(this);
 			
 		}

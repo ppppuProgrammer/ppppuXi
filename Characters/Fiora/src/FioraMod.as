@@ -9,6 +9,9 @@ package
         public function FioraMod()
         {
             this.characterPayload = new Fiora();
+			initialAnimationContainer = new FioraAnimations();
+			initialAnimationContainer.x = -226.8;
+			initialAnimationContainer.y = 213.6;
         }
     }
 }

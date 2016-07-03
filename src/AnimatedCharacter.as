@@ -1,243 +1,196 @@
-﻿package  {
+﻿package 
+{
+	import events.AnimationTransitionEvent;
+	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
-	import flash.display.MovieClip;
-	
-	
-	/*AnimatedCharacter is a class that is intended for use in interactive versions of ppppu. The intention is that this type of character
-	 * holds a movie clip with all the various animations to be used.*/
+	/**
+	 * ...
+	 * @author 
+	 */
 	public class AnimatedCharacter 
 	{
-		/*The movie clip that contains all the animations of the character. Expects the first frame to be used 
-		 * for a placement marker shape, every other frame is to be an animation. */
-		protected var m_charAnimations:MovieClip = null; 
-		//private var m_ColorTransform:ColorTransform = null;
-		//Background
-		protected var m_topLeftDiamondColor:ColorTransform = null;
-		protected var m_centerDiamondColor:ColorTransform = null; //For the top right and bottom left sections of the diamond
-		protected var m_bottomRightDiamondColor:ColorTransform = null;
-		protected var m_backgroundColor:ColorTransform = null;
-		protected var m_backlightColor:ColorTransform = null;
-		//Music
-		//protected var m_musicClassName:String = null; 
-		//The name of the music to play for the character.
-		protected var m_defaultMusicName:String= "Beep Block Skyway";
-		//protected var m_musicTitle:String = "Beep Block Skyway";
-		//protected var m_musicStartPoint:Number = 0;
-		//protected var m_musicLoopStartPoint:Number = m_musicStartPoint;
-		//protected var m_musicLoopEndPoint:Number= -1;
-		//Animation
-		private var m_playAnimationFrame:int = 0;
-		private var m_randomizePlayAnim:Boolean = true;
-		private var m_lockedAnimation:Vector.<Boolean>; //Keeps track if an animation can be switched to.
-		//Menu button
-		protected var m_menuIcon:Sprite = null;
+		//The name of the character
 		protected var m_name:String = null;
 		
-		//private var m_numOfLockedAnimations:int = 0;
+		/*The vector that contains all animation movieclips for the character.*/
+		protected var m_charAnimations:Vector.<MovieClip> = new Vector.<MovieClip>();
+		//animation labels are used to tell which animations are linked.
+		protected var m_animationLabel:Vector.<String> = new Vector.<String>();
 		
-		/*Frame targets is used to maintain a key-value pairing of animation index (vector index) to a specific frame (value at index) of 
-		 * charAnimations that contains an animation . This is done as certain animations may not be intended to be accessible by normal means.*/
-		private var m_frameTargets:Vector.<int> = new Vector.<int>();
+		private var m_currentlyPlayingAnimation:MovieClip = null;
+		//The id of the characters animation collection that is slated to play or is playing currently. -1 indicates nothing is playing.
+		private var m_currentAnimationId:int = -1;
+		/*Background colors*/
+		//The current colors of the background elements for the character
+		protected var m_backgroundColors:Object;
+		//The original colors set for the character
+		protected var m_topLeftDiamondColor:ColorTransform = new ColorTransform();
+		protected var m_centerDiamondColor:ColorTransform = new ColorTransform(); //For the top right and bottom left sections of the diamond
+		protected var m_bottomRightDiamondColor:ColorTransform = new ColorTransform();
+		protected var m_outerDiamondColor:ColorTransform = new ColorTransform();
+		protected var m_backlightColor:ColorTransform = new ColorTransform();
 		
+		//The name of the music to play for the character.
+		protected var m_defaultMusicName:String = "Beep Block Skyway";
+		
+		public var test:MovieClip;
+		//private var m_playAnimationId:int = 0;
+		//Indicates whether the animation to play is to be randomly chosen.
+		private var m_randomizePlayAnim:Boolean = true;
+		private var m_lockedAnimation:Vector.<Boolean> = new Vector.<Boolean>(); //Keeps track if an animation can be switched to.
+		
+		//Graphic used to represent the character on the menu
+		protected var m_menuIcon:Sprite = null;
+		
+		/*Index targets is used to maintain a key-value pairing of the accessible animations id (starts from 0) to a specific index
+		 * of charAnimations that contains an animation. This is done as certain animations may not be intended to be accessible 
+		 * by normal means.*/
+		private var m_idTargets:Vector.<int> = new Vector.<int>();
+		
+		//The frame in the current animation to switch to the linked animation. 
 		private var frameToTransitionToLinkedAnimation:int = -1;
-		private var queuedLinkedAnimationFrame:int = -1;
+		/*The index of the animation in the character animations vector that will be switched to when the current animation reaches
+		* the frame denoted in the above variable (frameToTransitionToLinkedAnimation)*/
+		private var queuedLinkedAnimationIndex:int = -1;
 		/*Indicates if the character is still in their linked animation, which are able to be set to loop a section endlessly until the 
 		 * character or animation is switched by the user.*/
 		private var isInLinkedAnimation:Boolean = false;
-		public function AnimatedCharacter()
+		
+		private var displayArea:Sprite = new Sprite();
+		
+		public function AnimatedCharacter() 
 		{
-			//m_charAnimations.x = -227.3;
-			//m_charAnimations.y = 214;
-			m_topLeftDiamondColor = new ColorTransform();
-			m_centerDiamondColor = new ColorTransform();
-			m_bottomRightDiamondColor = new ColorTransform();
-			m_backgroundColor = new ColorTransform();
-			m_backlightColor = new ColorTransform();
-			/*m_CharMC = charMC;
-			m_InDiamondMC = inDiamondMC;
-			m_ColorTransform = characterColorTransform;
-			m_OutDiamondMC = outDiamondMC;
-			m_TransitionDiamondMC = transitionDiamondMC;
-			m_defOutDiaMC = defOutDiaMC;
-			m_defInDiaMC = defInDiaMC;
-			m_defTransDiaMC = defTransDiaMC;
-			m_BacklightColorTransform = BacklightColorTransform;
-			m_useBacklight = useLight;*/
+			
 		}
-		/*Checks if a clip has the needed data to be usable. Needed movie clips are: charMC(the one with 9+ animations)
-		and the color transform to be applied to the various diamond movie clips. The actual diamond movie clips are not
-		required as the default one (peach/rosalina) will be used and have the color transform applied to it.*/
-		public function HasNecessaryData():Boolean
+		
+		//Resets the background colors object to the default values set for the character.
+		public function SetBackgroundColorsToDefault():void
 		{
-			if(m_charAnimations && m_charAnimations.totalFrames > 1 && m_name != null && m_menuIcon != null)
+			m_backgroundColors = { inDiaTL:m_topLeftDiamondColor, inDiaCen:m_centerDiamondColor, inDiaBR:m_bottomRightDiamondColor, 
+				outDia: m_outerDiamondColor,light:m_backlightColor };
+		}
+		
+		//Returns an object containing the current colors to use for background elements.
+		public function GetBackgroundColors():Object
+		{
+			return m_backgroundColors;
+		}
+		
+		public function IsValidCharacter():Boolean	{return (m_name != null && m_menuIcon != null);}
+		
+		public function GetName():String	{return m_name;}
+		public function GetIcon():Sprite	{ return m_menuIcon; }
+		
+		public function GetDefaultMusicName():String	{return m_defaultMusicName;}
+		
+		public function UpdateBackgroundColors():void
+		{
+			
+		}
+		
+		private function UpdateIdTargets():void
+		{
+			m_idTargets = new Vector.<int>();
+			var inaccessibleIndices:Vector.<int> = new Vector.<int>();
+			var label:String;
+			for (var x:int = 0; x < m_animationLabel.length; ++x)
 			{
-				//m_frameTargets
-				var inaccessibleFrames:Vector.<int> = new Vector.<int>();
-				var label:FrameLabel;
-				for (var x:int = 0; x < m_charAnimations.currentLabels.length; ++x)
+				label = m_animationLabel[x] as String;
+				//"Into_" must be found in the name at the first position of the string (0) for the labeled animation to be 
+				//accessible via normal means.
+				if (label != null && label.length > 0 && label.indexOf("Into_") != 0)
 				{
-					label = m_charAnimations.currentLabels[x] as FrameLabel;
-					//"Into_" must be found in the name at the first index of the string for the labeled frame to be accessible via normal means.
-					if (label.name.indexOf("Into_") != 0)
-					{
-						inaccessibleFrames[inaccessibleFrames.length] = label.frame;
-					}
+					inaccessibleIndices[inaccessibleIndices.length] = x;
 				}
-				for (var i:int = 1; i <= m_charAnimations.totalFrames; ++i)
-				{
-					if (inaccessibleFrames.indexOf(i) == -1)
-					{
-						m_frameTargets[m_frameTargets.length] = i;
-					}
-				}
-				m_lockedAnimation = new Vector.<Boolean>(GetNumberOfAnimations());
-				m_charAnimations.mouseEnabled = false;
-				m_charAnimations.mouseChildren = false;
-				if (m_menuIcon)
-				{
-					m_menuIcon.mouseChildren = false;
-					m_menuIcon.mouseEnabled = false;
-				}
-				return true;
 			}
-			else
+			for (var i:int = 0; i < m_charAnimations.length; ++i)
 			{
-				return false;
-			}
-		}
-		/*public function GetCharacterAnimations():MovieClip
-		{
-			return m_charAnimations;
-		}*/
-		
-		/*Function that should only be called by the animated character mod base class. This stops all movieclips contained
-		 * in m_charAnimations, preventing performance issues due to all the animations playing by default when a new MovieClip is created.
-		*/
-		public function InitializeAfterLoad():void
-		{
-			m_charAnimations.stopAllMovieClips();
-		}
-		
-		public function GetName():String
-		{
-			return m_name;
-		}
-		public function GetIcon():Sprite
-		{
-			return m_menuIcon;
-		}
-		public function GetDefaultMusicName():String
-		{
-			return m_defaultMusicName;
-		}
-		
-		//1 based index.
-		public function GetCurrentAnimationFrame():int
-		{
-			return m_playAnimationFrame;
-		}
-		
-		public function GetFrameTargets():Vector.<int>
-		{
-			return m_frameTargets;
-		}
-		/*public function GetMusicStartPoint():Number
-		{
-			return m_musicStartPoint;
-		}
-		public function GetMusicLoopStartPoint():Number
-		{
-			return m_musicLoopStartPoint;
-		}
-		public function GetMusicLoopEndPoint():Number
-		{
-			return m_musicLoopEndPoint;
-		}
-		public function GetMusicClassName():String
-		{
-			return m_musicClassName;
-		}*/
-		public function GetTLDiamondColor():ColorTransform
-		{
-			return m_topLeftDiamondColor;
-		}
-		public function GetCenterDiamondColor():ColorTransform
-		{
-			return m_centerDiamondColor; //For the top right and bottom left sections of the diamond
-		}
-		public function GetBRDiamondColor():ColorTransform
-		{
-			return m_bottomRightDiamondColor;
-		}
-		public function GetBackgroundColor():ColorTransform
-		{
-			return m_backgroundColor;
-		}
-		public function GetBacklightColor():ColorTransform
-		{
-			return m_backlightColor;
-		}
-		public function RandomizePlayAnim():void
-		{
-			//15 frame movie clip has 14 actual animations
-			//array[0-13]
-			// movieclip frame setting: 2 - 15
-			if(m_randomizePlayAnim)
-			{
-				//generates a number from 0 to (totalFrames - 1)
-				var randomAnimIndex:int = Math.floor(Math.random() * GetNumberOfAnimations());
-				if((GetNumberOfAnimations() - GetNumberOfLockedAnimations()) > 2)
+				if (inaccessibleIndices.indexOf(i) == -1)
 				{
-					//To clarify this, indexes start from 0 and frames start from 1. So to convert frames->index, subtract 1 from the frame number.
-					//To convert index->frame, add 1 to the index number.
-					while(randomAnimIndex == m_playAnimationFrame-1 || GetAnimationLockedStatus(randomAnimIndex))
-					{
-						randomAnimIndex = Math.floor(Math.random() * GetNumberOfAnimations());
-					}
+					m_idTargets[m_idTargets.length] = i;
 				}
-				else
-				{
-					while(GetAnimationLockedStatus(randomAnimIndex))
-					{
-						randomAnimIndex = Math.floor(Math.random() * GetNumberOfAnimations());
-					}
-				}
-				ChangeAnimationIndexToPlay(randomAnimIndex);
 			}
 		}
 		
-		public function GotoFrameAndPlayForCurrentAnimation(animationFrame:int):void
+		//Adds multiple animations from a single multi framed movieclip, in which each of those frames containing an animation.
+		public function AddAnimationsFromMovieClip(animationCollection:MovieClip):void
 		{
-			(m_charAnimations.getChildAt(0) as MovieClip).stop();
-			//select the animation to play
-			m_charAnimations.gotoAndStop(m_playAnimationFrame);
-			//and set this animation's frame number to reflect where it would be if animations weren't changed on a whim
-			var animationMC:MovieClip = m_charAnimations.getChildAt(0) as MovieClip;
-			//var parentMC:MovieClip = m_charAnimations.parent as MovieClip;
-			if(animationMC)
+			//TODO: Reactivate commented out code.
+			for (var i:int = 1; i <= animationCollection.totalFrames; ++i)
 			{
-				animationMC.gotoAndPlay(animationFrame);
-			}
-		}
-		
-		//animation index is 0 based. however the play animation frame variable is 1 based.
-		public function ChangeAnimationIndexToPlay(animIndex:int):void
-		{
-			/*if(animNumber < 1)
-			{
-				animNumber = 1;
-			}
-			else if(animNumber > GetNumberOfAnimations())
-			{
+				animationCollection.gotoAndStop(i);
+				var animationIndex:int = m_charAnimations.length;
 				
-				//animNumber = GetNumberOfAnimations();
-			}*/
-			m_playAnimationFrame = animIndex + 1;
-			trace(m_playAnimationFrame);
+				var label:String = animationCollection.currentFrameLabel;
+				var isLinkedEndAnimation:Boolean = false;
+				if (label && label.indexOf("Into_") != 0)
+				{
+					isLinkedEndAnimation = true;
+				}
+				//Animation labels are not allowed to overwrite each other
+				if (label && m_animationLabel.indexOf(label) != -1)
+				{
+					label = null;
+				}
+				var animationClass:Class = Object(animationCollection.getChildAt(0)).constructor;
+				var animation:DisplayObject = new animationClass();
+				if (animation && (animation as MovieClip).totalFrames > 1)
+				{
+					(animation as MovieClip).stop();
+					if (isLinkedEndAnimation == false)
+					{
+						//add animation
+						m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
+						m_animationLabel[animationIndex] = label; //add label
+						m_lockedAnimation[m_lockedAnimation.length] = false;
+						
+					}
+					else if (isLinkedEndAnimation == true && label != null)
+					{
+						m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
+						m_animationLabel[animationIndex] = label; //add label
+						//No need to worry about the animation's lock since linked end animations are unaccessible by normal means anyway.
+					}
+					//m_charAnimations[animationIndex].stop();
+				}
+				
+				
+				//animationCollection.removeChild(m_charAnimations[animationIndex]);
+				
+			}
+			//Allow the movie clip to be garbage collected
+			animationCollection.removeChildren();
+			animationCollection = null;
+			UpdateIdTargets();
+		}
+		
+		//Adds a movieclip to the character's animation vector. An animation added this way can not be linked to another.
+		public function AddAnimation(animation:MovieClip):void
+		{
+			//TODO: Complete function
+			UpdateIdTargets();
+		}
+		
+		[inline]
+		public function StopAnimation():void
+		{
+			if (m_currentlyPlayingAnimation)
+			{
+				if (m_currentlyPlayingAnimation.isPlaying)
+				{
+					m_currentlyPlayingAnimation.stop();
+				}
+			}
+		}
+		
+		public function GetCurrentAnimationId():int
+		{
+			return m_currentAnimationId;
 		}
 		
 		public function SetRandomizeAnimation(randomStatus:Boolean):void
@@ -248,34 +201,58 @@
 		{
 			return m_randomizePlayAnim;
 		}
-		public function ToggleRandomizeAnimation():void
+		
+		public function RandomizePlayAnim():void
 		{
-			m_randomizePlayAnim = !m_randomizePlayAnim;
+			if(m_randomizePlayAnim)
+			{
+				//Randomly select a number out of the number of accessible animations
+				var accessibleAnimationCount:int = GetNumberOfAccessibleAnimations();
+				var randomAnimIndex:int = Math.floor(Math.random() * accessibleAnimationCount);
+				
+				if((accessibleAnimationCount - GetNumberOfLockedAnimations()) > 2)
+				{
+					while(randomAnimIndex == m_currentAnimationId || GetAnimationLockedStatus(randomAnimIndex))
+					{
+						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
+					}
+				}
+				else
+				{
+					while(GetAnimationLockedStatus(randomAnimIndex))
+					{
+						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
+					}
+				}
+				ChangeAnimationIndexToPlay(randomAnimIndex);
+			}
 		}
-		public function GetAnimationLockedStatus(animIndex:int):Boolean
+		
+		public function SetLockOnAnimation(animId:int, lockStatus:Boolean):void
 		{
-			var frame:int = GetFrameTargetForIndex(animIndex);
-			if (frame == -1) { return false; }
-			else
-				return m_lockedAnimation[frame];
-		}
-		public function SetAnimationLockedStatus(animIndex:int, lockStatus:Boolean):void
-		{
-			if(animIndex < 1 || animIndex > GetNumberOfAnimations())
+			var indexForId:int = m_idTargets.indexOf(animId);
+			if(animId < 1 || animId > GetNumberOfAccessibleAnimations() || indexForId == -1)
 			{
 				return;
 			}
-			m_lockedAnimation[int(animIndex)] = lockStatus;
+			m_lockedAnimation[indexForId] = lockStatus;
 		}
-		public function GetNumberOfAnimations():int
+		
+		public function GetTotalNumberOfAnimations():int
 		{
-			return m_frameTargets.length/* m_charAnimations.totalFrames*/ - 1;
+			return m_charAnimations.length;
 		}
-		/*public function GetAnimationCurrentFrame():int
+		
+		/*"accessible" animations are animations that are not end linked animations (meaning, they must be manually activated by the user
+		 * with a special command)*/
+		[inline]
+		public function GetNumberOfAccessibleAnimations():int
 		{
-			return (m_CharMC.getChildAt(0) as MovieClip).currentFrame;
-		}*/
-		public function GetNumberOfLockedAnimations():int
+			return m_idTargets.length;
+		}
+		
+		[inline]
+		private function GetNumberOfLockedAnimations():int
 		{
 			var lockedAnimNum:int = 0;
 			for(var i:int = 0, l:int = m_lockedAnimation.length; i < l; ++i)
@@ -287,12 +264,13 @@
 			}
 			return lockedAnimNum;
 		}
+		
 		public function PlayingLockedAnimCheck():void
 		{
 			//Only 1 animation is available, so search for it and use it.
-			var accessibleFrame:int = GetFrameTargetForIndex(m_playAnimationFrame-1);
+			var accessibleFrame:int = GetIdTargetForIndex(m_currentAnimationId);
 			if (accessibleFrame == -1) { return;}
-			if(GetAnimationLockedStatus(accessibleFrame) && (GetNumberOfAnimations() - GetNumberOfLockedAnimations() == 1))
+			if(GetAnimationLockedStatus(accessibleFrame) && (GetNumberOfAccessibleAnimations() - GetNumberOfLockedAnimations() == 1))
 			{
 				var unlockedAnimNum:int = 1;
 				for each(var locked:Boolean in m_lockedAnimation)
@@ -307,56 +285,30 @@
 			}
 		}
 		
-		protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform
-		{
-			
-			var ct:ColorTransform = new ColorTransform();
-			ct.color = colorValue;
-			if (alpha != 255)
-			{
-				if (alpha > 255) { alpha = 255; }
-				ct.alphaMultiplier = 0;
-				ct.alphaOffset = alpha;
-			}
-			return ct;
-		}
-		
-		public function StopAnimation():void
-		{
-			if (m_charAnimations)
-			{
-				if (m_charAnimations.isPlaying)
-				{
-					m_charAnimations.stop();
-				}
-				(m_charAnimations.getChildAt(0) as MovieClip).stop();
-			}
-		}
-		
 		public function CheckAndSetupLinkedTransition():Boolean
 		{
-			var linkedAnimationNumber:int = -1;
-			var currLabel:String = m_charAnimations.currentFrameLabel;
+			var linkedAnimationIndex:int = -1;
+			var currLabel:String = m_animationLabel[m_currentAnimationId];// m_charAnimations.currentFrameLabel;
 			if (currLabel == null || currLabel.indexOf("Into_") == -1) 
 			{ 
 				return false;
 			}
 			
 			var labelSearchingFor:String = currLabel.replace("Into_", "");
-			var labelsArray:Array = m_charAnimations.currentLabels;
-			for (var x:int = 0, y:int = labelsArray.length; x < y; ++x )
+			var labels:Vector.<String> = m_animationLabel;
+			for (var x:int = 0, y:int = labels.length; x < y; ++x )
 			{
-				var label:FrameLabel = labelsArray[x] as FrameLabel;
-				if (label.name == labelSearchingFor)
+				var label:String = labels[x] as String;
+				if (label != null && label == labelSearchingFor)
 				{
-					linkedAnimationNumber = label.frame;
+					linkedAnimationIndex = x;
 					break;
 				}
 			}
-			if (linkedAnimationNumber == -1) { return false; }
+			if (linkedAnimationIndex == -1) { return false; }
 		
 			//Now to check the linked animation to do things
-			var currentAnimation:MovieClip = (m_charAnimations.getChildAt(0) as MovieClip);
+			var currentAnimation:MovieClip = m_currentlyPlayingAnimation;
 			var frameLabels:Array = currentAnimation.currentLabels;
 			var startFrame:int = -1, endFrame:int = -1;
 			for (var i:int = 0, l:int = frameLabels.length; i < l; ++i )
@@ -378,7 +330,7 @@
 					if (currentAnimation.currentFrame >= startFrame && currentAnimation.currentFrame <= endFrame)
 					{
 						frameToTransitionToLinkedAnimation = endFrame;
-						queuedLinkedAnimationFrame = linkedAnimationNumber;
+						queuedLinkedAnimationIndex = linkedAnimationIndex;
 						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
@@ -388,7 +340,7 @@
 					if (currentAnimation.currentFrame <= endFrame)
 					{
 						frameToTransitionToLinkedAnimation = endFrame;
-						queuedLinkedAnimationFrame = linkedAnimationNumber;
+						queuedLinkedAnimationIndex = linkedAnimationIndex;
 						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
@@ -397,60 +349,71 @@
 			return false;
 		}
 		
+		public function RemoveFromDisplay():void
+		{
+			displayArea.removeChildren();
+			if (displayArea.parent != null)	{displayArea.parent.removeChild(displayArea);}
+		}
+		
 		private function TryChangingToQueuedAnimation(e:Event):void
 		{
 			if (e.target.currentFrame == this.frameToTransitionToLinkedAnimation)
 			{
-				//Convert frame->index by subtracting 1
-				this.ChangeAnimationIndexToPlay(queuedLinkedAnimationFrame - 1);
+				this.ChangeAnimationIndexToPlay(queuedLinkedAnimationIndex);
 				this.GotoFrameAndPlayForCurrentAnimation(1);
 				frameToTransitionToLinkedAnimation = -1;
-				queuedLinkedAnimationFrame = -1;
+				queuedLinkedAnimationIndex = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 				isInLinkedAnimation = true;
-				m_charAnimations.dispatchEvent(new Event(AnimationTransitionEvent.ANIMATION_TRANSITIONED));
+				displayArea.dispatchEvent(new Event(AnimationTransitionEvent.ANIMATION_TRANSITIONED));
 			}
 			//Makes sure that if somehow it misses the transition to abort and remove the event listener.
 			if (e.target.currentFrame == e.target.totalFrames)
 			{
 				frameToTransitionToLinkedAnimation = -1;
-				queuedLinkedAnimationFrame = -1;
+				queuedLinkedAnimationIndex = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
-				m_charAnimations.dispatchEvent(new Event(AnimationTransitionEvent.ANIMATION_TRANSITIONED));
+				//Even though the transition is unable to activate, this event needs to be dispatched so any listeners can remove any sort 
+				//of locks put in place for animation transitions.
+				displayArea.dispatchEvent(new Event(AnimationTransitionEvent.ANIMATION_TRANSITIONED));
 				isInLinkedAnimation = false;
 			}
+		}
+		
+		public function GotoFrameAndPlayForCurrentAnimation(animationFrame:int):void
+		{
+			//StopAnimation();
+			//select the animation to play
+			//AddCharacterToDisplay();
+			//m_charAnimations.gotoAndStop(m_playAnimationFrame);
+			//if (displayArea.numChildren > 0) { displayArea.removeChildren();}
+			if (m_currentAnimationId < 0)	{ return; }
+			
+			//and set this animation's frame number to reflect where it would be if animations weren't changed on a whim
+			var animation:MovieClip = m_charAnimations[m_currentAnimationId];
+			if(animation)
+			{
+				//displayArea.addChild(animation);
+				//animation.nextFrame();
+				animation.gotoAndPlay(animationFrame);
+				//animation.play();
+			}
+			//test.gotoAndStop(m_currentAnimationId);
+			//(test.getChildAt(0) as MovieClip).gotoAndPlay(animationFrame);
+			/*if (test.numChildren == 1 )
+			{
+				displayArea.addChild(test.getChildAt(0));
+			}
+			(test).gotoAndStop(m_currentAnimationId+1);
+			(displayArea.getChildAt(0) as MovieClip).gotoAndPlay(animationFrame);
+			trace(displayArea.getChildAt(0).toString());*/
+			
 			
 		}
 		
-		public function AddAnimationToDisplayObject(parent:DisplayObjectContainer):void
+		public function AddToDisplay(parent:DisplayObjectContainer):void
 		{
-			parent.addChild(m_charAnimations);
-		}
-		
-		public function CreateAnimationFrameTargets():Vector.<int>
-		{
-			var frameTargets:Vector.<int> = new Vector.<int>();
-			var labels:Array = m_charAnimations.currentLabels;
-			var unaccessibleFrames:Array = [];
-			for (var i:int = 0, l:int = labels.length; i < l; ++i)
-			{
-				/*Labels should only be used to have an animation directly transition into another. The naming scheme for this
-				 * is "Into_(name)" and (name), with (name) being the animation that should not be normally accessible.*/
-				if ((labels[i].name as String).indexOf("Into_") == -1)
-				{
-					unaccessibleFrames[unaccessibleFrames.length] = labels[i].frame;
-				}
-			}
-			
-			//Parse through the frame labels and see what animations the user should not have access to from the menu.
-			for (var x:int = 0, y:int = m_charAnimations.totalFrames; x < y; ++x)
-			{
-				if (unaccessibleFrames.indexOf(x) == -1)
-				{
-					frameTargets[frameTargets.length] = x;
-				}
-			}
-			return frameTargets;
+			parent.addChild(displayArea);
 		}
 		
 		public function IsStillInLinkedAnimation():Boolean
@@ -464,14 +427,58 @@
 		}
 		
 		[inline]
-		private function GetFrameTargetForIndex(index:int):int
+		private function GetIdTargetForIndex(index:int):int
 		{
-			return m_frameTargets.indexOf(index);
+			return m_idTargets.indexOf(index);
 		}
-		/*public function GetParentMovieClip():MovieClip
+		
+		public function GetAnimationLockedStatus(animIndex:int):Boolean
 		{
-			var parentMC:MovieClip = m_CharMC.parent as MovieClip;
-			return parentMC;
-		}*/
+			var frame:int = GetIdTargetForIndex(animIndex);
+			if (frame == -1) { return false; }
+			else
+				return m_lockedAnimation[frame];
+		}
+		
+		/* Chnages the id of the animation to play and adds the appropriate animation to the display area.
+		* Parameter "animIndex" - the index of the character animations vector to pull the animation from and place on the display area.
+		* Result: -1 doesn't change the current animation id. Values >= 0 get the animation from the animations vector.
+		* */
+		public function ChangeAnimationIndexToPlay(animIndex:int=-1):void
+		{
+			if (animIndex > -1)	{ m_currentAnimationId = animIndex /*+ 1*/; }
+			
+			if (displayArea.numChildren == 1) 
+			{ 
+				(displayArea.getChildAt(0) as MovieClip).stop();  
+				displayArea.removeChildAt(0); 
+				m_currentlyPlayingAnimation = null;
+			}
+			
+			if (m_currentAnimationId > -1 && m_currentAnimationId < m_charAnimations.length && displayArea.numChildren == 0)
+			{
+				m_currentlyPlayingAnimation = m_charAnimations[m_currentAnimationId];
+				displayArea.addChild(m_charAnimations[m_currentAnimationId]);
+			}
+		}
+		
+		public function GetAnimationIdTargets():Vector.<int>
+		{
+			return m_idTargets;
+		}
+		
+		protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform
+		{
+			var ct:ColorTransform = new ColorTransform();
+			ct.color = colorValue;
+			if (alpha != 255)
+			{
+				if (alpha > 255) { alpha = 255; }
+				ct.alphaMultiplier = 0;
+				ct.alphaOffset = alpha;
+			}
+			return ct;
+		}
 	}
+
 }

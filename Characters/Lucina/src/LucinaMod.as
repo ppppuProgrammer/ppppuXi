@@ -9,6 +9,9 @@ package
         public function LucinaMod()
         {
             this.characterPayload = new Lucina();
+			initialAnimationContainer = new LucinaAnimations();
+			initialAnimationContainer.x = -54.05;
+			initialAnimationContainer.y = 93;
         }
     }
 }

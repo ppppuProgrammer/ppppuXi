@@ -9,6 +9,9 @@ package
         public function ZeldaMod()
         {
             this.characterPayload = new Zelda();
+			initialAnimationContainer = new ZeldaAnimations();
+			initialAnimationContainer.x = -54.75;
+			initialAnimationContainer.y = 94.5;
         }
     }
 }

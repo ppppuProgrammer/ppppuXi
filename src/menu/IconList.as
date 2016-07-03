@@ -1,6 +1,7 @@
 package menu 
 {
 	import com.bit101.components.List;
+	import events.RightClickedEvent;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;

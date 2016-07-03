@@ -9,6 +9,9 @@ package
         public function SamusMod()
         {
             this.characterPayload = new Samus();
+			initialAnimationContainer = new SamusAnimations();
+			initialAnimationContainer.x = -54.75;
+			initialAnimationContainer.y = 92;
         }
     }
 }

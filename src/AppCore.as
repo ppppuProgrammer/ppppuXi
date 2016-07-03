@@ -6,6 +6,11 @@ package
 	import com.greensock.loading.DataLoader;
 	import com.greensock.loading.LoaderMax;
 	import com.greensock.loading.SWFLoader;
+	import events.AnimationTransitionEvent;
+	import events.ExitLinkedAnimationEvent;
+	
+	import events.ChangeBackgroundEvent;
+	import events.SaveRequestEvent;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
@@ -90,6 +95,9 @@ package
 		//Timing
 		private var totalRunFrames:int = 0;
 		
+		//Music
+		private var musicPlayer:MusicPlayer = new MusicPlayer();
+		
 		//Constructor
 		public function AppCore() 
 		{
@@ -117,7 +125,7 @@ package
 			//Add an event listener that'll allow for frame checking.
 			mainStage.addEventListener(Event.ENTER_FRAME, RunLoop);
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
-			addEventListener(SaveRequestEvent.SAVE_SHARED_OBJECT, SaveSettingsToDisk);
+			addEventListener(events.SaveRequestEvent.SAVE_SHARED_OBJECT, SaveSettingsToDisk);
 			//settingsSaveFile.clear();
 		}
 		
@@ -130,9 +138,9 @@ package
 			//Add the key listeners
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyPressCheck);
 			stage.addEventListener(KeyboardEvent.KEY_UP, KeyReleaseCheck);
-			//Used to listen for when an activate animation transition has occured, to then allow character and animation changes to occur. 
-			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, RemoveTransitionLockoutHandler, true);
 			
+			addEventListener(ChangeBackgroundEvent.CHANGE_BACKGROUND, ChangeBackgroundColors, true);
+			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, AnimationTransitionOccured, true);
 			mainStage.MenuLayer.mouseEnabled = true;
 			//Disable mouse interaction for various objects
 			mainStage.mouseEnabled = false;
@@ -149,9 +157,9 @@ package
 			mainStage.TransitionDiamondBG.mouseChildren = false;
 			mainStage.TransitionDiamondBG.mouseEnabled = false;
 			
-			characterManager = new CharacterManager(mainStage, userSettings);
+			characterManager = new CharacterManager(/*mainStage, userSettings*/);
 			mainStage.x = (stage.stageWidth - mainStage.CharacterLayer.width /*- characterManager.MENUBUTTONSIZE/2*/) / 2;
-			
+			mainStage.CharacterLayer.addChild(characterManager);
 			
 			
 			
@@ -174,7 +182,7 @@ package
 			//characterManager.SetupMusicForCharacters();
 			//characterManager.ToggleMenu();
 			
-			mainMenu = new MainMenu(characterManager, characterManager.musicPlayer, userSettings);
+			mainMenu = new MainMenu(characterManager, null/*characterManager.musicPlayer*/, userSettings);
 			addChild(mainMenu);
 			mainMenu.Initialize();
 			
@@ -193,8 +201,8 @@ package
 			}
 			
 			
-			mainMenu.SetupCharacterLocks();
-			characterManager.InitializeSettingsWindow();
+			//mainMenu.SetupCharacterLocks();
+			//characterManager.InitializeSettingsWindow();
 			
 			mainStage.play();
 			
@@ -239,7 +247,7 @@ package
 			if (mainStage.currentFrame == flashStartFrame)
 			{
 				++totalRunFrames;
-				trace("total Frames: " + totalRunFrames);
+				//trace("total Frames: " + totalRunFrames);
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
 				if (userSettings.firstTimeRun == true)
@@ -276,14 +284,14 @@ package
 				{
 					
 					//frameNum != 7 is so Peach is the first character displayed on start
-					if(characterManager.GetCharSwitchStatus())
+					if(characterManager.AreCharacterSwitchesAllowed())
 					{
-						if (frameNum != flashStartFrame && characterManager.GetRandomSelectStatus())
+						if (frameNum != flashStartFrame && characterManager.IsRandomlySelectingCharacter())
 						{
 							characterManager.CharacterSwitchLogic();
 						}
 					}
-					characterManager.AddCurrentCharacter();
+					characterManager.DisplayAndUpdateCurrentCharacter();
 				}
 			}
 		}
@@ -299,17 +307,17 @@ package
 		it was an unintentional oversight at first, people were amused by this, so it has been kept as a feature.*/
 		private function KeyPressCheck(keyEvent:KeyboardEvent):void
 		{
-			if (characterManager.IsSettingsWindowActive())
+			/*if (characterManager.IsSettingsWindowActive())
 			{
 				return;
-			}
+			}*/
 			var keyPressed:int = keyEvent.keyCode;
 			var keyBindings:Object = userSettings.keyBindings;
 			if(keyDownStatus[keyPressed] == undefined || keyDownStatus[keyPressed] == false || (keyPressed == 48 || keyPressed == 96))
 			{
 				if((keyPressed == 48 || keyPressed == 96))
 				{
-					characterManager.RandomizeCurrentCharacterAnim(GetFrameNumberToSetForAnimation());
+					characterManager.RandomizeCurrentCharacterAnimation(GetFrameNumberToSetForAnimation());
 				}
 				else if((!(49 > keyPressed) && !(keyPressed > 57)) ||  (!(97 > keyPressed) && !(keyPressed > 105)))
 				{
@@ -325,7 +333,7 @@ package
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
 				{
-					characterManager.SetCharSwitchStatus(!characterManager.GetCharSwitchStatus());
+					characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
 					//if(characterManager.GetRandomSelectStatus() && !characterManager.GetCharSwitchStatus())
 					//{
 						//characterManager.SetRandomSelectStatus(false);
@@ -344,7 +352,7 @@ package
 				else if(keyPressed == keyBindings.AnimLockMode.main || keyPressed == keyBindings.AnimLockMode.alt)
 				{
 					//toggle animation lock/goto mode
-					characterManager.ToggleAnimationLockMode();
+					//characterManager.ToggleAnimationLockMode();
 				}
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
@@ -374,7 +382,7 @@ package
 				else if(keyPressed == keyBindings.RandomChar.main || keyPressed == keyBindings.RandomChar.alt)
 				{
 					//Toggles random character switching
-					characterManager.SetRandomSelectStatus(!characterManager.GetRandomSelectStatus());
+					characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
 				}
 				else if(keyPressed == keyBindings.Menu.main || keyPressed == keyBindings.Menu.alt)
 				{
@@ -387,7 +395,7 @@ package
 				}
 				else if(keyPressed == keyBindings.Backlight.main || keyPressed == keyBindings.Backlight.alt)
 				{
-					ToggleBackLight(!userSettings.backlightOn, ((mainStage.currentFrame - 2)% 120) + 1);
+					ToggleBackLight(!userSettings.backlightOn, GetFrameNumberToSetForAnimation());
 				}
 				else if (keyPressed == keyBindings.DisplayLimit.main || keyPressed == keyBindings.DisplayLimit.alt)
 				{
@@ -399,11 +407,11 @@ package
 				}
 				else if(keyPressed == keyBindings.Music.main || keyPressed == keyBindings.Music.alt)
 				{
-					characterManager.ToggleMusicPlay();
+					//characterManager.ToggleMusicPlay();
 				}
 				else if(keyPressed == keyBindings.CharTheme.main || keyPressed == keyBindings.CharTheme.alt)
 				{
-					characterManager.UseDefaultMusicForCurrentCharacter();
+					//characterManager.UseDefaultMusicForCurrentCharacter();
 				}
 				else if(keyPressed == keyBindings.NextHelpPage.main || keyPressed == keyBindings.NextHelpPage.alt)
 				{
@@ -419,11 +427,11 @@ package
 				}
 				else if(keyPressed == keyBindings.PrevMusic.main || keyPressed == keyBindings.PrevMusic.alt)
 				{
-					characterManager.ChangeMusicForCurrentCharacter(false);
+					//characterManager.ChangeMusicForCurrentCharacter(false);
 				}
 				else if(keyPressed == keyBindings.NextMusic.main || keyPressed == keyBindings.NextMusic.alt)
 				{
-					characterManager.ChangeMusicForCurrentCharacter(true);
+					//characterManager.ChangeMusicForCurrentCharacter(true);
 				}
 				else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
 				{
@@ -594,6 +602,8 @@ package
 		and the mod could not be added.*/
 		private function ProcessMod(mod:Mod/*, modType:int*/):Boolean
 		{
+			if (mod == null)	{ return false; }
+			
 			var modType:int = mod.GetModType();
 			
 			if (modType == Mod.MOD_ANIMATION)
@@ -609,11 +619,13 @@ package
 					{
 						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetIcon());
 						TryToLoadCharacterSettings(animCharacterMod.GetCharacter().GetName());
+						animCharacterMod.GetCharacter().test = animCharacterMod.initialAnimationContainer;
 					}
+					
 					//list.addItem();
 					//animCharacterMod.parent = null;
-					animCharacterMod = null;
 				}
+				
 			}
 			else if (modType == Mod.MOD_TEMPLATECHARACTER)
 			{
@@ -645,13 +657,14 @@ package
 						ProcessMod(childMod);
 					}
 				}
-				archive = null;
 			}
+			mod.Dispose();
+			mod = null;
 			return false;
 		}
 		
 		/*SETTINGS RELATED FUNCTIONS*/
-		public function SaveSettingsToDisk(e:SaveRequestEvent):void
+		public function SaveSettingsToDisk(e:events.SaveRequestEvent):void
 		{
 			if (helpScreenMC.visible)
 			{
@@ -685,11 +698,11 @@ package
 			ToggleBackLight(userSettings.backlightOn, 0);	
 			
 			//characterManager.GotoSelectedMenuCharacter(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
-			characterManager.SetCharSwitchStatus(userSettings.allowCharacterSwitches);
-			characterManager.SetRandomSelectStatus(userSettings.randomlySelectCharacter);
-			if (!userSettings.playMusic) { characterManager.ToggleMusicPlay(); }
+			characterManager.SetAllowingCharacterSwitching(userSettings.allowCharacterSwitches);
+			characterManager.SetIfRandomlySelectingCharacter(userSettings.randomlySelectCharacter);
+			//if (!userSettings.playMusic) { characterManager.ToggleMusicPlay(); }
 			
-			characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
+			//characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
 			//if (userSettings.playOneSongForAllCharacters) { characterManager.MusicForEachOrAll();}
 			//if (userSettings.showMenu == false) { characterManager.ToggleMenu(); }
 			
@@ -705,27 +718,36 @@ package
 				var charId:int = characterManager.GetCharacterIdByName(characterName);
 				if (charId > -1)
 				{
+					//processing of character settings
 					var charSettings:Object = userSettings.characterSettings[characterName];
+					if (charSettings.canSwitchTo == null) { charSettings.canSwitchTo = true; }
+					
+					//Set up character to use those settings.
+					characterManager.InitializeSettingsForCharacter(charId, charSettings);
+					//Insert something here for menu to update
+					mainMenu.SetupMenusForCharacter(charId, charSettings);
+					
 					//var lockedAnimationsVector:Vector.<Boolean> = userSettings.characterSettings[characterName].animationLocks;
-					var animLockObject:Object = charSettings.animationLocked;
+					/*var animLockObject:Object = charSettings.animationLocked;
 					for (var animationNumberStr:String in animLockObject)
 					{
 						var animNum:int = int(animationNumberStr);
 						characterManager.SetAnimationLockForCharacter(charId, animNum, animLockObject[animNum]);
-					}
-					if (charSettings.canSwitchTo == null) { charSettings.canSwitchTo = true; }
-					if (charSettings.canSwitchTo == false)
+					}*/
+					
+					/*if (charSettings.canSwitchTo == false)
 					{
 						//By default the character is unlocked. So if we can't switch to them, toggle to set true to false as needed.
-						mainMenu.ToggleCharacterLock(charId);
-					}
+						//mainMenu.ToggleCharacterLock(charId);
+						mainMenu.SetInitialCharacterLock(charId, charSettings.canSwitchTo);
+					}*/
 					//characterManager.SetLockOnCharacter(charId, charSettings.canSwitchTo);
 					/*if (charSettings.canSwitchTo == false)
 					{
 						characterManager.ToggleSelectedMenuCharacterLock(charId);
 					}*/
 					
-					var animSelect:int = charSettings.animationSelect;
+					/*var animSelect:int = charSettings.animationSelect;
 					if (animSelect == 0)
 					{
 						characterManager.GetCharacterById(charId).SetRandomizeAnimation(true);
@@ -734,9 +756,11 @@ package
 					{
 						characterManager.GetCharacterById(charId).SetRandomizeAnimation(false);
 						characterManager.GetCharacterById(charId).ChangeAnimationIndexToPlay(animSelect);
-					}
-				
-					characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
+					}*/
+					//TODO: Make Music player handle this.
+					//var musicId:int = musicPlayer.GetMusicIdByTitle(charSettings.playMusicTitle);
+					//musicPlayer.ChangeSelectedMusicForCharacter(musicId);
+					//characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
 					if (characterName == userSettings.currentCharacterName)
 					{
 						mainMenu.SetCharacterSelectorAndUpdate(charId);
@@ -908,14 +932,26 @@ package
 		{
 			return (totalRunFrames % 120);
 		}
+		private function AnimationTransitionOccured(e:Event):void
+		{
+			StopBackgroundAnimations();
+			addEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
+		}
 		
-		[inline]
+		private function ExitingLinkedAnimation(e:Event):void
+		{
+			removeEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
+			PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
+		}
 		private function StopBackgroundAnimations():void
 		{
 			mainStage.OuterDiamondBG.stop();
 			mainStage.InnerDiamondBG.stop();
 			mainStage.TransitionDiamondBG.stop();
 			mainStage.BacklightBG.stop();
+			//Since making the backlight invisible is a user setting and that shouldn't be interfered with, alpha will be used to hide
+			//the backlight.
+			mainStage.BacklightBG.alpha = 0; 
 		}
 		
 		[inline]
@@ -925,6 +961,21 @@ package
 			mainStage.InnerDiamondBG.gotoAndPlay(startFrame);
 			mainStage.TransitionDiamondBG.gotoAndPlay(startFrame);
 			mainStage.BacklightBG.gotoAndPlay(startFrame);
+			mainStage.BacklightBG.alpha = 1;
+		}
+		
+		private function ChangeBackgroundColors(e:ChangeBackgroundEvent):void
+		{
+			var colors:Object = e.colorTransforms;
+			mainStage.TransitionDiamondBG.TransitionDiamond.Color1.transform.colorTransform = 
+				mainStage.InnerDiamondBG.InnerDiamond.Color1.transform.colorTransform = colors.inDiaTL;
+			mainStage.TransitionDiamondBG.TransitionDiamond.Color2.transform.colorTransform = 
+				mainStage.InnerDiamondBG.InnerDiamond.Color2.transform.colorTransform = colors.inDiaCen;
+			mainStage.TransitionDiamondBG.TransitionDiamond.Color3.transform.colorTransform = 
+				mainStage.InnerDiamondBG.InnerDiamond.Color3.transform.colorTransform = colors.inDiaBR;
+			mainStage.TransitionDiamondBG.TransitionDiamond.Color4.transform.colorTransform = 
+				mainStage.OuterDiamondBG.OuterDiamond.Color.transform.colorTransform = colors.outDia;
+			mainStage.BacklightBG.Backlight.BacklightGfx.transform.colorTransform = colors.light;
 		}
 		
 		[inline]
@@ -933,14 +984,14 @@ package
 			mainMenu.visible = visible;
 		}
 		
-		private function AnimationTransitionHappened(e:Event):void
+		/*private function AnimationTransitionHappened(e:Event):void
 		{
 			var i:int = 0;
-		}
+		}*/
 		
-		private function RemoveTransitionLockoutHandler(e:Event):void
+		/*private function RemoveTransitionLockoutHandler(e:Event):void
 		{
 			characterManager.RemoveTransitionLockout();
-		}
+		}*/
 	}
 }

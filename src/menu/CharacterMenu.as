@@ -66,8 +66,8 @@ package menu
 		public function MoveListSelector(moveCount:int):void
 		{
 			var index:int = (characterList.menuCursorIndex + moveCount) % characterList.items.length;
-			trace("mouseOverIndex: " + characterList.menuCursorIndex);
-			trace("index: " + index);
+			//trace("mouseOverIndex: " + characterList.menuCursorIndex);
+			//trace("index: " + index);
 			if (index < 0) { index = characterList.items.length -1;}
 			//characterList.selectedIndex = index;
 			characterList.menuCursorIndex = index;
@@ -85,10 +85,16 @@ package menu
 			characterList.ForceRedraw();
 		}*/
 		
-		public function SetCharacterListLocks(locks:Vector.<Boolean>):void
+		
+		public function SetCharacterLock(charIndex:int, unlocked:Boolean):void
+		{
+			characterList.SetItemLock(charIndex, unlocked);
+		}
+		
+		/*public function SetCharacterListLocks(locks:Vector.<Boolean>):void
 		{
 			characterList.SetItemLocks(locks);
-		}
+		}*/
 		
 		public function AddIconToCharacterList(icon:DisplayObject):void
 		{

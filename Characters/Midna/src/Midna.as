@@ -15,12 +15,10 @@ package
 			m_topLeftDiamondColor = CreateColorTransformFromHex(0x999999);
 			m_centerDiamondColor = CreateColorTransformFromHex(0x666666);
 			m_bottomRightDiamondColor = CreateColorTransformFromHex(0x333333);
-			m_backgroundColor = CreateColorTransformFromHex(0xCCCCCC);
+			m_outerDiamondColor = CreateColorTransformFromHex(0xCCCCCC);
 			m_backlightColor = CreateColorTransformFromHex(0x49FBE1);
 			//m_backlightColor = new ColorTransform(1.0, 1.0, 1.0, 1.0, -26, 19, 122);
-			m_charAnimations = new MidnaAnimations();
-			m_charAnimations.x = -54.05;
-			m_charAnimations.y = 93;
+			
 			m_menuIcon = new MidnaIcon();
 			
 			m_name = "Midna";
