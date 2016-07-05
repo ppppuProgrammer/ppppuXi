@@ -200,6 +200,11 @@ package
 				}
 			}
 			
+			if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
+			{
+				mainMenu.SwitchToSelectedCharacter(0);
+				//characterManager.SwitchToCharacter(0);
+			}
 			
 			//mainMenu.SetupCharacterLocks();
 			//characterManager.InitializeSettingsWindow();

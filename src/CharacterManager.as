@@ -370,6 +370,11 @@
 		{
 			return m_currentCharacter.GetAnimationIdTargets();
 		}
+		
+		public function IsCharacterSet():Boolean
+		{
+			return m_currentCharacter != null;
+		}
 	}
 
 }
