@@ -16,6 +16,9 @@ package menu
 	{
 		protected var _lockedColor:uint = 0x000000;
 		protected var _rightClickedIndex:int = -1;
+		/*Whether to disable the scroll to selection that occurs when the list needs to be redrawn.
+		 * It remains disabled until the next draw call.*/
+		protected var disableNextScrollToSelection:Boolean = false;
 		
 		public function LockList(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, items:Array=null) 
 		{
@@ -145,6 +148,57 @@ package menu
 				item.locked = false;
 			}
 			super.addItemAt(item, index);
+		}
+		
+		public override function draw():void
+		{
+			super.draw();
+			if (disableNextScrollToSelection == true)
+			{
+				disableNextScrollToSelection = false;
+			}
+		}
+		
+		public function ChangeSelectedIndexWithoutMovingScrollBar(value:int):void
+		{
+			if(value >= 0 && value < _items.length)
+			{
+				_selectedIndex = value;
+			}
+			else
+			{
+				_selectedIndex = -1;
+			}
+			invalidate();
+		}
+		
+		public function DisableNextScrollToSelection():void
+		{
+			disableNextScrollToSelection = true;
+		}
+		
+		protected override function scrollToSelection():void
+		{
+			if (disableNextScrollToSelection == false)
+			{
+				var numItems:int = Math.ceil(_height / _listItemHeight);
+				if(_selectedIndex != -1)
+				{
+					if(_scrollbar.value > _selectedIndex)
+					{
+	//                    _scrollbar.value = _selectedIndex;
+					}
+					else if(_scrollbar.value + numItems < _selectedIndex)
+					{
+						_scrollbar.value = _selectedIndex - numItems + 1;
+					}
+				}
+				else
+				{
+					_scrollbar.value = 0;
+				}
+			}
+            fillItems();
 		}
 		
 		/*protected override function fillItems():void

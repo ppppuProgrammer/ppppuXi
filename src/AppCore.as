@@ -202,11 +202,11 @@ package
 				}
 			}
 			
-			if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
+			/*if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
 			{
 				mainMenu.SetCharacterSelectorAndUpdate(0);
 				//characterManager.SwitchToCharacter(0);
-			}
+			}*/
 			
 			//mainMenu.SetupCharacterLocks();
 			//characterManager.InitializeSettingsWindow();
@@ -317,12 +317,17 @@ package
 					//frameNum != 7 is so Peach is the first character displayed on start
 					if(characterManager.AreCharacterSwitchesAllowed())
 					{
-						if (frameNum != flashStartFrame && characterManager.IsRandomlySelectingCharacter())
+						if (frameNum != flashStartFrame)
 						{
 							characterManager.CharacterSwitchLogic();
 						}
 					}
-					characterManager.DisplayAndUpdateCurrentCharacter();
+					var charsWereSwitched:Boolean = characterManager.DisplayAndUpdateCurrentCharacter();
+					var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
+					//Need to get the index that targets the given animation id. 
+					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+					var target:int = currentCharacterIdTargets.indexOf(animId);
+					mainMenu.UpdateAnimationIndexSelected(target, charsWereSwitched);
 				}
 			}
 		}
@@ -368,7 +373,11 @@ package
 					var trueIndex:int = mainMenu.GetTrueItemIndexFromRelativePosition(animationIndex);
 					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
 					var switchSuccessful:Boolean = characterManager.ChangeAnimationForCurrentCharacter(currentCharacterIdTargets[trueIndex]);
-					if(switchSuccessful == true)	{ mainMenu.UpdateAnimationIndexSelected(trueIndex); }
+					if (switchSuccessful == true)	
+					{ 
+						characterManager.ChangeFrameOfCurrentAnimation(GetFrameNumberToSetForAnimation()); 
+						mainMenu.UpdateAnimationIndexSelected(trueIndex); 
+					}
 					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
@@ -498,17 +507,10 @@ package
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = visible;
 			if (!visible)
 			{
-				if (!userSettings.limitRenderArea)
-				{
-					ToggleDrawLimiter();
-				}
-				else
-				{
-					this.scrollRect = null;
+				this.scrollRect = null;
+				
+				mainStage.CharacterLayer.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
 					
-					mainStage.CharacterLayer.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
-					
-				}
 				if(userSettings.backlightOn)
 				{
 					//Disable backlight. The ToggleBackLight function will take care of saving the settings.
@@ -520,11 +522,12 @@ package
 			}
 			else
 			{
-				if (userSettings.limitRenderArea)
+				mainStage.CharacterLayer.scrollRect = null;
+				/*if (userSettings.limitRenderArea)
 				{
 					mainStage.CharacterLayer.scrollRect = null;
 					this.scrollRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
-				}
+				}*/
 				//settingsSaveFile.flush();
 				mainStage.OuterDiamondBG.gotoAndPlay(playFrameNum);
 				mainStage.TransitionDiamondBG.gotoAndPlay(playFrameNum);

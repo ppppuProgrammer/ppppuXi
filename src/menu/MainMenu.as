@@ -103,6 +103,7 @@ package menu
 		//Need to access the current character to set or unset the lock the animation.
 		private function SetAnimationLock(e:Event):void
 		{
+			animationMenu.DisableScrollToSelectionForNextRedraw();
 			var index:int = (e.target as AnimationList).rightClickedIndex;
 			var listItemLock:Boolean = (e.target as AnimationList).items[e.target.rightClickedIndex].locked;
 			var newLock:Boolean = characterManager.SetLockOnAnimationForCurrentCharacter(index, listItemLock);
@@ -119,9 +120,9 @@ package menu
 		/* Updates the animation select list to change the item index that should be selected)
 		 * item index is the index that targets a specific animation id for a character. It can be obtained
 		 * by searching for a given animation id in a characters idTargets vector.*/
-		public function UpdateAnimationIndexSelected(itemIndex:int):void
+		public function UpdateAnimationIndexSelected(itemIndex:int, moveScrollBar:Boolean = true):void
 		{
-			animationMenu.ChangeSelectedItem(itemIndex);
+			animationMenu.ChangeSelectedItem(itemIndex, moveScrollBar);
 		}
 		
 		public function GetTrueItemIndexFromRelativePosition(relativeIndex):int
@@ -263,7 +264,9 @@ package menu
 			{ 
 				return;
 			}
+			characterMenu.DisableScrollToSelectionForNextRedraw();
 			ToggleCharacterLock(e.target.rightClickedIndex);
+			//characterMenu.SetCharListScrollToSelection(true);
 			/*characterManager.ToggleLockOnCharacter(e.target.rightClickedIndex);
 			userSettings.ChangeCharacterLock(characterManager.GetCharacterById(e.target.rightClickedIndex).GetName(), 
 				characterManager.GetCharacterLockById(e.currentTarget.rightClickedIndex));*/

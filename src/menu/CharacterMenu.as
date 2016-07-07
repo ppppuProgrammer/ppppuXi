@@ -31,6 +31,11 @@ package menu
 			//characterList.addEventListener(MouseEvent.RIGHT_CLICK, SetCharacterLock);
 		}
 		
+		public function DisableScrollToSelectionForNextRedraw():void
+		{
+			characterList.DisableNextScrollToSelection();
+		}
+		
 		public function AddEventListenerToCharList(eventType:String, func:Function):void
 		{
 			characterList.addEventListener(eventType, func);

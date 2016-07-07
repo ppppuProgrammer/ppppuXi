@@ -53,6 +53,11 @@ package menu
 		
 		//private function RandomAnimationButton
 		
+		public function DisableScrollToSelectionForNextRedraw():void
+		{
+			animationList.DisableNextScrollToSelection();
+		}
+		
 		//Mouse input
 		public function RandomAnimationButtonSelected(e:Event = null):void
 		{
@@ -90,9 +95,15 @@ package menu
 			animationList.ResetList(frameTargets);
 		}
 		
-		public function ChangeSelectedItem(index:int):void
+		public function ChangeSelectedItem(index:int, moveScrollBar:Boolean=true):void
 		{
-			animationList.selectedIndex = index;
+			if (moveScrollBar == true)	
+				{animationList.selectedIndex = index;}
+			else
+				{
+					animationList.ChangeSelectedIndexWithoutMovingScrollBar(index);
+					animationList.DisableNextScrollToSelection();
+				}
 		}
 		
 		private function GetYPosForButton():Number

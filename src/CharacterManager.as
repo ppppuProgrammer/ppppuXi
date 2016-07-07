@@ -64,9 +64,9 @@
 		//The logic for the normal switch that happens every 120 frames
 		public function CharacterSwitchLogic():void
 		{
-			if (CheckIfTransitionLockIsActive())	{ return; }
+			if (m_currentCharacter != null && CheckIfTransitionLockIsActive())	{ return; }
 			
-			//Can't select a random character
+			//Sequential character changing
 			if(!m_selectRandomChar)
 			{
 				//character list wrap around
@@ -132,9 +132,11 @@
 			}
 		}
 		
-		public function DisplayAndUpdateCurrentCharacter(setFrameForAnimation:int=1):void
+		//Returns true if there was an actual character switch. Returns false otherwise
+		public function DisplayAndUpdateCurrentCharacter(setFrameForAnimation:int=1):Boolean
 		{
-			if (CheckIfTransitionLockIsActive())	{return; }
+			var charSwitchOccured:Boolean = false;
+			if (m_currentCharacter != null && CheckIfTransitionLockIsActive())	{return charSwitchOccured; }
 			
 			var currentCharacter:AnimatedCharacter = m_currentCharacter;
 			//If the current character selected is not the latest one being displayed, there needs to be some changes to get them on screen.
@@ -161,11 +163,13 @@
 				//userSettings.currentCharacterName = GetCurrentCharacter().GetName();
 				//Update latest char id 
 				m_latestCharacter = currentCharacter;
+				charSwitchOccured = true;
 			}
 			currentCharacter.RandomizePlayAnim();
 			currentCharacter.PlayingLockedAnimCheck();
 			currentCharacter.ChangeAnimationIndexToPlay();
 			currentCharacter.GotoFrameAndPlayForCurrentAnimation(setFrameForAnimation);
+			return charSwitchOccured;
 		}
 		
 		public function InitializeSettingsForCharacter(charId:int, settings:Object):void
@@ -348,6 +352,7 @@
 		[inline]
 		private function CheckIfTransitionLockIsActive():Boolean
 		{
+			if (m_currentCharacter == null) { return false;}
 			return transitionLockout == true || m_currentCharacter.IsStillInLinkedAnimation();
 		}
 		

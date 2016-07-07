@@ -75,7 +75,7 @@ copyFileName = ""
 fileExtension = builtFileName[(builtFileName.rfind(".")):]
 fileName = builtFileName[:(builtFileName.rfind("."))]
 if versionFileFound is True:
-    copyFileName = fileName + "_v" + programVersion + "_Build" + programBuildNumber + "_" + buildDate + fileExtension
+    copyFileName = fileName + "_Build" + programBuildNumber + "_" + buildDate + "_v" + programVersion + fileExtension
 else:
     #Use the time stamp as a fallback for missing Version data.
     copyFileName = fileName + "_" + datetime.strptime(timeStamp, '%m/%d/%Y %I:%M %p').strftime('%Y%m%d%H%M') + fileExtension
