@@ -27,7 +27,7 @@
 		//Controls whether the user wants a character to be randomly picked when it's switching time.
 		private var m_selectRandomChar:Boolean = false;
 		//Indicates if a character can be switched to. The index of the vector correspondes to the character's id.
-		private var m_canSwitchToCharacter:Vector.<Boolean> = new Vector.<Boolean>();
+		private var m_characterLocks:Vector.<Boolean> = new Vector.<Boolean>();
 		//Keep a tally of how many characters are not able to be switched to.
 		private var m_unswitchableCharactersNum:int = 0;
 		
@@ -54,7 +54,7 @@
 			if (character.IsValidCharacter())
 			{
 				m_charNamesDict[charName] = m_Characters.length;
-				m_canSwitchToCharacter[m_Characters.length] = true;
+				m_characterLocks[m_Characters.length] = false;
 				m_Characters[m_Characters.length] = character;
 				charAdded = true;
 			}
@@ -80,7 +80,7 @@
 					++m_currentCharacterId;
 				}
 				//Make sure the character can be switched to. If not, cycle through until we find one we can switch to
-				while(m_canSwitchToCharacter[m_currentCharacterId] == false)
+				while(m_characterLocks[m_currentCharacterId] == true)
 				{
 					if(m_currentCharacterId + 1 >= m_Characters.length)
 					{
@@ -99,7 +99,7 @@
 				var charactersAllowed:int = 0;
 				for(var i:int = 0, l:int = m_Characters.length; i < l; ++i)
 				{
-					if(m_canSwitchToCharacter[i] == true)	{++charactersAllowed;}
+					if(m_characterLocks[i] == false)	{++charactersAllowed;}
 				}
 				if(charactersAllowed <= 1) //Too limited of a pool of characters to pick from. To avoid a potential error and waste of time, just bypass switching characters and stick with the current one.
 				{
@@ -111,7 +111,7 @@
 					{
 						var randomCharId:int = Math.floor(Math.random() * m_Characters.length);
 						
-						if(m_canSwitchToCharacter[randomCharId] == true)
+						if(m_characterLocks[randomCharId] == false)
 						{
 							if(charactersAllowed == 2)
 							{
@@ -177,7 +177,7 @@
 				var animFrame:int = int(animationFrameStr);
 				character.SetLockOnAnimation(animFrame, animLockObject[animFrame]);
 			}
-			m_canSwitchToCharacter[charId] = settings.canSwitchTo;
+			m_characterLocks[charId] = settings.locked;
 			var animSelect:int = settings.animationSelect;
 			if (animSelect == 0)
 			{
@@ -238,7 +238,9 @@
 			}
 		}
 		
-		public function RandomizeCurrentCharacterAnimation(playFromThisFrame:int):void
+		/*Has the current character randomly select one of their animations and starts playing it from the
+		 * specified frame. Returns the id of the animation that will play.*/
+		public function RandomizeCurrentCharacterAnimation(playFromThisFrame:int):int
 		{
 			var currChar:AnimatedCharacter = m_currentCharacter;
 			currChar.SetRandomizeAnimation(true);
@@ -246,6 +248,7 @@
 			//userSettings.characterSettings[currChar.GetName()].animationSelect = 0;
 			
 			currChar.GotoFrameAndPlayForCurrentAnimation(playFromThisFrame);
+			return currChar.GetCurrentAnimationId();
 		}
 		
 		public function ChangeAnimationForCurrentCharacter(characterAnimIndex:int):void
@@ -259,6 +262,12 @@
 			currChar.SetRandomizeAnimation(false);
 			currChar.ChangeAnimationIndexToPlay(characterAnimIndex);
 			//userSettings.characterSettings[currChar.GetName()].animationSelect = characterAnimFrame;
+		}
+		
+		public function SetLockOnAnimationForCurrentCharacter(targetIndex:int, lock:Boolean):Boolean
+		{
+			m_currentCharacter.SetLockOnAnimation(targetIndex, lock);
+			return m_currentCharacter.GetAnimationLockedStatus(targetIndex);
 		}
 		
 		[inline]
@@ -289,7 +298,7 @@
 			{
 				charIndex = 0;
 			}
-			if(m_canSwitchToCharacter[charIndex] == true && m_currentCharacter != m_Characters[charIndex])
+			if(m_characterLocks[charIndex] == false && m_currentCharacter != m_Characters[charIndex])
 			{
 				m_currentCharacter = m_Characters[charIndex];
 				DisplayAndUpdateCurrentCharacter();
@@ -302,13 +311,13 @@
 		{
 			if(charIndex == -1)	{charIndex = 0;}
 			//Test if setting this character to be unselectable will result in all characters being unselectable
-			if (m_canSwitchToCharacter[charIndex] && m_unswitchableCharactersNum + 1 >= m_Characters.length)
+			if (m_characterLocks[charIndex] == false && m_unswitchableCharactersNum + 1 >= m_Characters.length)
 			{
 				return false; //Need to exit the function immediantly, 1 character must always be selectable.
 			}
-			m_canSwitchToCharacter[charIndex] = !m_canSwitchToCharacter[charIndex];
+			m_characterLocks[charIndex] = !m_characterLocks[charIndex];
 			//userSettings.characterSettings[m_Characters[charIndex].GetName()].canSwitchTo = m_canSwitchToCharacter[charIndex];
-			if (!m_canSwitchToCharacter[charIndex])
+			if (m_characterLocks[charIndex] == true)
 			{
 				++m_unswitchableCharactersNum;
 			}
@@ -316,7 +325,7 @@
 			{
 				--m_unswitchableCharactersNum;
 			}
-			return m_canSwitchToCharacter[charIndex];
+			return m_characterLocks[charIndex];
 		}
 		
 		public function GetCharacterIdByName(name:String):int

@@ -21,7 +21,7 @@ package
 		public var playOneSongForAllCharacters:Boolean = false;
 		public var globalSongTitle:String = "Beep Block Skyway";
 		//The latest version of the user settings. Change this whenever there is a modification with the class properties (renaming, adding/removing)
-		public const SAVE_VERSION:int = 4;
+		public const SAVE_VERSION:int = 5;
 		//The version of the settings that this settings object was created for.
 		public var version:int = SAVE_VERSION;
 		public function UserSettings() 
@@ -72,19 +72,19 @@ package
 			//keyBindings..main = Keyboard; keyBindings..alt = -1;
 		}
 		
-		public function ChangeCharacterLock(name:String, unlocked:Boolean):void
+		public function ChangeCharacterLock(name:String, locked:Boolean):void
 		{
 			if (name in characterSettings == false)
 			{
 				CreateSettingsForNewCharacter(name);
 			}
-			characterSettings[name].canSwitchTo = unlocked;
+			characterSettings[name].locked = locked;
 		}
 		
 		public function CreateSettingsForNewCharacter(charName:String):void
 		{
 			characterSettings[charName] = new Object();
-			characterSettings[charName].canSwitchTo = true;
+			characterSettings[charName].locked = false;
 			characterSettings[charName].animationLocked = new Object();
 			characterSettings[charName].playMusicTitle = globalSongTitle;
 			characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation
@@ -114,6 +114,11 @@ package
 			if ("playOneSongForAllCharacters" in obj) { playOneSongForAllCharacters = obj.playOneSongForAllCharacters; }
 			if ("globalSongTitle" in obj) { globalSongTitle = obj.globalSongTitle;}
 			// = obj.;
+		}
+		
+		public function CheckIfCharacterHasSettings(name:String ):Boolean
+		{
+			return (characterSettings.name != null);
 		}
 	}
 

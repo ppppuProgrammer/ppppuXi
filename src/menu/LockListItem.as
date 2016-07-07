@@ -11,7 +11,7 @@ package menu
 	public class LockListItem extends IconListItem 
 	{
 		protected var _lockedColor:uint = 0xeeeeee;
-		protected var _unlocked:Boolean = true;
+		protected var _locked:Boolean = true;
 		public function LockListItem(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, data:Object=null) 
 		{
 			super(parent, xpos, ypos, data);
@@ -31,13 +31,15 @@ package menu
 				{
 					//var dataDispObj:DisplayObject = _data as DisplayObject;
 					//var unlocked:Boolean = _data.unlocked;
-					if (_data.unlocked)
+					if (_data.locked == false)
 					{
-						icon.alpha = 1;
+						icon.alpha = .75;
+						//this.alpha = .75;
 					}
 					else
 					{
-						icon.alpha = 0.5;
+						//this.alpha = .5;
+						icon.alpha = 0.25;
 					}
 				}
 			}
@@ -63,9 +65,9 @@ package menu
 		public override function set data(value:Object):void
 		{
 			super.data = value;
-			if (_data != null && "unlocked" in value)
+			if (_data != null && "locked" in value)
 			{
-				unlocked = value.unlocked;
+				locked = value.locked;
 			}
 		}
 		
@@ -77,14 +79,14 @@ package menu
 		/**
 		 * Sets/gets whether or not this item is locked.
 		 */
-		public function set unlocked(value:Boolean):void
+		public function set locked(value:Boolean):void
 		{
-			_data.unlocked = _unlocked = value;
+			_data.locked = _locked = value;
 			invalidate();
 		}
-		public function get unlocked():Boolean
+		public function get locked():Boolean
 		{
-			return _unlocked;
+			return _locked;
 		}
 		
 		/**

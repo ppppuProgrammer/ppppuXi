@@ -14,7 +14,7 @@ package menu
 		/*The frame of the character's animation collection movie clip to go to. The displayed index does not necessarily
 		 * match the target frame*/
 		//private var _frameNumber:int;
-		private var _targetFrame:int;
+		//private var _targetFrame:int;
 		
 		private const selectedBlockIcon:Sprite = new HitBlockIcon();
 		private const blockIcon:Sprite = new BlockIcon();
@@ -57,14 +57,14 @@ package menu
 			invalidate();
 		}
 		
-		public function set targetFrame(value:int):void
+		/*public function set targetFrame(value:int):void
 		{
 			_targetFrame = targetFrame;
 		}
 		public function get targetFrame():int
 		{
 			return _targetFrame;
-		}
+		}*/
 		/*public override function draw():void
 		{
 			super.draw();

@@ -1,7 +1,7 @@
 package menu 
 {
 	import com.bit101.components.List;
-	import events.RightClickedEvent;
+	import events.LockEvent;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
@@ -49,7 +49,6 @@ package menu
 			{
 				item = IconListItem(_itemHolder.getChildAt(0));
 				item.removeEventListener(MouseEvent.CLICK, onSelect);
-				item.removeEventListener(MouseEvent.RIGHT_CLICK, onRightClick);
 				_itemHolder.removeChildAt(0);
 			}
 
@@ -71,7 +70,6 @@ package menu
 				item.selectedColor = _selectedColor;
 				item.rolloverColor = _rolloverColor;
 				item.addEventListener(MouseEvent.CLICK, onSelect);
-				item.addEventListener(MouseEvent.RIGHT_CLICK, onRightClick);
 			}
 		}
 		
@@ -112,44 +110,6 @@ package menu
 			fillItems();
 		}
 		
-		/**
-		 * Sets / gets the index of the right clicked list item.
-		 */
-		public function set rightClickedIndex(value:int):void
-		{
-			if(value >= 0 && value < _items.length)
-			{
-				_rightClickedIndex = value;
-//				_scrollbar.value = _selectedIndex;
-			}
-			else
-			{
-				_rightClickedIndex = -1;
-			}
-			invalidate();
-			//dispatchEvent(new Event(MouseEvent.RIGHT_CLICK));
-		}
-		public function get rightClickedIndex():int
-		{
-			return _rightClickedIndex;
-		}
-		
-		protected function onRightClick(event:Event):void
-		{
-			if (! (event.target is ListItem)) return;
-			var offset:int = _scrollbar.value;
-			
-			for(var i:int = 0; i < _itemHolder.numChildren; i++)
-			{
-				if (_itemHolder.getChildAt(i) == event.target)
-				{
-					rightClickedIndex = i + offset; 
-					break;
-				}
-			}
-			dispatchEvent(new Event(RightClickedEvent.RIGHT_CLICKED));
-		}
-		
 		protected override function fillItems():void
         {
             var offset:int = _scrollbar.value;
@@ -185,11 +145,6 @@ package menu
                 }
             }
         }
-		
-		public function FakeMouseOverOnItem(index:int):void
-		{
-			
-		}
 	}
 
 }

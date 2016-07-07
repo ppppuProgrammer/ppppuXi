@@ -6,6 +6,7 @@ package menu
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import com.bit101.components.ListItem;
+	import events.LockEvent;
 	
 	/**
 	 * ...
@@ -33,13 +34,36 @@ package menu
             fillItems();
 		}
 		
-		//locks/unlocks an item of a specified index. Returns the new unlocked value for the item.
+		public function get rightClickedIndex():int
+		{
+			return _rightClickedIndex;
+		}
+		
+		/**
+		 * Sets / gets the index of the right clicked list item.
+		 */
+		public function set rightClickedIndex(value:int):void
+		{
+			if(value >= 0 && value < _items.length)
+			{
+				_rightClickedIndex = value;
+//				_scrollbar.value = _selectedIndex;
+			}
+			else
+			{
+				_rightClickedIndex = -1;
+			}
+			invalidate();
+			//dispatchEvent(new Event(MouseEvent.RIGHT_CLICK));
+		}
+		
+		//locks/unlocks an item of a specified index. Returns the new locked value for the item.
 		public function ToggleItemLock(index:int):void
 		{
 			if (index > -1 && index < _itemHolder.numChildren)
 			{
 				var item:LockListItem = (_itemHolder.getChildAt(index) as LockListItem);
-				item.unlocked = !item.unlocked;
+				item.locked = !item.locked;
 			}
 		}
 		
@@ -50,7 +74,7 @@ package menu
 			if (lockIndex < numItems)
 			{
 				var item:LockListItem = _itemHolder.getChildAt(lockIndex) as LockListItem;
-				item.unlocked = value;
+				item.locked = value;
 			}
 		}
 		
@@ -61,7 +85,7 @@ package menu
             for(var i:int = 0; i < numItems; i++)
             {
                 var item:LockListItem = _itemHolder.getChildAt(i) as LockListItem;
-				item.unlocked = locks[i];
+				item.locked = locks[i];
 			}
 		}
 		
@@ -106,17 +130,17 @@ package menu
 		
 		public override function addItem(item:Object):void
 		{
-			if (!("unlocked" in item))
+			if (!("locked" in item))
 			{
-				item.unlocked = true;
+				item.locked = false;
 			}
 			super.addItem(item);
 		}
 		public override function addItemAt(item:Object, index:int):void
 		{
-			if (!("unlocked" in item))
+			if (!("locked" in item))
 			{
-				item.unlocked = true;
+				item.locked = false;
 			}
 			super.addItemAt(item, index);
 		}
@@ -174,46 +198,36 @@ package menu
 		{
 			if(! (event.target is ListItem)) return;
 			
-			var offset:int = _scrollbar.value;
+			//Locked items can not be selected
+			if (event.target is LockListItem && (event.target as LockListItem).locked == true)	{return;}
 			
-			var originalSelectedIndex:int = selectedIndex;
+			var offset:int = _scrollbar.value;
+
 			for(var i:int = 0; i < _itemHolder.numChildren; i++)
 			{
-				if (_itemHolder.getChildAt(i) == event.target) 
-				{
-					//Locked items can not be selected
-					if (event.target is LockListItem && (event.target as LockListItem).unlocked == false)
-					{
-						//Restore the selected status for the original selected index. 
-						ListItem(_itemHolder.getChildAt(originalSelectedIndex)).selected =true;
-						return;
-					}
-					_selectedIndex = i + offset;
-				}
+				if (_itemHolder.getChildAt(i) == event.target)	{ _selectedIndex = i + offset; }
 				ListItem(_itemHolder.getChildAt(i)).selected = false;
 			}
 			ListItem(event.target).selected = true;
 			dispatchEvent(new Event(Event.SELECT));
 		}
 		
-		protected override function onRightClick(event:Event):void
+		protected function onRightClick(event:Event):void
 		{
 			if (! (event.target is LockListItem)) return;
-			LockListItem(event.target).unlocked = !LockListItem(event.target).unlocked;
-			super.onRightClick(event);
-			/*if (! (event.target is LockListItem)) return;
+			LockListItem(event.target).locked = !LockListItem(event.target).locked;
+			
 			var offset:int = _scrollbar.value;
 			
 			for(var i:int = 0; i < _itemHolder.numChildren; i++)
 			{
 				if (_itemHolder.getChildAt(i) == event.target)
 				{
-					rightClickedIndex = i + offset;
+					rightClickedIndex = i + offset; 
 					break;
 				}
 			}
-			LockListItem(event.target).unlocked = !LockListItem(event.target).unlocked;
-			dispatchEvent(new Event(RightClickedEvent.RIGHT_CLICKED));*/
+			dispatchEvent(new Event(LockEvent.LOCK));
 		}
 		
 		/*public function ForceRedraw():void

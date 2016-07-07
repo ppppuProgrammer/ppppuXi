@@ -1,0 +1,15 @@
+package $(Package) $(CSLB){
+   
+   /**
+   $(CBI)* ...
+   $(CBI)* @author $(DefaultUser)
+   $(CBI)*/
+   public class $(FileName) $(CSLB){
+      
+      public static const VERSION:String = "$(Major).$(Minor).$(Revision)";
+	  public static const BUILDNUMBER:String = "$(Build)"
+	  public static const BUILDDATE:String = "$(TimeStamp)";
+      
+   }
+   
+}

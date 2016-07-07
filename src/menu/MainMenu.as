@@ -1,7 +1,7 @@
 package menu 
 {
 	import com.bit101.components.PushButton;
-	import events.RightClickedEvent;
+	import events.LockEvent;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.display.Sprite;
@@ -46,8 +46,11 @@ package menu
 			characterMenu = new CharacterMenu();
 			addChild(characterMenu);
 			
-			characterMenu.AddEventListenerToCharList(Event.SELECT, CharacterSelected);
-			characterMenu.AddEventListenerToCharList(events.RightClickedEvent.RIGHT_CLICKED, SetCharacterLock);
+			addEventListener(Event.SELECT, SelectHandler, true);
+			addEventListener(LockEvent.LOCK, LockHandler, true);
+			
+			//characterMenu.AddEventListenerToCharList(Event.SELECT, CharacterSelected);
+			characterMenu.AddEventListenerToCharList(events.LockEvent.LOCK, SetCharacterLock);
 			
 			settingsButton = new PushButton(this, 0, 640, "", OpenSettingsWindow);
 			settingsButton.setSize(32, 32);
@@ -57,19 +60,74 @@ package menu
 			settingsButton.addChild(settingsIcon);
 			
 			animationMenu = new AnimationMenu(this, 550);
-			animationMenu.AddEventListenerToAnimList(Event.SELECT, AnimationSelected);
+			animationMenu.x = stage.stageWidth - animationMenu.width;
+			//animationMenu.AddEventListenerToAnimList(Event.SELECT, AnimationSelected);
 			//characterMenu
 		}
 		
 		public function SetupMenusForCharacter(charId:int, characterSettings:Object)
 		{
-			characterMenu.SetCharacterLock(charId, characterSettings.canSwitchTo);
+			characterMenu.SetCharacterLock(charId, characterSettings.locked);
 			
 			//animationMenu.SetLockOnAnimation();
 		}
 		
+		private function SelectHandler(e:Event):void
+		{
+			if (e.target.name == "Character Select List")
+			{
+				CharacterSelected(e);
+			}
+			else if (e.target.name == "Animation Select List")
+			{
+				AnimationSelected(e);
+			}
+		}
+		
+		private function LockHandler(e:Event):void
+		{
+			if (e.target.name == "Character Select List")
+			{
+				SetCharacterLock(e);
+			}
+			else if (e.target.name == "Animation Select List")
+			{
+				SetAnimationLock(e);
+			}
+		}
+		
 		/*Animation Menu*/
 		//{
+		//Need to access the current character to set or unset the lock the animation.
+		private function SetAnimationLock(e:Event):void
+		{
+			var index:int = (e.target as AnimationList).rightClickedIndex;
+			var listItemLock:Boolean = (e.target as AnimationList).selectedItem.locked;
+			var newLock:Boolean = characterManager.SetLockOnAnimationForCurrentCharacter(index, listItemLock);
+			//The animation's locked state could not be changed. Set the list item back to it's original lock state.
+			if (listItemLock != newLock)
+			{
+				animationMenu.ChangeLockOnItem(index, newLock);
+			}
+			//var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+			//var target:int = currentCharacterIdTargets[index];
+			
+		}
+		
+		/* Updates the animation select list to change the item index that should be selected)
+		 * item index is the index that targets a specific animation id for a character. It can be obtained
+		 * by searching for a given animation id in a characters idTargets vector.*/
+		public function UpdateAnimationIndexSelected(itemIndex:int):void
+		{
+			animationMenu.ChangeSelectedItem(itemIndex);
+		}
+		
+		public function GetTrueItemIndexFromRelativePosition(relativeIndex):int
+		{
+			if (relativeIndex == -1) { return -1; }
+			var itemTrueIndex:int = animationMenu.GetTrueIndexOfItem(relativeIndex);
+			return itemTrueIndex;
+		}
 		/*Changes the animation to play for the current character and updates the menus
 		* Parameter relativeItemIndex: the index of the item currently on display. This index
 		* does not correspond to the true index of the item, which requests knowing the value

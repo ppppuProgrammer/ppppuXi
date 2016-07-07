@@ -32,10 +32,12 @@ package menu
 			setSize(40, 440);
 			
 			//list
-			animationList = new AnimationList(this,0,40);
+			animationList = new AnimationList(this, 0, 40);
+			animationList.name = "Animation Select List";
 			animationList.listItemClass = AnimationListItem;
 			animationList.setSize(40, AnimationButtonSize * MAX_ITEMS_DISPLAYED);
 			animationList.listItemHeight = AnimationButtonSize;
+			//animationList.rolloverColor = 0xEEEEEE;
 			
 			randomAnimationButton = new PushButton(this, 0, animationList.y + animationList.height + 5, "?");
 			randomAnimationButton.setSize(40, 40);
@@ -113,6 +115,11 @@ package menu
 		public function ChangeModeLabelToLock():void
 		{
 			modeLabel.text = "Keyboard Mode:\nLock";
+		}
+		
+		public function ChangeLockOnItem(index:int, lock:Boolean):void
+		{
+			animationList.items[index].data.locked = lock;
 		}
 	}
 

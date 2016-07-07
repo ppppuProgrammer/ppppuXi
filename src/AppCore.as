@@ -98,6 +98,8 @@ package
 		//Music
 		private var musicPlayer:MusicPlayer = new MusicPlayer();
 		
+		private const appName:String = "ppppuXi beta";
+		
 		//Constructor
 		public function AppCore() 
 		{
@@ -202,7 +204,7 @@ package
 			
 			if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
 			{
-				mainMenu.SwitchToSelectedCharacter(0);
+				mainMenu.SetCharacterSelectorAndUpdate(0);
 				//characterManager.SwitchToCharacter(0);
 			}
 			
@@ -228,6 +230,30 @@ package
 			helpScreenMC.x = (mainStage.HelpLayer.getRect(mainStage.HelpLayer).right - helpScreenMC.width) / 2;
 			mainStage.HelpLayer.addChild(helpScreenMC);
 			helpScreenMC.y = 0;
+			
+			var buildDate:String = Version.BUILDDATE;
+			var date:String = buildDate.substring(0, buildDate.indexOf(" "));
+			var time:String = buildDate.substring(buildDate.indexOf(" ")+1);
+			var dayMonthSlashPos:int = date.indexOf("/");
+			var monthYearSlashPos:int = date.lastIndexOf("/");
+			var month:String = date.substring(0, dayMonthSlashPos);
+			if (month.length == 1) { month = 0 + month; }
+			var day:String = date.substring(dayMonthSlashPos + 1, monthYearSlashPos);
+			if (day.length == 1) { day = 0 + day; }
+			var year:String = date.substring(monthYearSlashPos + 1);
+			
+			//time
+			var buildAfterNoon:Boolean = (time.indexOf("PM") != -1) ? true : false;
+			var hour:String = String( int(time.substring(0, time.indexOf(":"))) + buildAfterNoon ? 12 : 0);
+			if (hour.length == 1) { hour = 0 + hour; }
+			var minute:String = time.substring(time.indexOf(":") + 1, time.indexOf(" "));
+			if (minute.length == 1) {  minute = 0 + minute; }
+			
+			//format is YYYYMMDDHHmm (greatest to least significance)
+			var finalBuildDate:String = year + month + day + hour + minute;
+			
+			helpScreenMC.BuildText.text = appName + " version " + Version.VERSION + " Build #" + 
+			Version.BUILDNUMBER + " Build date: " + finalBuildDate;
 		}
 
 		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
@@ -322,7 +348,12 @@ package
 			{
 				if((keyPressed == 48 || keyPressed == 96))
 				{
-					characterManager.RandomizeCurrentCharacterAnimation(GetFrameNumberToSetForAnimation());
+					var chosenAnimId:int = characterManager.RandomizeCurrentCharacterAnimation(GetFrameNumberToSetForAnimation());
+					//Need to get the index that targets the given animation id. 
+					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+					var target:int = currentCharacterIdTargets.indexOf(chosenAnimId);
+					
+					mainMenu.UpdateAnimationIndexSelected(target);
 				}
 				else if((!(49 > keyPressed) && !(keyPressed > 57)) ||  (!(97 > keyPressed) && !(keyPressed > 105)))
 				{
@@ -332,8 +363,12 @@ package
 						keyPressed = keyPressed - 48;
 					}
 					//AnimationIndex 
+					
 					var animationIndex:int = keyPressed - 49; 
-					mainMenu.ChangeAnimationForCurrentCharacter(animationIndex);
+					var trueIndex:int = mainMenu.GetTrueItemIndexFromRelativePosition(animationIndex);
+					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+					characterManager.ChangeAnimationForCurrentCharacter(currentCharacterIdTargets[trueIndex]);
+					mainMenu.UpdateAnimationIndexSelected(trueIndex);
 					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
@@ -620,11 +655,11 @@ package
 				var animCharacterMod:AnimatedCharacterMod = mod as AnimatedCharacterMod;
 				if (animCharacterMod)
 				{
+					var characterName:String = animCharacterMod.GetCharacter().GetName();
 					if (characterManager.AddCharacter(animCharacterMod.GetCharacter()))
 					{
 						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetIcon());
-						TryToLoadCharacterSettings(animCharacterMod.GetCharacter().GetName());
-						animCharacterMod.GetCharacter().test = animCharacterMod.initialAnimationContainer;
+						TryToLoadCharacterSettings(characterName);
 					}
 					
 					//list.addItem();
@@ -718,6 +753,10 @@ package
 		
 		private function TryToLoadCharacterSettings(characterName:String):void
 		{
+			if (userSettings.CheckIfCharacterHasSettings(characterName) == false)
+			{
+				userSettings.CreateSettingsForNewCharacter(characterName);
+			}
 			if(characterName in userSettings.characterSettings)
 			{
 				var charId:int = characterManager.GetCharacterIdByName(characterName);
@@ -725,12 +764,14 @@ package
 				{
 					//processing of character settings
 					var charSettings:Object = userSettings.characterSettings[characterName];
-					if (charSettings.canSwitchTo == null) { charSettings.canSwitchTo = true; }
+					if (charSettings.locked == null) { charSettings.locked = false; }
 					
 					//Set up character to use those settings.
 					characterManager.InitializeSettingsForCharacter(charId, charSettings);
 					//Insert something here for menu to update
 					mainMenu.SetupMenusForCharacter(charId, charSettings);
+					
+					trace(characterName + ": " + charSettings.locked);
 					
 					//var lockedAnimationsVector:Vector.<Boolean> = userSettings.characterSettings[characterName].animationLocks;
 					/*var animLockObject:Object = charSettings.animationLocked;

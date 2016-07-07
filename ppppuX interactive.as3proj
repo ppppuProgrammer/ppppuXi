@@ -8,7 +8,7 @@
     <movie fps="30" />
     <movie width="640" />
     <movie height="720" />
-    <movie version="20" />
+    <movie version="12" />
     <movie minorVersion="0" />
     <movie platform="Flash Player" />
     <movie background="#0C0046" />
@@ -87,7 +87,9 @@
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">cmd.exe /C python "$(ProjectDir)\BuildModsSwf.py" "$(CompilerPath)" "$(FDBuild)" $(BuildConfig)</postBuildCommand>
+  <postBuildCommand alwaysRun="False">cmd.exe /C python "$(ProjectDir)\BuildModsSwf.py" "$(CompilerPath)" "$(FDBuild)" $(BuildConfig)
+
+cmd.exe /C python "$(ProjectDir)\MakeBuildCopy.py" "$(OutputDir)" "$(OutputName)" "$(BuildConfig)" "$(TimeStamp)"</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="True" />

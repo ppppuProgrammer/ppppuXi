@@ -86,9 +86,9 @@ package menu
 		}*/
 		
 		
-		public function SetCharacterLock(charIndex:int, unlocked:Boolean):void
+		public function SetCharacterLock(charIndex:int, locked:Boolean):void
 		{
-			characterList.SetItemLock(charIndex, unlocked);
+			characterList.SetItemLock(charIndex, locked);
 		}
 		
 		/*public function SetCharacterListLocks(locks:Vector.<Boolean>):void
