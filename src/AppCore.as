@@ -367,8 +367,8 @@ package
 					var animationIndex:int = keyPressed - 49; 
 					var trueIndex:int = mainMenu.GetTrueItemIndexFromRelativePosition(animationIndex);
 					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-					characterManager.ChangeAnimationForCurrentCharacter(currentCharacterIdTargets[trueIndex]);
-					mainMenu.UpdateAnimationIndexSelected(trueIndex);
+					var switchSuccessful:Boolean = characterManager.ChangeAnimationForCurrentCharacter(currentCharacterIdTargets[trueIndex]);
+					if(switchSuccessful == true)	{ mainMenu.UpdateAnimationIndexSelected(trueIndex); }
 					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)

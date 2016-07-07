@@ -15,7 +15,7 @@ package menu
 	 */
 	public class IconList extends List 
 	{
-		protected var _rightClickedIndex:int = -1;
+		
 		
 		public function IconList(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, items:Array=null) 
 		{

@@ -231,7 +231,7 @@
 		public function SetLockOnAnimation(animId:int, lockStatus:Boolean):void
 		{
 			var indexForId:int = m_idTargets.indexOf(animId);
-			if(animId < 1 || animId > GetNumberOfAccessibleAnimations() || indexForId == -1)
+			if(animId < 0 || animId > GetNumberOfAccessibleAnimations() || indexForId == -1)
 			{
 				return;
 			}

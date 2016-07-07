@@ -11,7 +11,7 @@ package menu
 	public class LockListItem extends IconListItem 
 	{
 		protected var _lockedColor:uint = 0xeeeeee;
-		protected var _locked:Boolean = true;
+		protected var _locked:Boolean = false;
 		public function LockListItem(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, data:Object=null) 
 		{
 			super(parent, xpos, ypos, data);
@@ -82,7 +82,7 @@ package menu
 		public function set locked(value:Boolean):void
 		{
 			_data.locked = _locked = value;
-			invalidate();
+			//invalidate();
 		}
 		public function get locked():Boolean
 		{

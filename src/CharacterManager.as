@@ -251,16 +251,18 @@
 			return currChar.GetCurrentAnimationId();
 		}
 		
-		public function ChangeAnimationForCurrentCharacter(characterAnimIndex:int):void
+		//Returns true if the animation could be switched. false if the switch failed.
+		public function ChangeAnimationForCurrentCharacter(characterAnimIndex:int):Boolean
 		{
 			var currChar:AnimatedCharacter = m_currentCharacter;
 			if (CheckIfTransitionLockIsActive() || currChar.GetTotalNumberOfAnimations() < characterAnimIndex || 
 				currChar.GetAnimationLockedStatus(characterAnimIndex))
 			{
-				return;
+				return false;
 			}
 			currChar.SetRandomizeAnimation(false);
 			currChar.ChangeAnimationIndexToPlay(characterAnimIndex);
+			return true;
 			//userSettings.characterSettings[currChar.GetName()].animationSelect = characterAnimFrame;
 		}
 		

@@ -36,6 +36,33 @@ package menu
 				
 			}*/
 		}
+		
+		public override function set selectedIndex(value:int):void
+		{
+			if(value >= 0 && value < _items.length)
+			{
+				_selectedIndex = value;
+				var offset:int = _scrollbar.value;
+				var numItems:int = Math.ceil(_height / _listItemHeight);
+				numItems = Math.min(numItems, _items.length);
+				
+				if (offset + numItems >= value)
+				{
+					_scrollbar.value = value - numItems +1;
+				}
+				else if (offset + numItems <= value)
+				{
+					_scrollbar.value = value;
+				}
+//				_scrollbar.value = _selectedIndex;
+			}
+			else
+			{
+				_selectedIndex = -1;
+			}
+			invalidate();
+			//dispatchEvent(new Event(Event.SELECT));
+		}
 	}
 
 }

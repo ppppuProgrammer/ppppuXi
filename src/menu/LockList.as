@@ -15,6 +15,8 @@ package menu
 	public class LockList extends IconList 
 	{
 		protected var _lockedColor:uint = 0x000000;
+		protected var _rightClickedIndex:int = -1;
+		
 		public function LockList(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, items:Array=null) 
 		{
 			super(parent, xpos, ypos, items);

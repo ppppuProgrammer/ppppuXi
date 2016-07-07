@@ -59,11 +59,6 @@ package menu
 			
 		}
 		
-		public function AddEventListenerToAnimList(eventType:String, func:Function):void
-		{
-			animationList.addEventListener(eventType, func);
-		}
-		
 		/*public function AddEventListenerToAnimList(eventType:String, func:Function):void
 		{
 			animationList.addEventListener(eventType, func);
@@ -119,7 +114,7 @@ package menu
 		
 		public function ChangeLockOnItem(index:int, lock:Boolean):void
 		{
-			animationList.items[index].data.locked = lock;
+			animationList.items[index].locked = lock;
 		}
 	}
 
