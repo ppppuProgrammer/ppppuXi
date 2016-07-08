@@ -65,7 +65,7 @@ package menu
 			//characterMenu
 		}
 		
-		public function SetupMenusForCharacter(charId:int, characterSettings:Object)
+		public function SetupMenusForCharacter(charId:int, characterSettings:Object):void
 		{
 			characterMenu.SetCharacterLock(charId, characterSettings.locked);
 			
@@ -89,7 +89,7 @@ package menu
 		{
 			if (e.target.name == "Character Select List")
 			{
-				SetCharacterLock(e);
+				SetCharacterLock_Mouse(e);
 			}
 			else if (e.target.name == "Animation Select List")
 			{
@@ -125,7 +125,7 @@ package menu
 			animationMenu.ChangeSelectedItem(itemIndex, moveScrollBar);
 		}
 		
-		public function GetTrueItemIndexFromRelativePosition(relativeIndex):int
+		public function GetTrueItemIndexFromRelativePosition(relativeIndex:int):int
 		{
 			if (relativeIndex == -1) { return -1; }
 			var itemTrueIndex:int = animationMenu.GetTrueIndexOfItem(relativeIndex);
@@ -178,15 +178,38 @@ package menu
 		
 		/* Character Menu*/
 		//{
+		[inline]
+		public function UpdateCharacterMenuForCharacter(/*charId:int*/):void
+		{
+			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+			animationMenu.SetAnimationList(currentCharacterFrameTargets);
+			animationMenu.ChangeSelectedItem(
+				currentCharacterFrameTargets.indexOf(characterManager.GetCurrentAnimationIdOfCharacter()));
 		
-		public function ToggleCharacterLock(indexOverride:int=-1):void
+				
+		}
+		
+		[inline]
+		public function SetCharacterLock(index:int, lock:Boolean):void
+		{
+			characterMenu.SetCharacterLock(index, lock);
+		}
+		
+		/*public function ToggleCharacterLock(indexOverride:int=-1):void
 		{
 			var index:int = (indexOverride == -1) ? characterMenu.ToggleLockOnMenuCursor() : indexOverride;
-			var unlocked:Boolean = characterManager.ToggleLockOnCharacter(index);
-			characterMenu.SetUnlockedStatus(index, unlocked);
+			var locked:Boolean = characterManager.ToggleLockOnCharacter(index);
+			characterMenu.SetCharacterLock(index, locked);
 			/*userSettings.ChangeCharacterLock(characterManager.GetCharacterById(e.target.rightClickedIndex).GetName(), 
-				characterManager.GetCharacterLockById(e.currentTarget.rightClickedIndex));*/
+				characterManager.GetCharacterLockById(e.currentTarget.rightClickedIndex));
+		}*/
+		
+		public function GetIndexOfCharacterKeyboardMenuCursor():int
+		{
+			return characterMenu.GetKeyboardMenuCursorIndex();
 		}
+		
+		
 		
 		//Keyboard Input
 		//{
@@ -194,8 +217,16 @@ package menu
 		public function SwitchToSelectedCharacter(indexOverride:int=-1):void
 		{
 			var selectedIndex:int = (indexOverride == -1) ? characterMenu.GetKeyboardMenuCursorIndex() : indexOverride;
+			if (characterManager.DoesCharacterHaveAnimations(selectedIndex) == false)
+			{
+				return;
+			}
 			characterManager.AllowChangeOutOfLinkedAnimation();
-			characterManager.SwitchToCharacter(selectedIndex);
+			var newCharId:int = characterManager.SwitchToCharacter(selectedIndex);
+			//character switch failed
+			if (newCharId != selectedIndex)	{ return; }
+			
+			characterManager.UpdateAndDisplayCurrentCharacter();
 			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
 			animationMenu.SetAnimationList(currentCharacterFrameTargets);
 			animationMenu.ChangeSelectedItem(
@@ -209,19 +240,20 @@ package menu
 		//Positive number moves downward, negative moves upward.
 		public function MoveCharacterSelector(indexMove:int):void
 		{
-			characterMenu.MoveListSelector(indexMove);
+			characterMenu.MoveKeyboardListSelector(indexMove);
 		}
 		
 		public function SetCharacterSelectorAndUpdate(index:int ):void
 		{
 			if (index < characterManager.GetTotalNumOfCharacters())
 			{
-				characterManager.AllowChangeOutOfLinkedAnimation();
+				if (characterManager.DoesCharacterHaveAnimations(index) == false)
+				{
+					return;
+				}
+				//characterManager.AllowChangeOutOfLinkedAnimation();
 				characterMenu.SetListSelectorPosition(index);
-				
-				SwitchToSelectedCharacter(index);
-				//characterManager.SwitchToCharacter(index);
-				//animationMenu.SetAnimationList(characterManager.GetFrameTargetsForCharacter(index));
+				UpdateCharacterMenuForCharacter();
 			}
 		}
 		
@@ -249,23 +281,36 @@ package menu
 		 * the character has changed.*/
 		private function CharacterSelected(e:Event):void
 		{
-			SwitchToSelectedCharacter(e.target.selectedIndex);
+			if (characterManager.DoesCharacterHaveAnimations(e.target.selectedIndex) == true)
+			{
+				SwitchToSelectedCharacter(e.target.selectedIndex);
+			}
+			else
+			{
+				//Character didn't have animations, so reset the character list selected item to have the
+				//current character's icon selected.
+				characterMenu.SetListSelectorPosition(characterManager.GetIdOfCurrentCharacter());
+			}
+			
 			//characterManager.SwitchToCharacter(e.target.selectedIndex);
 			//animationMenu.SetAnimationList(characterManager.GetFrameTargetsForCharacter(e.target.selectedIndex));
 			//characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
 			
 		}
 		
-		private function SetCharacterLock(e:Event):void
+		private function SetCharacterLock_Mouse(e:Event):void
 		{
 			//Ran into a bug where right clicking on an item still returned -1. Since it seems to be hard to replicate, just do a check
 			//on rightClickedIndex.
-			if (e.target.rightClickedIndex == -1) 
+			var index:int = e.target.rightClickedIndex;
+			if (index == -1) 
 			{ 
 				return;
 			}
 			characterMenu.DisableScrollToSelectionForNextRedraw();
-			ToggleCharacterLock(e.target.rightClickedIndex);
+			var locked:Boolean = characterManager.ToggleLockOnCharacter(index);
+			SetCharacterLock(index, locked);
+			//ToggleCharacterLock(e.target.rightClickedIndex);
 			//characterMenu.SetCharListScrollToSelection(true);
 			/*characterManager.ToggleLockOnCharacter(e.target.rightClickedIndex);
 			userSettings.ChangeCharacterLock(characterManager.GetCharacterById(e.target.rightClickedIndex).GetName(), 

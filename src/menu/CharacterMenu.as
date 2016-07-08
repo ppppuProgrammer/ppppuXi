@@ -41,11 +41,6 @@ package menu
 			characterList.addEventListener(eventType, func);
 		}
 		
-		public function SetUnlockedStatus(index:int, unlocked:Boolean):void
-		{
-			characterList.items[index].unlocked = unlocked;
-		}
-		
 		/*Toggles the lock on the currently selected character on the menu. Used when the Keyboard is the input device.
 		 * Returns the selected index of the character list.*/
 		
@@ -68,7 +63,7 @@ package menu
 			return characterList.menuCursorIndex;
 		}
 		
-		public function MoveListSelector(moveCount:int):void
+		public function MoveKeyboardListSelector(moveCount:int):void
 		{
 			var index:int = (characterList.menuCursorIndex + moveCount) % characterList.items.length;
 			//trace("mouseOverIndex: " + characterList.menuCursorIndex);
@@ -82,7 +77,7 @@ package menu
 		{
 			if (index > characterList.items.length) { index = characterList.items.length - 1; }
 			characterList.selectedIndex = index;
-			characterList.menuCursorIndex = index;
+			//characterList.menuCursorIndex = index;
 		}
 		
 		/*public function ForceListRedraw():void
@@ -93,7 +88,12 @@ package menu
 		
 		public function SetCharacterLock(charIndex:int, locked:Boolean):void
 		{
-			characterList.SetItemLock(charIndex, locked);
+			characterList.items[charIndex].locked = locked;
+			/*Force a redraw since the list will not update immediately if a keyboard related function 
+			 * calls this ( those functions avoid calls to other functions that would lead to the list
+			 * calling Invalidate() which normally would cause a redraw ).*/
+			characterList.draw();
+			//characterList.SetItemLock(charIndex, locked);
 		}
 		
 		/*public function SetCharacterListLocks(locks:Vector.<Boolean>):void

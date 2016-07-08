@@ -16,17 +16,18 @@
 		private var m_charNamesDict:Dictionary = new Dictionary(); //Maps the character's name to an id number(int) (ie. "Peach" has an id of 0)
 		private var m_Characters:Vector.<AnimatedCharacter> = new Vector.<AnimatedCharacter>();
 		
-		private var m_currentCharacterId:int = 0;
+		//Holds the id of the character to switch to next time a automatic character switch occurs.
+		private var m_nextCharacterId:int = 0;
 		//The character that is being managed.
 		private var m_currentCharacter:AnimatedCharacter = null;
 		//The character that is being displayed on the stage.
-		private var m_latestCharacter:AnimatedCharacter = null;
+		//private var m_latestCharacter:AnimatedCharacter = null;
 		
 		//Controls whether the user wants character switching to be allowed or not.
 		private var m_allowCharSwitches:Boolean = true;
 		//Controls whether the user wants a character to be randomly picked when it's switching time.
 		private var m_selectRandomChar:Boolean = false;
-		//Indicates if a character can be switched to. The index of the vector correspondes to the character's id.
+		//Indicates if a character is locked, meaning they can't be switched to. The index of the vector correspondes to the character's id.
 		private var m_characterLocks:Vector.<Boolean> = new Vector.<Boolean>();
 		//Keep a tally of how many characters are not able to be switched to.
 		private var m_unswitchableCharactersNum:int = 0;
@@ -70,25 +71,25 @@
 			if(!m_selectRandomChar)
 			{
 				//character list wrap around
-				if(m_currentCharacterId + 1 >= m_Characters.length)
+				if(m_nextCharacterId + 1 >= m_Characters.length)
 				{
-					m_currentCharacterId = 0;
+					m_nextCharacterId = 0;
 				}
 				else
 				{
 					//go to next character
-					++m_currentCharacterId;
+					++m_nextCharacterId;
 				}
 				//Make sure the character can be switched to. If not, cycle through until we find one we can switch to
-				while(m_characterLocks[m_currentCharacterId] == true)
+				while(m_characterLocks[m_nextCharacterId] == true || DoesCharacterHaveAnimations(m_nextCharacterId) == false)
 				{
-					if(m_currentCharacterId + 1 >= m_Characters.length)
+					if(m_nextCharacterId + 1 >= m_Characters.length)
 					{
-						m_currentCharacterId = 0;
+						m_nextCharacterId = 0;
 					}
 					else
 					{
-						++m_currentCharacterId;
+						++m_nextCharacterId;
 					}
 				}
 			}
@@ -111,18 +112,18 @@
 					{
 						var randomCharId:int = Math.floor(Math.random() * m_Characters.length);
 						
-						if(m_characterLocks[randomCharId] == false)
+						if(m_characterLocks[randomCharId] == false && DoesCharacterHaveAnimations(randomCharId) == true)
 						{
 							if(charactersAllowed == 2)
 							{
-								m_currentCharacterId = randomCharId;
+								m_nextCharacterId = randomCharId;
 								switchOk = true;
 							}
 							else
 							{
-								if(m_currentCharacterId != randomCharId)
+								if(m_nextCharacterId != randomCharId)
 								{
-									m_currentCharacterId = randomCharId;
+									m_nextCharacterId = randomCharId;
 									switchOk = true;
 								}
 							}
@@ -133,17 +134,17 @@
 		}
 		
 		//Returns true if there was an actual character switch. Returns false otherwise
-		public function DisplayAndUpdateCurrentCharacter(setFrameForAnimation:int=1):Boolean
+		public function UpdateAndDisplayCurrentCharacter(setFrameForAnimation:int=1):Boolean
 		{
 			var charSwitchOccured:Boolean = false;
 			if (m_currentCharacter != null && CheckIfTransitionLockIsActive())	{return charSwitchOccured; }
 			
-			var currentCharacter:AnimatedCharacter = m_currentCharacter;
+			var currentCharacter:AnimatedCharacter = m_Characters[m_nextCharacterId];//m_currentCharacter;
 			//If the current character selected is not the latest one being displayed, there needs to be some changes to get them on screen.
-			if (m_latestCharacter != currentCharacter)
+			if (m_currentCharacter != currentCharacter)
 			{
 				//Stop the old character's movieclips from playing. Not doing this causes issues with garbage collection, massively slowing down the flash.
-				var characterRemoving:AnimatedCharacter = m_latestCharacter;
+				var characterRemoving:AnimatedCharacter = m_currentCharacter;
 				if (characterRemoving)
 				{
 					characterRemoving.StopAnimation();
@@ -156,13 +157,12 @@
 				
 				//Add the new character's animation movie clip
 				currentCharacter.AddToDisplay(this);
-				 
 				dispatchEvent(new ChangeBackgroundEvent(ChangeBackgroundEvent.CHANGE_BACKGROUND, currentCharacter.GetBackgroundColors()));
 				
 				//Update user settings
 				//userSettings.currentCharacterName = GetCurrentCharacter().GetName();
 				//Update latest char id 
-				m_latestCharacter = currentCharacter;
+				m_currentCharacter = currentCharacter;
 				charSwitchOccured = true;
 			}
 			currentCharacter.RandomizePlayAnim();
@@ -170,6 +170,11 @@
 			currentCharacter.ChangeAnimationIndexToPlay();
 			currentCharacter.GotoFrameAndPlayForCurrentAnimation(setFrameForAnimation);
 			return charSwitchOccured;
+		}
+		
+		public function GetIdOfCurrentCharacter():int
+		{
+			return GetCharacterIdByName(m_currentCharacter.GetName());
 		}
 		
 		public function InitializeSettingsForCharacter(charId:int, settings:Object):void
@@ -297,7 +302,7 @@
 			
 		}
 		
-		public function SwitchToCharacter(charIndex:int=-1):void
+		public function SwitchToCharacter(charIndex:int=-1):int
 		{
 			//Undefined index, fall back to the first character
 			if(charIndex == -1)
@@ -306,11 +311,13 @@
 			}
 			if(m_characterLocks[charIndex] == false && m_currentCharacter != m_Characters[charIndex])
 			{
-				m_currentCharacter = m_Characters[charIndex];
-				DisplayAndUpdateCurrentCharacter();
+				//m_currentCharacter = m_Characters[charIndex];
+				m_nextCharacterId = charIndex;
+				//UpdateAndDisplayCurrentCharacter();
 				//userSettings.currentCharacterName = GetCurrentCharacter().GetName();
 				
 			}
+			return m_nextCharacterId;
 		}
 		
 		public function ToggleLockOnCharacter(charIndex:int=-1):Boolean
@@ -334,6 +341,7 @@
 			return m_characterLocks[charIndex];
 		}
 		
+		[inline]
 		public function GetCharacterIdByName(name:String):int
 		{
 			var id:int = -1;
@@ -390,6 +398,17 @@
 		public function IsCharacterSet():Boolean
 		{
 			return m_currentCharacter != null;
+		}
+		
+		//Tests if the character of the given id has animations.
+		public function DoesCharacterHaveAnimations(charId:int):Boolean
+		{
+			if (charId > -1 && charId < GetTotalNumOfCharacters())
+			{
+				return (m_Characters[charId].GetTotalNumberOfAnimations() > 0) ? true : false;
+			}
+			//Invalid id, so technically the char id given does not have any animations.
+			return false;
 		}
 	}
 

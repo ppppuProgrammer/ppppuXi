@@ -204,8 +204,10 @@ package
 			
 			/*if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
 			{
+				//mainMenu.SetCharacterSelectorAndUpdate(0);
+				characterManager.SwitchToCharacter(0);
 				mainMenu.SetCharacterSelectorAndUpdate(0);
-				//characterManager.SwitchToCharacter(0);
+				//mainMenu.UpdateCharacterMenuForCharacter();
 			}*/
 			
 			//mainMenu.SetupCharacterLocks();
@@ -216,11 +218,6 @@ package
 			
 		}
 		
-		
-		public function FinalizeInitialization():void
-		{
-			
-		}
 		private function SetupHelpMovieClip():void
 		{
 			//Set the position of the help screen
@@ -272,13 +269,21 @@ package
 				{
 					mainStage.gotoAndStop("Start");
 					PlayBackgroundAnimations();
+					
+					if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
+					{
+						//mainMenu.SetCharacterSelectorAndUpdate(0);
+						characterManager.SwitchToCharacter(0);
+						//mainMenu.SetCharacterSelectorAndUpdate(0);
+						//mainMenu.UpdateCharacterMenuForCharacter();
+					}
 				}
 			}
 			
 			if (mainStage.currentFrame == flashStartFrame)
 			{
 				++totalRunFrames;
-				//trace("total Frames: " + totalRunFrames);
+				trace("Frame: " + totalRunFrames);
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
 				if (userSettings.firstTimeRun == true)
@@ -317,17 +322,29 @@ package
 					//frameNum != 7 is so Peach is the first character displayed on start
 					if(characterManager.AreCharacterSwitchesAllowed())
 					{
-						if (frameNum != flashStartFrame)
+						/* The first run frame should not have the character switch logic run.
+						 * This is so the initial character set (which is the last character on screen the previous
+						 * time the program was ran or the first character loaded if the settings save file wasn't found)
+						 * isn't switch from and give them a chance to be seen as intended.*/
+						if (frameNum != 0)
 						{
 							characterManager.CharacterSwitchLogic();
 						}
 					}
-					var charsWereSwitched:Boolean = characterManager.DisplayAndUpdateCurrentCharacter();
-					var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
-					//Need to get the index that targets the given animation id. 
-					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-					var target:int = currentCharacterIdTargets.indexOf(animId);
-					mainMenu.UpdateAnimationIndexSelected(target, charsWereSwitched);
+					
+					//if (frameNum != 0)
+					{
+						var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter();
+						if (charsWereSwitched == true)
+						{
+							mainMenu.SetCharacterSelectorAndUpdate(characterManager.GetIdOfCurrentCharacter());
+						}
+						var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
+						//Need to get the index that targets the given animation id. 
+						var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+						var target:int = currentCharacterIdTargets.indexOf(animId);
+						mainMenu.UpdateAnimationIndexSelected(target, charsWereSwitched);
+					}
 				}
 			}
 		}
@@ -406,7 +423,14 @@ package
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
 					//(Un)lock the character who the menu cursor is on
-					mainMenu.ToggleCharacterLock();
+					var index:int = mainMenu.GetIndexOfCharacterKeyboardMenuCursor();
+					if (index != -1)
+					{
+						var locked:Boolean = characterManager.ToggleLockOnCharacter(index);
+						mainMenu.SetCharacterLock(index, locked);
+					}
+					
+					//mainMenu.ToggleCharacterLock();
 					//characterManager.ToggleLockOnCharacter(characterManager.GetMenuCursorPosition());
 				}
 				else if(keyPressed == keyBindings.GotoChar.main || keyPressed == keyBindings.GotoChar.alt)
@@ -620,11 +644,6 @@ package
 		
 		/*MODIFICATION SYSTEM RELATED FUNCTIONS*/
 		
-		
-		private function StartupLoadComplete(e:LoaderEvent):void
-		{
-			FinalizeInitialization();
-		}
 		private function FinishedLoadingSWF(e:LoaderEvent):void
 		{
 			var mod:Mod = (e.target.content.rawContent as Mod);
@@ -812,7 +831,9 @@ package
 					//characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
 					if (characterName == userSettings.currentCharacterName)
 					{
-						mainMenu.SetCharacterSelectorAndUpdate(charId);
+						var characterId:int = characterManager.SwitchToCharacter(charId);
+						//mainMenu.
+						mainMenu.SetCharacterSelectorAndUpdate(characterId);
 						//mainMenu.ChangeAnimationForCurrentCharacter();
 					}
 				}

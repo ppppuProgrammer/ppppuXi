@@ -98,12 +98,12 @@ package menu
 		public function ChangeSelectedItem(index:int, moveScrollBar:Boolean=true):void
 		{
 			if (moveScrollBar == true)	
-				{animationList.selectedIndex = index;}
+			{animationList.selectedIndex = index;}
 			else
-				{
-					animationList.ChangeSelectedIndexWithoutMovingScrollBar(index);
-					animationList.DisableNextScrollToSelection();
-				}
+			{
+				animationList.ChangeSelectedIndexWithoutMovingScrollBar(index);
+				animationList.DisableNextScrollToSelection();
+			}
 		}
 		
 		private function GetYPosForButton():Number

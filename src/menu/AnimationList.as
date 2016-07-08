@@ -29,7 +29,7 @@ package menu
 			for (var i:int = 0; i < frameTargets.length; ++i)
 			{
 				var text:String = String(i + 1);
-				addItem({label:text, frameTarget:frameTargets[i]});
+				addItem({label:text/*, frameTarget:frameTargets[i]*/});
 			}
 			/*for (var i:int = 1; i <= frameTargets.length; ++i)
 			{

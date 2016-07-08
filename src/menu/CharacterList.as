@@ -73,14 +73,15 @@ package menu
 			if(value >= 0 && value < _items.length)
 			{
 				_selectedIndex = value;
-				_menuCursorIndex = value;
+				if (_menuCursorIndex == -1)	{ _menuCursorIndex = value; }
+				
 				var offset:int = _scrollbar.value;
 				var numItems:int = Math.ceil(_height / _listItemHeight);
 				numItems = Math.min(numItems, _items.length);
 				
 				if (offset + numItems >= value)
 				{
-					_scrollbar.value = value - numItems +1;
+//					_scrollbar.value = value - numItems +1;
 				}
 				else if (offset + numItems <= value)
 				{

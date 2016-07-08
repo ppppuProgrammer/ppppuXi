@@ -387,7 +387,7 @@
 			//AddCharacterToDisplay();
 			//m_charAnimations.gotoAndStop(m_playAnimationFrame);
 			//if (displayArea.numChildren > 0) { displayArea.removeChildren();}
-			if (m_currentAnimationId < 0)	{ return; }
+			if (m_currentAnimationId < 0 || m_charAnimations.length == 0)	{ return; }
 			
 			//and set this animation's frame number to reflect where it would be if animations weren't changed on a whim
 			var animation:MovieClip = m_charAnimations[m_currentAnimationId];
