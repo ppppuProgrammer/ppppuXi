@@ -82,7 +82,7 @@ package menu
 		public function set locked(value:Boolean):void
 		{
 			_data.locked = _locked = value;
-			//invalidate();
+			invalidate();
 		}
 		public function get locked():Boolean
 		{

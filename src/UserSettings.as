@@ -8,12 +8,12 @@ package
 	public class UserSettings extends Object
 	{
 		public var backlightOn:Boolean=true;
-		public var limitRenderArea:Boolean=true;
+		//public var limitRenderArea:Boolean=true;
 		public var showBackground:Boolean=true;
 		public var firstTimeRun:Boolean=true;
 		public var playMusic:Boolean=true;
 		public var showMenu:Boolean = true;
-		public var characterSettings:Object = new Object();
+		private var characterSettings:Object = new Object();
 		public var keyBindings:Object = new Object();
 		public var currentCharacterName:String = "";
 		public var randomlySelectCharacter:Boolean = false;
@@ -39,7 +39,7 @@ package
 			keyBindings.PrevAnimPage = new Object();
 			keyBindings.NextAnimPage = new Object();
 			keyBindings.Backlight = new Object();
-			keyBindings.DisplayLimit = new Object();
+			//keyBindings.DisplayLimit = new Object();
 			keyBindings.Background = new Object();
 			keyBindings.Music = new Object();
 			keyBindings.CharTheme = new Object();
@@ -61,7 +61,7 @@ package
 			keyBindings.PrevAnimPage.main = Keyboard.MINUS; keyBindings.PrevAnimPage.alt = Keyboard.NUMPAD_SUBTRACT;
 			keyBindings.NextAnimPage.main = Keyboard.EQUAL; keyBindings.NextAnimPage.alt = Keyboard.NUMPAD_ADD;
 			keyBindings.Backlight.main = Keyboard.L; keyBindings.Backlight.alt = -1;
-			keyBindings.DisplayLimit.main = Keyboard.P; keyBindings.DisplayLimit.alt = -1;
+			//keyBindings.DisplayLimit.main = Keyboard.P; keyBindings.DisplayLimit.alt = -1;
 			keyBindings.Background.main = Keyboard.B; keyBindings.Background.alt = -1;
 			keyBindings.Music.main = Keyboard.M; keyBindings.Music.alt = -1;
 			keyBindings.CharTheme.main = Keyboard.N; keyBindings.CharTheme.alt = -1;
@@ -72,13 +72,34 @@ package
 			//keyBindings..main = Keyboard; keyBindings..alt = -1;
 		}
 		
-		public function ChangeCharacterLock(name:String, locked:Boolean):void
+		public function UpdateShowingBacklight(value:Boolean):void
 		{
-			if (name in characterSettings == false)
-			{
-				CreateSettingsForNewCharacter(name);
-			}
-			characterSettings[name].locked = locked;
+			backlightOn = value;
+		}
+		
+		public function UpdateShowBackground(value:Boolean):void
+		{
+			showBackground = value;
+		}
+		
+		public function UpdateMenuVisibility(value:Boolean):void
+		{
+			showMenu = value;
+		}
+		
+		public function UpdateCharacterSwitching(value:Boolean):void
+		{
+			allowCharacterSwitches = value;
+		}
+		
+		public function UpdateRandomCharacterSelecting(value:Boolean):void
+		{
+			randomlySelectCharacter = value;
+		}
+		
+		public function UpdateCurrentCharacterName(characterName:String):void
+		{
+			currentCharacterName = characterName;
 		}
 		
 		public function CreateSettingsForNewCharacter(charName:String):void
@@ -88,12 +109,41 @@ package
 			characterSettings[charName].animationLocked = new Object();
 			characterSettings[charName].playMusicTitle = globalSongTitle;
 			characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation
+		} 
+		
+		public function UpdateSettingForCharacter_Lock(characterName:String, value:Boolean):void
+		{
+			characterSettings[characterName].locked = value;
+		}
+		
+		public function UpdateSettingForCharacter_AnimationLock(characterName:String, animationId:int, value:Boolean):void
+		{
+			characterSettings[characterName].animationLocked[animationId] = value;
+		}
+		
+		public function UpdateSettingForCharacter_Music(characterName:String, value:String):void
+		{
+			characterSettings[characterName].playMusicTitle = value;
+		}
+		
+		public function UpdateSettingForCharacter_SelectedAnimation(characterName:String, value:int):void
+		{
+			characterSettings[characterName].animationSelect = value;
+		}
+		
+		public function GetSettingsForCharacter(characterName:String):Object
+		{
+			if (characterName in characterSettings)
+			{
+				return characterSettings[characterName];
+			}
+			return null;
 		}
 		
 		public function ConvertFromObject(obj:Object):void
 		{ 
 			backlightOn = obj.backlightOn;
-			limitRenderArea = obj.limitRenderArea;
+			//limitRenderArea = obj.limitRenderArea;
 			showBackground = obj.showBackground;
 			firstTimeRun = obj.firstTimeRun; 
 			playMusic = obj.playMusic;

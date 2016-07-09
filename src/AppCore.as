@@ -163,27 +163,6 @@ package
 			mainStage.x = (stage.stageWidth - mainStage.CharacterLayer.width /*- characterManager.MENUBUTTONSIZE/2*/) / 2;
 			mainStage.CharacterLayer.addChild(characterManager);
 			
-			
-			
-			//list.
-			
-			/*var textList:List = new List(this);
-			textList.x = 50;
-			textList.listItemHeight = 30;
-			textList.setSize(50, list.listItemHeight*10);
-			for (var i:int = 0; i < 20; ++i)
-			{
-				textList.addItem( { label: String(i) } );
-			}
-			textList.alternateRows = list.alternateRows = true;*/
-			//displayWidthLimit = stage.stageWidth - this.x*2;
-			
-			//Creates the menus for the flash. This will also not allow any more characters to be added
-			//characterManager.CreateMenus(mainStage.MenuLayer);
-			//characterManager.InitializeMusicManager(mainStage, stage.frameRate);
-			//characterManager.SetupMusicForCharacters();
-			//characterManager.ToggleMenu();
-			
 			mainMenu = new MainMenu(characterManager, null/*characterManager.musicPlayer*/, userSettings);
 			addChild(mainMenu);
 			mainMenu.Initialize();
@@ -201,17 +180,6 @@ package
 					ProcessMod(startupMods[i]);
 				}
 			}
-			
-			/*if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
-			{
-				//mainMenu.SetCharacterSelectorAndUpdate(0);
-				characterManager.SwitchToCharacter(0);
-				mainMenu.SetCharacterSelectorAndUpdate(0);
-				//mainMenu.UpdateCharacterMenuForCharacter();
-			}*/
-			
-			//mainMenu.SetupCharacterLocks();
-			//characterManager.InitializeSettingsWindow();
 			
 			mainStage.play();
 			
@@ -256,7 +224,6 @@ package
 		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
 		private function RunLoop(e:Event):void
 		{
-			//var mainStageMC:MovieClip = (e.target as MovieClip);
 			var frameNum:int = totalRunFrames; //The current frame that the main stage is at.
 
 			if(frameNum == 0)
@@ -269,21 +236,13 @@ package
 				{
 					mainStage.gotoAndStop("Start");
 					PlayBackgroundAnimations();
-					
-					if (characterManager.IsCharacterSet() == false && characterManager.GetTotalNumOfCharacters() > 0)
-					{
-						//mainMenu.SetCharacterSelectorAndUpdate(0);
-						characterManager.SwitchToCharacter(0);
-						//mainMenu.SetCharacterSelectorAndUpdate(0);
-						//mainMenu.UpdateCharacterMenuForCharacter();
-					}
 				}
 			}
 			
 			if (mainStage.currentFrame == flashStartFrame)
 			{
 				++totalRunFrames;
-				trace("Frame: " + totalRunFrames);
+				//trace("Frame: " + totalRunFrames);
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
 				if (userSettings.firstTimeRun == true)
@@ -329,6 +288,7 @@ package
 						if (frameNum != 0)
 						{
 							characterManager.CharacterSwitchLogic();
+							//trace("Switched at " + totalRunFrames);
 						}
 					}
 					
@@ -337,6 +297,7 @@ package
 						var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter();
 						if (charsWereSwitched == true)
 						{
+							userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
 							mainMenu.SetCharacterSelectorAndUpdate(characterManager.GetIdOfCurrentCharacter());
 						}
 						var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
@@ -375,6 +336,7 @@ package
 					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
 					var target:int = currentCharacterIdTargets.indexOf(chosenAnimId);
 					
+					userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCurrentCharacterName(), 0);
 					mainMenu.UpdateAnimationIndexSelected(target);
 				}
 				else if((!(49 > keyPressed) && !(keyPressed > 57)) ||  (!(97 > keyPressed) && !(keyPressed > 105)))
@@ -393,13 +355,15 @@ package
 					if (switchSuccessful == true)	
 					{ 
 						characterManager.ChangeFrameOfCurrentAnimation(GetFrameNumberToSetForAnimation()); 
+						userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCurrentCharacterName(), trueIndex);
 						mainMenu.UpdateAnimationIndexSelected(trueIndex); 
 					}
 					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
 				{
-					characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
+					var charSwitchingAllowed:Boolean = characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
+					userSettings.UpdateCharacterSwitching(charSwitchingAllowed);
 					//if(characterManager.GetRandomSelectStatus() && !characterManager.GetCharSwitchStatus())
 					//{
 						//characterManager.SetRandomSelectStatus(false);
@@ -419,6 +383,9 @@ package
 				{
 					//toggle animation lock/goto mode
 					//characterManager.ToggleAnimationLockMode();
+					//query menu for lock mode
+					//set menu's lock mode too its inverse
+					
 				}
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
@@ -428,6 +395,7 @@ package
 					{
 						var locked:Boolean = characterManager.ToggleLockOnCharacter(index);
 						mainMenu.SetCharacterLock(index, locked);
+						userSettings.UpdateSettingForCharacter_Lock(characterManager.GetCharacterNameById(index), locked);
 					}
 					
 					//mainMenu.ToggleCharacterLock();
@@ -437,6 +405,7 @@ package
 				{
 					//Go to the character who the menu cursor is on
 					mainMenu.SwitchToSelectedCharacter();
+					userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
 					//characterManager.GotoSelectedMenuCharacter(characterManager.GetMenuCursorPosition());
 					//settingsSaveFile.flush();
 				}
@@ -455,12 +424,14 @@ package
 				else if(keyPressed == keyBindings.RandomChar.main || keyPressed == keyBindings.RandomChar.alt)
 				{
 					//Toggles random character switching
-					characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
+					var randomCharSelect:Boolean = characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
+					userSettings.UpdateRandomCharacterSelecting(randomCharSelect);
 				}
 				else if(keyPressed == keyBindings.Menu.main || keyPressed == keyBindings.Menu.alt)
 				{
 					//characterManager.ToggleMenu();
 					mainMenu.visible = !mainMenu.visible;
+					userSettings.UpdateMenuVisibility(mainMenu.visible);
 				}
 				else if(keyPressed == keyBindings.Help.main || keyPressed == keyBindings.Help.alt)
 				{	
@@ -468,11 +439,7 @@ package
 				}
 				else if(keyPressed == keyBindings.Backlight.main || keyPressed == keyBindings.Backlight.alt)
 				{
-					ToggleBackLight(!userSettings.backlightOn, GetFrameNumberToSetForAnimation());
-				}
-				else if (keyPressed == keyBindings.DisplayLimit.main || keyPressed == keyBindings.DisplayLimit.alt)
-				{
-					ToggleDrawLimiter();
+					SetBackLight(!userSettings.backlightOn, GetFrameNumberToSetForAnimation());
 				}
 				else if(keyPressed == keyBindings.Background.main || keyPressed == keyBindings.Background.alt)
 				{
@@ -527,7 +494,7 @@ package
 	
 		public function ChangeBackgroundVisibility(visible:Boolean, playFrameNum:int):void
 		{
-			userSettings.showBackground = visible;
+			userSettings.UpdateShowBackground(visible);
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = visible;
 			if (!visible)
 			{
@@ -535,72 +502,26 @@ package
 				
 				mainStage.CharacterLayer.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
 					
-				if(userSettings.backlightOn)
-				{
-					//Disable backlight. The ToggleBackLight function will take care of saving the settings.
-					ToggleBackLight(false, 0);
-				}
-				mainStage.OuterDiamondBG.stop();
-				mainStage.TransitionDiamondBG.stop();
-				mainStage.InnerDiamondBG.stop();
+				StopBackgroundAnimations();
 			}
 			else
 			{
 				mainStage.CharacterLayer.scrollRect = null;
-				/*if (userSettings.limitRenderArea)
-				{
-					mainStage.CharacterLayer.scrollRect = null;
-					this.scrollRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
-				}*/
-				//settingsSaveFile.flush();
-				mainStage.OuterDiamondBG.gotoAndPlay(playFrameNum);
-				mainStage.TransitionDiamondBG.gotoAndPlay(playFrameNum);
-				mainStage.InnerDiamondBG.gotoAndPlay(playFrameNum);
+				PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
 			}
 			
 		}
 		
-		//Reduces the visible area of the flash to the original ppppu's size (480x720) and enables cacheAsBitmap to speed up performance.
-		//
-		public function ToggleDrawLimiter():void
+		private function SetBackLight(visible:Boolean, playFrameNum:int):void
 		{
-			if (userSettings.limitRenderArea && !userSettings.showBackground)
-			{
-				//If the display limit is on already and the background is not shown, 
-				//Do not allow the limiter to be turned off.
-				return;
-			}
-			//this.cacheAsBitmap = !this.cacheAsBitmap;
-			//userSettings.limitRenderArea = this.cacheAsBitmap;
-			userSettings.limitRenderArea = !userSettings.limitRenderArea;
-			this.scrollRect = null;
-			mainStage.CharacterLayer.scrollRect = null;
-			if (userSettings.limitRenderArea == true)
-			{
-				if (userSettings.showBackground)
-				{
-					this.scrollRect = new Rectangle(0, 0, stage.stageWidth, stage.stageHeight);
-				}
-				else
-				{
-					//If the diamond background isn't being shown, reduce the scrollRect so the character isn't outside the background sprite with the planet.
-					mainStage.CharacterLayer.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
-				}
-				
-			}
-		}
-		
-		private function ToggleBackLight(visible:Boolean, playFrameNum:int):void
-		{
-			//Do not make the light visible if the background isn't being shown
-			if(!userSettings.showBackground && visible == true)
-			{
-				return;
-			}
-			userSettings.backlightOn = visible;
+			userSettings.UpdateShowingBacklight(visible);
 			//settingsSaveFile.flush();
 			
-			mainStage.BacklightBG.visible = visible;
+			//Do not make the light visible if the background isn't being shown
+			if (!(!userSettings.showBackground && visible))
+			{
+				mainStage.BacklightBG.visible = visible;
+			}
 			if(!visible)
 			{
 				mainStage.BacklightBG.stop();
@@ -656,8 +577,6 @@ package
 			//remove the mod file.
 			removeChild(mod);
 			mod = null;
-			//e.target.unload();
-			//e.target.dispose();
 		}
 		
 		/*Processes a mod and then adds it into ppppu. Returns true if mod was successfully added and false if a problem was encounter
@@ -683,9 +602,6 @@ package
 						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetIcon());
 						TryToLoadCharacterSettings(characterName);
 					}
-					
-					//list.addItem();
-					//animCharacterMod.parent = null;
 				}
 				
 			}
@@ -751,13 +667,13 @@ package
 				}
 				settingsSaveFile.data.ppppuSettings = userSettings;
 			}
-			if (userSettings.limitRenderArea == true) { ToggleDrawLimiter(); }
+			//if (userSettings.limitRenderArea == true) { ToggleDrawLimiter(); }
 			ChangeBackgroundVisibility(userSettings.showBackground, 0);
 			if (userSettings.showBackground == true)
 			{
 				mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
 			}
-			ToggleBackLight(userSettings.backlightOn, 0);	
+			SetBackLight(userSettings.backlightOn, 0);	
 			
 			//characterManager.GotoSelectedMenuCharacter(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
 			characterManager.SetAllowingCharacterSwitching(userSettings.allowCharacterSwitches);
@@ -779,65 +695,26 @@ package
 			{
 				userSettings.CreateSettingsForNewCharacter(characterName);
 			}
-			if(characterName in userSettings.characterSettings)
+
+			var charId:int = characterManager.GetCharacterIdByName(characterName);
+			if (charId > -1)
 			{
-				var charId:int = characterManager.GetCharacterIdByName(characterName);
-				if (charId > -1)
-				{
-					//processing of character settings
-					var charSettings:Object = userSettings.characterSettings[characterName];
-					if (charSettings.locked == null) { charSettings.locked = false; }
-					
-					//Set up character to use those settings.
-					characterManager.InitializeSettingsForCharacter(charId, charSettings);
-					//Insert something here for menu to update
-					mainMenu.SetupMenusForCharacter(charId, charSettings);
-					
-					trace(characterName + ": " + charSettings.locked);
-					
-					//var lockedAnimationsVector:Vector.<Boolean> = userSettings.characterSettings[characterName].animationLocks;
-					/*var animLockObject:Object = charSettings.animationLocked;
-					for (var animationNumberStr:String in animLockObject)
-					{
-						var animNum:int = int(animationNumberStr);
-						characterManager.SetAnimationLockForCharacter(charId, animNum, animLockObject[animNum]);
-					}*/
-					
-					/*if (charSettings.canSwitchTo == false)
-					{
-						//By default the character is unlocked. So if we can't switch to them, toggle to set true to false as needed.
-						//mainMenu.ToggleCharacterLock(charId);
-						mainMenu.SetInitialCharacterLock(charId, charSettings.canSwitchTo);
-					}*/
-					//characterManager.SetLockOnCharacter(charId, charSettings.canSwitchTo);
-					/*if (charSettings.canSwitchTo == false)
-					{
-						characterManager.ToggleSelectedMenuCharacterLock(charId);
-					}*/
-					
-					/*var animSelect:int = charSettings.animationSelect;
-					if (animSelect == 0)
-					{
-						characterManager.GetCharacterById(charId).SetRandomizeAnimation(true);
-					}
-					else
-					{
-						characterManager.GetCharacterById(charId).SetRandomizeAnimation(false);
-						characterManager.GetCharacterById(charId).ChangeAnimationIndexToPlay(animSelect);
-					}*/
-					//TODO: Make Music player handle this.
-					//var musicId:int = musicPlayer.GetMusicIdByTitle(charSettings.playMusicTitle);
-					//musicPlayer.ChangeSelectedMusicForCharacter(musicId);
-					//characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
-					if (characterName == userSettings.currentCharacterName)
-					{
-						var characterId:int = characterManager.SwitchToCharacter(charId);
-						//mainMenu.
-						mainMenu.SetCharacterSelectorAndUpdate(characterId);
-						//mainMenu.ChangeAnimationForCurrentCharacter();
-					}
-				}
+				//processing of character settings
+				var charSettings:Object = userSettings.GetSettingsForCharacter(characterName);
 				
+				//Set up character to use those settings.
+				characterManager.InitializeSettingsForCharacter(charId, charSettings);
+				//Insert something here for menu to update
+				mainMenu.SetupMenusForCharacter(charId, charSettings);
+				
+				//TODO: Make Music player handle this.
+				//var musicId:int = musicPlayer.GetMusicIdByTitle(charSettings.playMusicTitle);
+				//musicPlayer.ChangeSelectedMusicForCharacter(musicId);
+				//characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
+				if (characterName == userSettings.currentCharacterName)
+				{
+					var characterId:int = characterManager.SwitchToCharacter(charId);
+				}
 			}
 			
 			
@@ -911,10 +788,6 @@ package
 			else if (textFieldName == "BacklightText")
 			{
 				keybindingObj = userSettings.keyBindings.Backlight;
-			}
-			else if (textFieldName == "DisplayLimitText")
-			{
-				keybindingObj = userSettings.keyBindings.DisplayLimit;
 			}
 			else if (textFieldName == "BackgroundText")
 			{
@@ -1013,6 +886,7 @@ package
 			removeEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
 			PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
 		}
+		[inline]
 		private function StopBackgroundAnimations():void
 		{
 			mainStage.OuterDiamondBG.stop();
@@ -1021,7 +895,7 @@ package
 			mainStage.BacklightBG.stop();
 			//Since making the backlight invisible is a user setting and that shouldn't be interfered with, alpha will be used to hide
 			//the backlight.
-			mainStage.BacklightBG.alpha = 0; 
+			mainStage.BacklightBG.visible = false;
 		}
 		
 		[inline]
@@ -1031,7 +905,10 @@ package
 			mainStage.InnerDiamondBG.gotoAndPlay(startFrame);
 			mainStage.TransitionDiamondBG.gotoAndPlay(startFrame);
 			mainStage.BacklightBG.gotoAndPlay(startFrame);
-			mainStage.BacklightBG.alpha = 1;
+			if (userSettings.backlightOn == true)
+			{
+				mainStage.BacklightBG.visible = true;
+			}
 		}
 		
 		private function ChangeBackgroundColors(e:ChangeBackgroundEvent):void
@@ -1053,15 +930,5 @@ package
 		{
 			mainMenu.visible = visible;
 		}
-		
-		/*private function AnimationTransitionHappened(e:Event):void
-		{
-			var i:int = 0;
-		}*/
-		
-		/*private function RemoveTransitionLockoutHandler(e:Event):void
-		{
-			characterManager.RemoveTransitionLockout();
-		}*/
 	}
 }

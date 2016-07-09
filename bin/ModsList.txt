@@ -25,6 +25,7 @@ ACHAR_Piranhagirls.swf
 ACHAR_AppleBloom.swf
 ACHAR_SweetieBelle.swf
 ACHAR_Scootaloo.swf
+#ACHAR_Toadette.swf
 
 #Music mods
 #M_CMCTheme.swf

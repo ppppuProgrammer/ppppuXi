@@ -31,11 +31,13 @@ package
 		private var userSettings:UserSettings;
 		private var p_config:Panel;
 		private const UNASSIGNED_TEXT:String = "Unassigned";
+		private var _labelPosY:Number = 0;
+		private function get labelPosY():Number { var value:Number = _labelPosY;  _labelPosY += 10;  return value; }
 		//Dictionary that maps keycodes to their associated names. Original code can be found at http://stackoverflow.com/a/19739892 
 		public static var keyDict:Dictionary;
 		private var keyFunctionsList:Vector.<String> = new < String > ["LockChar", "GotoChar", "AutoCharSwitch", "RandomChar", 
 			"CharCursorPrev", "CharCursorNext", "PrevAnimPage", "NextAnimPage", "AnimLockMode", "Menu", "Help", "NextHelpPage",
-			"Backlight", "Background", "DisplayLimit", "Music", "CharTheme", "PrevMusic", "NextMusic", "MusicForAll", "Activate"];
+			"Backlight", "Background", "Music", "CharTheme", "PrevMusic", "NextMusic", "MusicForAll", "Activate"];
 		
 		private var warningText:Label;
 		
@@ -58,38 +60,37 @@ package
 			var labelsPosX:Number = 5;
 			
 			//Labels
-			var l_description:Label = new Label(p_config, m_width / 4, posY_multiplier * 0, "key configuration");
+			var l_description:Label = new Label(p_config, m_width / 4, posY_multiplier * labelPosY, "key configuration");
 			var txtFormat:TextFormat = l_description.textField.getTextFormat();
 			txtFormat.size = 24;
 			txtFormat.font = "Super Mario 256";
 			l_description.textField.setTextFormat(txtFormat);
 			l_description.setSize(100, 20);
-			var l_description2:Label = new Label(p_config, 0, posY_multiplier * 10, "Click a box to change the key for a function. Press Escape to clear a key.");
+			var l_description2:Label = new Label(p_config, 0, posY_multiplier * labelPosY, "Click a box to change the key for a function. Press Escape to clear a key.");
 			l_description2.x = (m_width - l_description2.width) / 2;
 			//Character
-			var l_lockChar:Label = new Label(p_config, labelsPosX, posY_multiplier*20, "Lock selected character");
-			var l_switchChar:Label = new Label(p_config, labelsPosX, posY_multiplier*30, "Switch to selected character");
-			new Label(p_config, labelsPosX, posY_multiplier*40, "Automatic character switch toggle");
-			new Label(p_config, labelsPosX, posY_multiplier*50, "Random character select toggle");
-			new Label(p_config, labelsPosX, posY_multiplier*60, "Character cursor up");
-			new Label(p_config, labelsPosX, posY_multiplier*70, "Character cursor down");
+			var l_lockChar:Label = new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Lock selected character");
+			var l_switchChar:Label = new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Switch to selected character");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Automatic character switch toggle");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Random character select toggle");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Character cursor up");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Character cursor down");
 			//Animation
-			new Label(p_config, labelsPosX, posY_multiplier*80, "Previous animation page");
-			new Label(p_config, labelsPosX, posY_multiplier*90, "Next animation page");
-			new Label(p_config, labelsPosX, posY_multiplier*100, "Animation menu switch/lock mode toggle");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Previous animation page");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Next animation page");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Animation menu switch/lock mode toggle");
 			//Misc
-			new Label(p_config, labelsPosX, posY_multiplier*110, "Show/hide menus");
-			new Label(p_config, labelsPosX, posY_multiplier*120, "Show/hide help");
-			new Label(p_config, labelsPosX, posY_multiplier*130, "Change help page");
-			new Label(p_config, labelsPosX, posY_multiplier*140, "Backlight ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*150, "Background ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*160, "Display limit toggle");
-			new Label(p_config, labelsPosX, posY_multiplier*170, "Music ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*180, "Use character's default theme");
-			new Label(p_config, labelsPosX, posY_multiplier*190, "Change to previous music");
-			new Label(p_config, labelsPosX, posY_multiplier*200, "Change to next music");
-			new Label(p_config, labelsPosX, (posY_multiplier * 210), "Toggle same music for all characters mode");
-			new Label(p_config, labelsPosX, (posY_multiplier * 220), "Activate scene transition if available");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Show/hide menus");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Show/hide help");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change help page");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Backlight ON/OFF");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Background ON/OFF");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Music ON/OFF");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Use character's default theme");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change to previous music");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change to next music");
+			new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Toggle same music for all characters mode");
+			new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Activate scene transition if available");
 			
 			warningText = new Label(p_config, 40, m_height - 20, "");
 			var warningTxtFormat:TextFormat = warningText.textField.getTextFormat();

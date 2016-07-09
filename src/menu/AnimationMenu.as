@@ -25,6 +25,8 @@ package menu
 		private var randomAnimationButton:PushButton;
 		
 		private var buttonYPos:Number = 10;
+		//Used for functions that activate through keyboard input
+		private var inChangeMode:Boolean = true;
 		public function AnimationMenu(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number =  0)
 		{
 			name = "Animation Menu";
@@ -42,7 +44,7 @@ package menu
 			randomAnimationButton = new PushButton(this, 0, animationList.y + animationList.height + 5, "?");
 			randomAnimationButton.setSize(40, 40);
 			//randomAnimationButton.
-			//modeLabel = new Label(this, 5, 0, "Keyboard Mode:\nChange");
+			modeLabel = new Label(this, 5, 0, "Key Mode:\nChange");
 			
 			/*anim1Button = new PushButton(this, 5, GetYPosForButton(), "1");
 			anim1Button.setSize(AnimationButtonSize, AnimationButtonSize);
@@ -52,6 +54,19 @@ package menu
 		}
 		
 		//private function RandomAnimationButton
+		
+		public function SetKeyboardMode(changeMode:Boolean):void
+		{
+			if (changeMode == true)
+			{
+				modeLabel.text = "Key Mode:\nChange";
+			}
+			else
+			{
+				modeLabel.text = "Key Mode:\nLock";
+			}
+			inChangeMode = changeMode;
+		}
 		
 		public function DisableScrollToSelectionForNextRedraw():void
 		{
@@ -90,9 +105,9 @@ package menu
 			return -1;
 		}
 		
-		public function SetAnimationList(frameTargets:Vector.<int>):void
+		public function SetAnimationList(idTargets:Vector.<int>, locks:Vector.<Boolean>):void
 		{
-			animationList.ResetList(frameTargets);
+			animationList.ResetList(idTargets, locks);
 		}
 		
 		public function ChangeSelectedItem(index:int, moveScrollBar:Boolean=true):void
@@ -104,6 +119,9 @@ package menu
 				animationList.ChangeSelectedIndexWithoutMovingScrollBar(index);
 				animationList.DisableNextScrollToSelection();
 			}
+			//Avoid a flicker caused by the list (and its items) taking too long to be redrawn.
+			//animationList.draw();
+			animationList.ForceItemRedrawThisFrame();
 		}
 		
 		private function GetYPosForButton():Number

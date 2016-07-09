@@ -135,7 +135,7 @@ package menu
 		* Parameter relativeItemIndex: the index of the item currently on display. This index
 		* does not correspond to the true index of the item, which requests knowing the value
 		* of the vertical scroll bar.*/
-		public function ChangeAnimationForCurrentCharacter(relativeItemIndex:int):void
+		/*public function ChangeAnimationForCurrentCharacter(relativeItemIndex:int):void
 		{
 			if (relativeItemIndex == -1) { return; }
 			var itemTrueIndex:int = animationMenu.GetTrueIndexOfItem(relativeItemIndex);
@@ -149,17 +149,21 @@ package menu
 			animationMenu.ChangeSelectedItem(target);
 			
 			//animationMenu.ForceListRedraw();
-		}
+		}*/
+		
 		/*Animation Menu Handlers (Mouse input)*/
 		//{
 		private function AnimationSelected(e:Event):void
 		{
 			if (e.target.selectedIndex == -1) { return; }
-			ChangeAnimation(e.target.selectedIndex);
+			var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+			characterManager.AllowChangeOutOfLinkedAnimation();
+			characterManager.ChangeAnimationForCurrentCharacter(e.target.selectedIndex);
+			characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
 		}
 		//}
 		//Just changes the animation of the character and sets it to the proper time position
-		[inline]
+		/*[inline]
 		private function ChangeAnimation(itemIndex:int):void
 		{
 			if (itemIndex == -1) { return;}
@@ -173,7 +177,7 @@ package menu
 			characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
 			//currentCharacter.GotoFrameAndPlayForCurrentAnimation(currentFrameForAnimation);
 			
-		}
+		}*/
 		//}
 		
 		/* Character Menu*/
@@ -182,7 +186,8 @@ package menu
 		public function UpdateCharacterMenuForCharacter(/*charId:int*/):void
 		{
 			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-			animationMenu.SetAnimationList(currentCharacterFrameTargets);
+			var currentCharacterLockedAnimations:Vector.<Boolean> = characterManager.GetAnimationLocksOnCharacter();
+			animationMenu.SetAnimationList(currentCharacterFrameTargets, currentCharacterLockedAnimations);
 			animationMenu.ChangeSelectedItem(
 				currentCharacterFrameTargets.indexOf(characterManager.GetCurrentAnimationIdOfCharacter()));
 		
@@ -228,7 +233,8 @@ package menu
 			
 			characterManager.UpdateAndDisplayCurrentCharacter();
 			var currentCharacterFrameTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-			animationMenu.SetAnimationList(currentCharacterFrameTargets);
+			var currentCharacterLockedAnimations:Vector.<Boolean> = characterManager.GetAnimationLocksOnCharacter();
+			animationMenu.SetAnimationList(currentCharacterFrameTargets, currentCharacterLockedAnimations);
 			animationMenu.ChangeSelectedItem(
 				currentCharacterFrameTargets.indexOf(characterManager.GetCurrentAnimationIdOfCharacter()));
 			//characterManager.GetCurrentCharacter()

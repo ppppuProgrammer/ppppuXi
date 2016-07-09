@@ -228,14 +228,17 @@
 			}
 		}
 		
-		public function SetLockOnAnimation(animId:int, lockStatus:Boolean):void
+		public function SetLockOnAnimation(animId:int, lockValue:Boolean):void
 		{
 			var indexForId:int = m_idTargets.indexOf(animId);
-			if(animId < 0 || animId > GetNumberOfAccessibleAnimations() || indexForId == -1)
+			/*Conditions that will not have a set locked:
+			 * 1) index for id [id target] is -1 (animation id did not belong to an accessible animation). 
+			 * 2) if lockValue is true: setting the lock on the given animation will lead to all animations being locked.*/
+			if( indexForId == -1 || (lockValue == true && GetNumberOfLockedAnimations() + 1 >= GetNumberOfAccessibleAnimations()) )
 			{
 				return;
 			}
-			m_lockedAnimation[indexForId] = lockStatus;
+			m_lockedAnimation[indexForId] = lockValue;
 		}
 		
 		public function GetTotalNumberOfAnimations():int
@@ -257,7 +260,7 @@
 			var lockedAnimNum:int = 0;
 			for(var i:int = 0, l:int = m_lockedAnimation.length; i < l; ++i)
 			{
-				if(m_lockedAnimation[i])
+				if(m_lockedAnimation[i] == true)
 				{
 					++lockedAnimNum;
 				}
@@ -268,11 +271,11 @@
 		public function PlayingLockedAnimCheck():void
 		{
 			//Only 1 animation is available, so search for it and use it.
-			var accessibleFrame:int = GetIdTargetForIndex(m_currentAnimationId);
-			if (accessibleFrame == -1) { return;}
-			if(GetAnimationLockedStatus(accessibleFrame) && (GetNumberOfAccessibleAnimations() - GetNumberOfLockedAnimations() == 1))
+			var accessibleId:int = GetIdTargetForIndex(m_currentAnimationId);
+			if (accessibleId == -1) { return;}
+			if(GetAnimationLockedStatus(accessibleId) && (GetNumberOfAccessibleAnimations() - GetNumberOfLockedAnimations() == 1))
 			{
-				var unlockedAnimNum:int = 1;
+				var unlockedAnimNum:int = 0;
 				for each(var locked:Boolean in m_lockedAnimation)
 				{
 					if(!locked)
@@ -434,10 +437,15 @@
 		
 		public function GetAnimationLockedStatus(animIndex:int):Boolean
 		{
-			var frame:int = GetIdTargetForIndex(animIndex);
-			if (frame == -1) { return false; }
+			var idTarget:int = GetIdTargetForIndex(animIndex);
+			if (idTarget == -1) { return false; }
 			else
-				return m_lockedAnimation[frame];
+				return m_lockedAnimation[idTarget];
+		}
+		
+		public function GetAnimationLocks():Vector.<Boolean>
+		{
+			return m_lockedAnimation;
 		}
 		
 		/* Chnages the id of the animation to play and adds the appropriate animation to the display area.

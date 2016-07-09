@@ -1,6 +1,7 @@
 package menu 
 {
 	import flash.display.DisplayObjectContainer;
+	import com.bit101.components.ListItem;
 	
 	/**
 	 * ...
@@ -23,13 +24,31 @@ package menu
 			return offset + itemIndex;
 		}
 		
-		public function ResetList(frameTargets:Vector.<int>):void
+		/*Forces the list items to not wait for the next frame to be redraw but to be redraw the frame 
+		 * this function is called*/
+		public function ForceItemRedrawThisFrame():void
+		{
+			var numItems:int = Math.ceil(_height / _listItemHeight);
+			numItems = Math.min(numItems, _items.length);
+            for(var i:int = 0; i < numItems; i++)
+            {
+                var item:ListItem = _itemHolder.getChildAt(i) as ListItem;
+				item.draw();
+				if (item is AnimationListItem)
+				{
+					(item as AnimationListItem).ForceChildrenRedrawThisFrame();
+				}
+			}
+		}
+		
+		
+		public function ResetList(frameTargets:Vector.<int>, locks:Vector.<Boolean>):void
 		{
 			removeAll();
 			for (var i:int = 0; i < frameTargets.length; ++i)
 			{
 				var text:String = String(i + 1);
-				addItem({label:text/*, frameTarget:frameTargets[i]*/});
+				addItem({label:text, locked:locks[i]/*, frameTarget:frameTargets[i]*/});
 			}
 			/*for (var i:int = 1; i <= frameTargets.length; ++i)
 			{

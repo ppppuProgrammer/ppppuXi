@@ -4,7 +4,6 @@
 	import events.ChangeBackgroundEvent;
 	import events.ExitLinkedAnimationEvent;
 	import flash.display.Sprite;
-	import flash.events.DRMReturnVoucherCompleteEvent;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
 	/**
@@ -237,7 +236,7 @@
 			return m_allowCharSwitches;
 		}
 		
-		public function SetAllowingCharacterSwitching(canSwitch:Boolean):void
+		public function SetAllowingCharacterSwitching(canSwitch:Boolean):Boolean
 		{
 			m_allowCharSwitches = canSwitch;
 			//userSettings.allowCharacterSwitches = switchStatus;
@@ -245,6 +244,7 @@
 			{
 				if(IsRandomlySelectingCharacter())	{SetIfRandomlySelectingCharacter(false);}
 			}
+			return m_allowCharSwitches;
 		}
 		
 		/*Has the current character randomly select one of their animations and starts playing it from the
@@ -275,6 +275,11 @@
 			//userSettings.characterSettings[currChar.GetName()].animationSelect = characterAnimFrame;
 		}
 		
+		public function GetAnimationLocksOnCharacter():Vector.<Boolean>
+		{
+			return m_currentCharacter.GetAnimationLocks();
+		}
+		
 		public function SetLockOnAnimationForCurrentCharacter(targetIndex:int, lock:Boolean):Boolean
 		{
 			m_currentCharacter.SetLockOnAnimation(targetIndex, lock);
@@ -287,7 +292,7 @@
 			return m_selectRandomChar;
 		}
 		
-		public function SetIfRandomlySelectingCharacter(randomSelect:Boolean):void
+		public function SetIfRandomlySelectingCharacter(randomSelect:Boolean):Boolean
 		{
 			m_selectRandomChar = randomSelect;
 			//userSettings.randomlySelectCharacter = selectStatus;
@@ -299,6 +304,7 @@
 					SetAllowingCharacterSwitching(true);
 				}
 			}
+			return m_selectRandomChar;
 			
 		}
 		
@@ -342,6 +348,17 @@
 		}
 		
 		[inline]
+		public function GetCharacterNameById(charId:int):String
+		{
+			var name:String = null;
+			if (charId > 0 && charId < m_Characters.length)
+			{
+				name = m_Characters[charId].GetName();
+			}
+			return name;
+		}
+		
+		[inline]
 		public function GetCharacterIdByName(name:String):int
 		{
 			var id:int = -1;
@@ -350,6 +367,12 @@
 				id = m_charNamesDict[name];
 			}
 			return id;
+		}
+		
+		public function GetCurrentCharacterName():String
+		{
+			var name:String= null;
+			return m_currentCharacter.GetName();
 		}
 		
 		public function ChangeFrameOfCurrentAnimation(frame:int):void

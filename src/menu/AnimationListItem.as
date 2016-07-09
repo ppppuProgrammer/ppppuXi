@@ -1,5 +1,6 @@
 package menu 
 {
+	import com.bit101.components.Component;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
@@ -55,6 +56,18 @@ package menu
 			}
 			
 			invalidate();
+		}
+		
+		public function ForceChildrenRedrawThisFrame():void
+		{
+			for (var i:int = 0; i < this.numChildren; i++) 
+			{
+				var child:Component = this.getChildAt(i) as Component;
+				if (child != null)
+				{
+					child.draw();
+				}
+			}
 		}
 		
 		/*public function set targetFrame(value:int):void
