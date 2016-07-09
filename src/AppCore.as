@@ -706,7 +706,6 @@ package
 				characterManager.InitializeSettingsForCharacter(charId, charSettings);
 				//Insert something here for menu to update
 				mainMenu.SetupMenusForCharacter(charId, charSettings);
-				
 				//TODO: Make Music player handle this.
 				//var musicId:int = musicPlayer.GetMusicIdByTitle(charSettings.playMusicTitle);
 				//musicPlayer.ChangeSelectedMusicForCharacter(musicId);

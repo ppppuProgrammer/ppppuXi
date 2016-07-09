@@ -351,7 +351,7 @@
 		public function GetCharacterNameById(charId:int):String
 		{
 			var name:String = null;
-			if (charId > 0 && charId < m_Characters.length)
+			if (charId > -1 && charId < m_Characters.length)
 			{
 				name = m_Characters[charId].GetName();
 			}

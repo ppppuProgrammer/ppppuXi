@@ -111,9 +111,10 @@ package menu
 			if (listItemLock != newLock)
 			{
 				animationMenu.ChangeLockOnItem(index, newLock);
+				
 			}
-			//var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-			//var target:int = currentCharacterIdTargets[index];
+			userSettings.UpdateSettingForCharacter_AnimationLock(
+				characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), index, newLock);
 			
 		}
 		
@@ -160,6 +161,9 @@ package menu
 			characterManager.AllowChangeOutOfLinkedAnimation();
 			characterManager.ChangeAnimationForCurrentCharacter(e.target.selectedIndex);
 			characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
+			userSettings.UpdateSettingForCharacter_SelectedAnimation(
+				characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), e.target.selectedIndex);	
+				
 		}
 		//}
 		//Just changes the animation of the character and sets it to the proper time position
@@ -290,11 +294,12 @@ package menu
 			if (characterManager.DoesCharacterHaveAnimations(e.target.selectedIndex) == true)
 			{
 				SwitchToSelectedCharacter(e.target.selectedIndex);
+				userSettings.UpdateCurrentCharacterName(characterManager.GetCharacterNameById(e.target.selectedIndex));
 			}
 			else
 			{
-				//Character didn't have animations, so reset the character list selected item to have the
-				//current character's icon selected.
+				//Selected character didn't have animations, so have the character list's selected item be set to the
+				//current character's icon.
 				characterMenu.SetListSelectorPosition(characterManager.GetIdOfCurrentCharacter());
 			}
 			
@@ -316,6 +321,7 @@ package menu
 			characterMenu.DisableScrollToSelectionForNextRedraw();
 			var locked:Boolean = characterManager.ToggleLockOnCharacter(index);
 			SetCharacterLock(index, locked);
+			userSettings.UpdateSettingForCharacter_Lock(characterManager.GetCharacterNameById(index), locked);
 			//ToggleCharacterLock(e.target.rightClickedIndex);
 			//characterMenu.SetCharListScrollToSelection(true);
 			/*characterManager.ToggleLockOnCharacter(e.target.rightClickedIndex);

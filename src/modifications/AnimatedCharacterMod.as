@@ -30,7 +30,10 @@ package modifications
 			super.FirstFrame(e);
 			if (characterPayload != null && initialAnimationContainer != null)
 			{
-				if (initialAnimationContainer.totalFrames > 1)	{ characterPayload.AddAnimationsFromMovieClip(initialAnimationContainer); }
+				//A movie clip containing 1 children is one that typically has movie clips contained in each frame and that initialAnimationContainer is not an animation itself.
+				//If there are more children then it's likely that the initialAnimationContainer itself is  an animation and is the only one.
+				if (initialAnimationContainer.numChildren == 1)	{ characterPayload.AddAnimationsFromMovieClip(initialAnimationContainer); }
+				else { characterPayload.AddAnimation(initialAnimationContainer);}
 				characterPayload.SetBackgroundColorsToDefault();
 				//characterPayload.InitializeAfterLoad();
 			}

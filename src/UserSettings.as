@@ -13,7 +13,7 @@ package
 		public var firstTimeRun:Boolean=true;
 		public var playMusic:Boolean=true;
 		public var showMenu:Boolean = true;
-		private var characterSettings:Object = new Object();
+		public var characterSettings:Object = new Object();
 		public var keyBindings:Object = new Object();
 		public var currentCharacterName:String = "";
 		public var randomlySelectCharacter:Boolean = false;
@@ -168,7 +168,7 @@ package
 		
 		public function CheckIfCharacterHasSettings(name:String ):Boolean
 		{
-			return (characterSettings.name != null);
+			return (characterSettings[name] != null);
 		}
 	}
 

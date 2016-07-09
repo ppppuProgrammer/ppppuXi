@@ -170,9 +170,22 @@
 		}
 		
 		//Adds a movieclip to the character's animation vector. An animation added this way can not be linked to another.
-		public function AddAnimation(animation:MovieClip):void
+		public function AddAnimation(initialAnimation:MovieClip):void
 		{
-			//TODO: Complete function
+			var animationIndex:int = m_charAnimations.length;
+			
+			var animationClass:Class = Object(initialAnimation).constructor;
+			var animation:MovieClip = new animationClass();
+			if (animation && (animation as MovieClip).totalFrames > 1)
+			{
+				(animation as MovieClip).stop();
+				//add animation
+				m_charAnimations[animationIndex] = animation as MovieClip;
+				m_animationLabel[animationIndex] = null; //add label
+				m_lockedAnimation[m_lockedAnimation.length] = false;
+			}
+			//Allow the original movie clip to be garbage collected
+			initialAnimation = null;
 			UpdateIdTargets();
 		}
 		
