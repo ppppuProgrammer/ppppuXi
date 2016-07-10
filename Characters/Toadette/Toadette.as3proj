@@ -4,20 +4,19 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\ppppuXinteractive.swf" />
+    <movie path="..\..\bin\ACHAR_Toadette.swf" />
     <movie fps="30" />
-    <movie width="640" />
-    <movie height="720" />
-    <movie version="20" />
+    <movie width="800" />
+    <movie height="600" />
+    <movie version="18" />
     <movie minorVersion="0" />
     <movie platform="Flash Player" />
-    <movie background="#0C0046" />
-    <movie preferredSDK="Apache Flex 4.15.0 FP20.0 AIR20.0 en_US;4.15.0;" />
+    <movie background="#FFFFFF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="lib" />
+    <class path="..\..\src" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -26,7 +25,7 @@
     <option allowSourcePathOverlap="False" />
     <option benchmark="False" />
     <option es="False" />
-    <option inline="True" />
+    <option inline="False" />
     <option locale="" />
     <option loadConfig="" />
     <option optimize="True" />
@@ -44,7 +43,7 @@
     <option linkReport="" />
     <option loadExterns="" />
     <option staticLinkRSL="True" />
-    <option additional="-frame AppMain Main" />
+    <option additional="" />
     <option compilerConstants="" />
     <option minorVersion="" />
   </build>
@@ -54,7 +53,7 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="ppppuX-BaseAssets.swc" />
+    <element path="Toadette.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
@@ -74,27 +73,21 @@
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\Main.as" />
+    <compile path="src\ToadetteMod.as" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
     <hidden path="obj" />
-    <hidden path="src\NewAnimatedCharacter.as" />
-    <hidden path="src\NewCharacterManager.as" />
-    <hidden path="src\Old Copy of AnimatedCharacter.as" />
-    <hidden path="src\Old Copy of CharacterManager.as" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">cmd.exe /C python "$(ProjectDir)\BuildModsSwf.py" "$(CompilerPath)" "$(FDBuild)" $(BuildConfig)
-
-cmd.exe /C python "$(ProjectDir)\MakeBuildCopy.py" "$(OutputDir)" "$(OutputName)" "$(BuildConfig)" "$(TimeStamp)"</postBuildCommand>
+  <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->
   <options>
-    <option showHiddenPaths="True" />
+    <option showHiddenPaths="False" />
     <option testMovie="Default" />
-    <option testMovieCommand="bin/index.html" />
+    <option testMovieCommand="" />
   </options>
   <!-- Plugin storage -->
   <storage />
