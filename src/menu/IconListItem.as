@@ -13,19 +13,29 @@ package menu
 	public class IconListItem extends ListItem
 	{
 		//private function charButton:MenuButton;
-		protected var _icon:Sprite;
+		//protected var _icon:Sprite;
 		protected var iconCurrentlyUsed:DisplayObject = null;
 		public function IconListItem(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, data:Object = null) 
 		{
-			//Only a display object is allowed. If the data parameter is not a display object nullify it.
+			/*//Only a display object is allowed. If the data parameter is not a display object nullify it.
 			if (!data is DisplayObject)
 			{
 				data = null;
-			}
+			}*/
 			super(parent, xpos, ypos, data);
 			mouseChildren = false;
 			//_data = data;
 			
+		}
+		
+		public override function set data(value:Object):void
+		{
+			super.data = value;
+			/*if (_data && "icon" in _data)
+			{
+				_data.icon.width = this.width;
+				_data.icon.height = this.height;
+			}*/
 		}
 		
 		/*public override function set data(value:Object):void
@@ -102,6 +112,8 @@ package menu
 				if (icon)
 				{
 					addChildAt(icon as DisplayObject, 0);
+					icon.width = this._width;
+					icon.height = _height;
 					iconCurrentlyUsed = icon;
 				}
 			}

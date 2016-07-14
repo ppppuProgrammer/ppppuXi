@@ -117,13 +117,19 @@
 			}
 		}
 		
-		//Adds multiple animations from a single multi framed movieclip, in which each of those frames containing an animation.
+		/*Adds multiple animations from a single multi framed movieclip, in which each of those frames containing an animation.
+		Because of how "attached" movie clips are when exported from Flash CS, there needs to be some work done
+		to get the animations seperated. Every animation in a frame of the animation Collection must have AS linkage.
+		This is so we can get the constructor for the animation, create a new instance and save that into the animations vector.*/
 		public function AddAnimationsFromMovieClip(animationCollection:MovieClip):void
 		{
 			//TODO: Reactivate commented out code.
 			for (var i:int = 1; i <= animationCollection.totalFrames; ++i)
 			{
 				animationCollection.gotoAndStop(i);
+				//Stop the movie clip in the collection from playing, which can cause sounds embed into them
+				//to play for a few milliseconds during this.
+				(animationCollection.getChildAt(0) as MovieClip).stop();
 				var animationIndex:int = m_charAnimations.length;
 				
 				var label:String = animationCollection.currentFrameLabel;
@@ -172,6 +178,7 @@
 		//Adds a movieclip to the character's animation vector. An animation added this way can not be linked to another.
 		public function AddAnimation(initialAnimation:MovieClip):void
 		{
+			initialAnimation.stop();
 			var animationIndex:int = m_charAnimations.length;
 			
 			var animationClass:Class = Object(initialAnimation).constructor;

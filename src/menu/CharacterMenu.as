@@ -16,17 +16,20 @@ package menu
 		
 		private var characterList:CharacterList;
 		private var charChangeModeButton:PushButton;
+		
+		//consts
+		public static const characterIconSize:Number = 35;
 		public function CharacterMenu() 
 		{
 			name = "Character Menu";
 			characterList = new CharacterList(this);
 			characterList.name = "Character Select List";
 			characterList.listItemClass = CharacterListItem;
-			characterList.listItemHeight = MainMenu.characterIconSize;
-			characterList.setSize(LIST_WIDTH,  MainMenu.characterIconSize * MAX_LIST_ITEMS_DISPLAYED);
+			characterList.listItemHeight = characterIconSize;
+			characterList.setSize(characterIconSize+10,  characterIconSize * MAX_LIST_ITEMS_DISPLAYED);
 			
 			charChangeModeButton = new PushButton(this, 0, characterList.y + characterList.height + 5);
-			charChangeModeButton.setSize(MainMenu.characterIconSize,  MainMenu.characterIconSize);
+			charChangeModeButton.setSize(characterIconSize,  characterIconSize);
 			//characterList.addEventListener(Event.SELECT, CharacterSelected);
 			//characterList.addEventListener(MouseEvent.RIGHT_CLICK, SetCharacterLock);
 		}

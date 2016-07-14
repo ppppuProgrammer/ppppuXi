@@ -115,11 +115,12 @@ package menu
 			{
 				//Creates a new graphicListItem and feeds it the object parameter passed when addItem() was called.
 				item = new _listItemClass(_itemHolder, 0, i * _listItemHeight/*, _items[i]*/);
-				if (item.data is DisplayObject)
+				/*var icon:DisplayObject =  item.data["icon"] as DisplayObject;
+				if (icon)
 				{
 					item.data.width = item.data.height = _listItemHeight;
-				}
-				item.setSize(width, _listItemHeight);
+				}*/
+				item.setSize(width-10, _listItemHeight);
 				item.defaultColor = _defaultColor;
 
 				item.selectedColor = _selectedColor;

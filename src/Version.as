@@ -9,8 +9,8 @@ package
    {
       
       public static const VERSION:String = "0.1.1";
-	  public static const BUILDNUMBER:String = "32"
-	  public static const BUILDDATE:String = "7/9/2016 9:43 PM";
+	  public static const BUILDNUMBER:String = "38"
+	  public static const BUILDDATE:String = "7/14/2016 6:19 AM";
       
    }
    

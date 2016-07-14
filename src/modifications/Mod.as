@@ -45,10 +45,8 @@ package modifications
 		
 		public function GetModType():int { return modType; }
 	
-		public function Dispose():void
-		{
-			
-		}
+		//Abstract function meant to be overwritten for the needs of any Mod subclasses
+		public function Dispose():void{}
 		
 	}
 

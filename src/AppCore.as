@@ -1,7 +1,5 @@
 package  
 {
-	//import Characters.*;
-	import com.bit101.components.List;
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.DataLoader;
 	import com.greensock.loading.LoaderMax;
@@ -14,35 +12,21 @@ package
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
-	import flash.display.Loader;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.geom.Point;
-	import flash.net.LocalConnection;
-	import flash.net.registerClassAlias;
 	import flash.net.SharedObject;
-	import flash.system.Capabilities;
-	import flash.text.TextField;
-	import flash.ui.Multitouch;
-	import flash.ui.MultitouchInputMode;
-	import flash.utils.ByteArray;
-	import flash.utils.describeType;
-	import flash.utils.Dictionary;
-	import flash.utils.getDefinitionByName;
 	import flash.geom.Rectangle;
 	import flash.ui.Keyboard;
-	import flash.text.TextFieldType;
-	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFormat;
 	import CharacterManager;
-	import menu.IconList;
 	import menu.MainMenu;
 	import MenuButton;
 	import modifications.*;
-	import modifications.Mod;
 	import flash.display.Sprite;
-	import modifications.AnimatedCharacterMod;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
+	import flash.text.TextFieldType;
 	/**
 	 * Responsible for managing all the various aspects of ppppuNX (and interactive). 
 	 * @author ppppuProgrammer
@@ -123,7 +107,7 @@ package
 				}
 			}
 			//Touch inputs are to be handled as if they were mouse inputs
-			Multitouch.inputMode = MultitouchInputMode.NONE;
+			//Multitouch.inputMode = MultitouchInputMode.NONE;
 			//Add an event listener that'll allow for frame checking.
 			mainStage.addEventListener(Event.ENTER_FRAME, RunLoop);
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
@@ -274,7 +258,7 @@ package
 				mainStage.InnerDiamondBG.gotoAndPlay(animationFrame);
 				mainStage.TransitionDiamondBG.gotoAndPlay(animationFrame);
 				mainStage.BacklightBG.gotoAndPlay(animationFrame);*/
-				
+
 				if(frameNum % 120 == 0) //Add character clip
 				{
 					
@@ -292,20 +276,22 @@ package
 						}
 					}
 					
-					//if (frameNum != 0)
+					var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter();
+					if (charsWereSwitched == true)
 					{
-						var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter();
-						if (charsWereSwitched == true)
-						{
-							userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
-							mainMenu.SetCharacterSelectorAndUpdate(characterManager.GetIdOfCurrentCharacter());
-						}
-						var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
-						//Need to get the index that targets the given animation id. 
-						var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-						var target:int = currentCharacterIdTargets.indexOf(animId);
-						mainMenu.UpdateAnimationIndexSelected(target, charsWereSwitched);
+						
+						userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
+						mainMenu.SetCharacterSelectorAndUpdate(characterManager.GetIdOfCurrentCharacter());
+						
 					}
+					/*Updates the menu to match the automatically selected animation. Do not call 
+					MainMenu::SelectAnimation() as that is for user input and takes relative index of the list item,
+					unlike the below code which uses the absolute index.*/
+					var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
+					//Need to get the index that targets the given animation id. 
+					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+					var target:int = currentCharacterIdTargets.indexOf(animId);
+					mainMenu.UpdateAnimationIndexSelected(target, charsWereSwitched);
 				}
 			}
 		}
@@ -331,13 +317,7 @@ package
 			{
 				if((keyPressed == 48 || keyPressed == 96))
 				{
-					var chosenAnimId:int = characterManager.RandomizeCurrentCharacterAnimation(GetFrameNumberToSetForAnimation());
-					//Need to get the index that targets the given animation id. 
-					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-					var target:int = currentCharacterIdTargets.indexOf(chosenAnimId);
-					
-					userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCurrentCharacterName(), 0);
-					mainMenu.UpdateAnimationIndexSelected(target);
+					mainMenu.SelectAnimation(null, -1);
 				}
 				else if((!(49 > keyPressed) && !(keyPressed > 57)) ||  (!(97 > keyPressed) && !(keyPressed > 105)))
 				{
@@ -349,21 +329,14 @@ package
 					//AnimationIndex 
 					
 					var animationIndex:int = keyPressed - 49; 
-					var trueIndex:int = mainMenu.GetTrueItemIndexFromRelativePosition(animationIndex);
-					var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
-					var switchSuccessful:Boolean = characterManager.ChangeAnimationForCurrentCharacter(currentCharacterIdTargets[trueIndex]);
-					if (switchSuccessful == true)	
-					{ 
-						characterManager.ChangeFrameOfCurrentAnimation(GetFrameNumberToSetForAnimation()); 
-						userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCurrentCharacterName(), trueIndex);
-						mainMenu.UpdateAnimationIndexSelected(trueIndex); 
-					}
+					mainMenu.SelectAnimation(null, animationIndex);
 					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
 				}
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
 				{
 					var charSwitchingAllowed:Boolean = characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
 					userSettings.UpdateCharacterSwitching(charSwitchingAllowed);
+					userSettings.UpdateRandomCharacterSelecting(characterManager.IsRandomlySelectingCharacter());
 					//if(characterManager.GetRandomSelectStatus() && !characterManager.GetCharSwitchStatus())
 					//{
 						//characterManager.SetRandomSelectStatus(false);
@@ -382,6 +355,7 @@ package
 				else if(keyPressed == keyBindings.AnimLockMode.main || keyPressed == keyBindings.AnimLockMode.alt)
 				{
 					//toggle animation lock/goto mode
+					mainMenu.ToggleAnimationMenuKeyboardMode();
 					//characterManager.ToggleAnimationLockMode();
 					//query menu for lock mode
 					//set menu's lock mode too its inverse
@@ -390,22 +364,14 @@ package
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
 					//(Un)lock the character who the menu cursor is on
-					var index:int = mainMenu.GetIndexOfCharacterKeyboardMenuCursor();
-					if (index != -1)
-					{
-						var locked:Boolean = characterManager.ToggleLockOnCharacter(index);
-						mainMenu.SetCharacterLock(index, locked);
-						userSettings.UpdateSettingForCharacter_Lock(characterManager.GetCharacterNameById(index), locked);
-					}
-					
-					//mainMenu.ToggleCharacterLock();
-					//characterManager.ToggleLockOnCharacter(characterManager.GetMenuCursorPosition());
+					mainMenu.SetCharacterLock();
 				}
 				else if(keyPressed == keyBindings.GotoChar.main || keyPressed == keyBindings.GotoChar.alt)
 				{
 					//Go to the character who the menu cursor is on
-					mainMenu.SwitchToSelectedCharacter();
-					userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
+					mainMenu.SelectCharacter();
+					//mainMenu.SwitchToSelectedCharacter();
+					//userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
 					//characterManager.GotoSelectedMenuCharacter(characterManager.GetMenuCursorPosition());
 					//settingsSaveFile.flush();
 				}
@@ -425,6 +391,7 @@ package
 				{
 					//Toggles random character switching
 					var randomCharSelect:Boolean = characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
+					userSettings.UpdateCharacterSwitching(characterManager.AreCharacterSwitchesAllowed());
 					userSettings.UpdateRandomCharacterSelecting(randomCharSelect);
 				}
 				else if(keyPressed == keyBindings.Menu.main || keyPressed == keyBindings.Menu.alt)
@@ -604,6 +571,15 @@ package
 					}
 				}
 				
+			}
+			else if (modType == Mod.MOD_ANIMATION)
+			{
+				var animationMod:AnimationMod = mod as AnimationMod;
+				if (animationMod != null)
+				{
+					characterManager.AddAnimationsToCharacter(animationMod.GetTargetCharacterName(), 
+						animationMod.GetAnimationContainer());
+				}
 			}
 			else if (modType == Mod.MOD_TEMPLATECHARACTER)
 			{
@@ -812,7 +788,7 @@ package
 			{
 				keybindingObj = userSettings.keyBindings.MusicForAll;
 			}
-			else if (textFieldName == "Activate")
+			else if (textFieldName == "ActivateText")
 			{
 				keybindingObj = userSettings.keyBindings.Activate;
 			}

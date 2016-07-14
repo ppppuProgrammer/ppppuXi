@@ -3,7 +3,6 @@ package menu
 	import com.bit101.components.PushButton;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
-	import flash.text.TextFormat;
 	import com.bit101.components.Style;
 	
 	/**
@@ -12,8 +11,8 @@ package menu
 	 */
 	public class IconPushButton extends PushButton
 	{
-		public var _unselectedIcon:Sprite = null;
-		public var _selectedIcon:Sprite = null;
+		protected var _unselectedIcon:Sprite = null;
+		protected var _selectedIcon:Sprite = null;
 		protected var currentIcon:Sprite = null;
 		
 		public function IconPushButton(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, label:String = "", defaultHandler:Function = null)
@@ -59,18 +58,6 @@ package menu
 			   //_face.graphics.endFill();
 		}
 		
-		override protected function addChildren():void
-		{
-			super.addChildren();
-			var tf:TextFormat = _label.textField.getTextFormat();
-			tf.font = "Super Mario 256";
-			tf.size = 20;
-			tf.color = 0xffffff;
-			tf.align = "center";
-			_label.textField.defaultTextFormat = tf;
-			//addChildAt(unselectedIcon, 0);
-		}
-		
 		public function set unselectedIcon(value:Sprite):void
 		{
 			if (_unselectedIcon != null)
@@ -98,8 +85,16 @@ package menu
 			_selectedIcon.width = this.width;
 			_selectedIcon.height = this.height;
 		}
-		//public function get selectedIcon():Sprite { return ; }
-		//public function get unselectedIcon():Sprite { return ; }
+		
+		public override function setSize(w:Number, h:Number):void
+		{
+			if (_selectedIcon && _unselectedIcon)
+			{
+				_selectedIcon.width = _unselectedIcon.width = w;
+				_selectedIcon.height = _unselectedIcon.height = h;
+			}
+			super.setSize(w,h);
+		}
 	}
 
 }

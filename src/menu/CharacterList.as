@@ -94,7 +94,7 @@ package menu
 				_selectedIndex = -1;
 			}
 			invalidate();
-			//dispatchEvent(new Event(Event.SELECT));
+			dispatchEvent(new Event(Event.SELECT));
 		}
 		
 		public function set menuCursorIndex(value:int):void

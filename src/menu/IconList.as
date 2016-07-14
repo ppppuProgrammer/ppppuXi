@@ -19,10 +19,7 @@ package menu
 		
 		public function IconList(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, items:Array=null) 
 		{
-			super(parent, xpos, ypos, items);
-			
-			
-			
+			super(parent, xpos, ypos, items);	
 		}
 		
 		/**
@@ -58,12 +55,8 @@ package menu
 			for(var i:int = 0; i < numItems; i++)
 			{
 				//Creates a new graphicListItem and feeds it the object parameter passed when addItem() was called.
-				item = new _listItemClass(_itemHolder, 0, i * _listItemHeight/*, _items[i]*/);
-				var icon:DisplayObject = item.data as DisplayObject || item.data["icon"] as DisplayObject;
-				if (icon)
-				{
-					item.data.width = item.data.height = _listItemHeight;
-				}
+				item = new _listItemClass(_itemHolder, 0, i * _listItemHeight);
+				
 				item.setSize(width, _listItemHeight);
 				item.defaultColor = _defaultColor;
 

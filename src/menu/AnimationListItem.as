@@ -23,7 +23,8 @@ package menu
 		public function AnimationListItem(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, data:Object=null) 
 		{
 			super(parent, xpos, ypos, data);
-			
+			/*selectedBlockIcon.width = blockIcon.width = this.width;
+			selectedBlockIcon.height = blockIcon.height = this.height;*/
 		}
 		
 		/**
@@ -41,6 +42,13 @@ package menu
 			//_label.textField.setTextFormat(tf);
 			//_label.
 		}
+		
+		/*override public function setSize(w:Number, h:Number):void
+		{
+			super.setSize(w, h);
+			selectedBlockIcon.width = blockIcon.width = w;
+			selectedBlockIcon.height = blockIcon.height = h;
+		}*/
 		
 		public override function set selected(value:Boolean):void
 		{

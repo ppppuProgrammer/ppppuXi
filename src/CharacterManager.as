@@ -3,6 +3,7 @@
 	import events.AnimationTransitionEvent;
 	import events.ChangeBackgroundEvent;
 	import events.ExitLinkedAnimationEvent;
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
@@ -59,6 +60,26 @@
 				charAdded = true;
 			}
 			return charAdded;
+		}
+		
+		public function AddAnimationsToCharacter(characterName:String, animationContainer:MovieClip):void
+		{
+			if (animationContainer == null) { return; }
+			
+			var characterId:int = GetCharacterIdByName(characterName);
+			if (characterId > -1)
+			{
+				var character:AnimatedCharacter = m_Characters[characterId];
+				if (animationContainer.numChildren > 1)
+				{
+					character.AddAnimation(animationContainer);
+				}
+				else if(animationContainer.numChildren == 1)
+				{
+					character.AddAnimationsFromMovieClip(animationContainer);
+				}
+			}
+			
 		}
 		
 		//The logic for the normal switch that happens every 120 frames
@@ -306,6 +327,11 @@
 			}
 			return m_selectRandomChar;
 			
+		}
+		
+		public function AreAnimationsRandomlyPickedForCurrentCharacter():Boolean
+		{
+			return m_currentCharacter.GetRandomAnimStatus();
 		}
 		
 		public function SwitchToCharacter(charIndex:int=-1):int

@@ -12,7 +12,7 @@ package menu
 	 */
 	public class AnimationMenu extends Panel
 	{
-		public const AnimationButtonSize:Number = 30;
+		public const AnimationButtonSize:Number = 35;
 		private const MAX_ITEMS_DISPLAYED:int = 9;
 		
 		//Text
@@ -22,7 +22,7 @@ package menu
 		private var animationList:AnimationList;
 		
 		//Buttons
-		private var randomAnimationButton:PushButton;
+		private var randomAnimationButton:RandomAnimationButton;
 		
 		private var buttonYPos:Number = 10;
 		//Used for functions that activate through keyboard input
@@ -31,21 +31,24 @@ package menu
 		{
 			name = "Animation Menu";
 			super(parent, xpos, ypos);
-			setSize(40, 440);
+			
 			
 			//list
-			animationList = new AnimationList(this, 0, 40);
+			animationList = new AnimationList(this, 0, 35);
 			animationList.name = "Animation Select List";
 			animationList.listItemClass = AnimationListItem;
-			animationList.setSize(40, AnimationButtonSize * MAX_ITEMS_DISPLAYED);
 			animationList.listItemHeight = AnimationButtonSize;
+			//10 units are used for the scrollbar, so have to add 10 to the button size so the button will actually end up being the desired size.
+			animationList.setSize(AnimationButtonSize + 10, AnimationButtonSize * MAX_ITEMS_DISPLAYED);
+			
 			//animationList.rolloverColor = 0xEEEEEE;
 			
-			randomAnimationButton = new PushButton(this, 0, animationList.y + animationList.height + 5, "?");
-			randomAnimationButton.setSize(40, 40);
-			//randomAnimationButton.
-			modeLabel = new Label(this, 5, 0, "Key Mode:\nChange");
+			randomAnimationButton = new RandomAnimationButton(this, 0, animationList.y + animationList.height + 10, "?");
+			randomAnimationButton.setSize(45, 45);
+			randomAnimationButton.name = "Random Animation Button";
+			modeLabel = new Label(this, 5, 0, "Mode:\nChange");
 			
+			setSize(45, randomAnimationButton.y + randomAnimationButton.height);
 			/*anim1Button = new PushButton(this, 5, GetYPosForButton(), "1");
 			anim1Button.setSize(AnimationButtonSize, AnimationButtonSize);
 			anim1Button.label
@@ -55,17 +58,28 @@ package menu
 		
 		//private function RandomAnimationButton
 		
-		public function SetKeyboardMode(changeMode:Boolean):void
+		public function GetLockOnItem(index:int):Boolean
+		{
+			return animationList.items[index].locked;
+		}
+		
+		public function GetIfKeyboardModeIsInChangeMode():Boolean
+		{
+			return inChangeMode;
+		}
+		
+		public function SetKeyboardMode(changeMode:Boolean):Boolean
 		{
 			if (changeMode == true)
 			{
-				modeLabel.text = "Key Mode:\nChange";
+				modeLabel.text = "Mode:\nChange";
 			}
 			else
 			{
-				modeLabel.text = "Key Mode:\nLock";
+				modeLabel.text = "Mode:\nLock";
 			}
 			inChangeMode = changeMode;
+			return inChangeMode;
 		}
 		
 		public function DisableScrollToSelectionForNextRedraw():void
@@ -74,9 +88,9 @@ package menu
 		}
 		
 		//Mouse input
-		public function RandomAnimationButtonSelected(e:Event = null):void
+		public function SetSelectOnRandomAnimationButton(selected:Boolean):void
 		{
-			
+			randomAnimationButton.selected = selected;
 		}
 		
 		/*public function AddEventListenerToAnimList(eventType:String, func:Function):void
@@ -94,20 +108,9 @@ package menu
 			return animationList.GetTrueAnimationIndex(relativeIndex);
 		}
 		
-		public function GetAnimationIdTargetOfItem(itemIndex:int):int
+		public function SetAnimationList(locks:Vector.<Boolean>):void
 		{
-			//itemIndex parameter should be 0 - (MAX_ITEMS_DISPLAYED -1)
-			
-			if (itemIndex > -1 && itemIndex < animationList.items.length)
-			{
-				return animationList.items[itemIndex].frameTarget;
-			}
-			return -1;
-		}
-		
-		public function SetAnimationList(idTargets:Vector.<int>, locks:Vector.<Boolean>):void
-		{
-			animationList.ResetList(idTargets, locks);
+			animationList.ResetList(locks);
 		}
 		
 		public function ChangeSelectedItem(index:int, moveScrollBar:Boolean=true):void
@@ -124,26 +127,9 @@ package menu
 			animationList.ForceItemRedrawThisFrame();
 		}
 		
-		private function GetYPosForButton():Number
-		{
-			var _retYPos:Number = buttonYPos;
-			buttonYPos += AnimationButtonSize + 2;
-			return _retYPos;
-		}
-		
-		public function ChangeModeLabelToChange():void
-		{
-			modeLabel.text = "Keyboard Mode:\nChange";
-		}
-		
-		public function ChangeModeLabelToLock():void
-		{
-			modeLabel.text = "Keyboard Mode:\nLock";
-		}
-		
 		public function ChangeLockOnItem(index:int, lock:Boolean):void
 		{
-			animationList.items[index].locked = lock;
+			animationList.SetItemLock(index, lock);
 		}
 	}
 
