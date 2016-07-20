@@ -26,7 +26,7 @@ package
 		
 		//private var m_parent:MovieClip;
 		public const m_width:Number=480;
-		public const m_height:Number = 680;
+		public const m_height:Number = 640;
 		private var buttonAwaitingKeyInput:PushButton=null;
 		private var userSettings:UserSettings;
 		private var p_config:Panel;
@@ -37,7 +37,7 @@ package
 		public static var keyDict:Dictionary;
 		private var keyFunctionsList:Vector.<String> = new < String > ["LockChar", "GotoChar", "AutoCharSwitch", "RandomChar", 
 			"CharCursorPrev", "CharCursorNext", "PrevAnimPage", "NextAnimPage", "AnimLockMode", "Menu", "Help", "NextHelpPage",
-			"Backlight", "Background", "Music", "CharTheme", "PrevMusic", "NextMusic", "MusicForAll", "Activate"];
+			"Backlight", "Background", "Music", "CharTheme", "PrevMusic", "NextMusic", "Activate"];
 		
 		private var warningText:Label;
 		
@@ -86,10 +86,10 @@ package
 			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Backlight ON/OFF");
 			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Background ON/OFF");
 			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Music ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Use character's default theme");
+			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Use character's preferred music");
 			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change to previous music");
 			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change to next music");
-			new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Toggle same music for all characters mode");
+			//new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Toggle same music for all characters mode");
 			new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Activate scene transition if available");
 			
 			warningText = new Label(p_config, 40, m_height - 20, "");

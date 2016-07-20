@@ -67,7 +67,7 @@ package
 			keyBindings.CharTheme.main = Keyboard.N; keyBindings.CharTheme.alt = -1;
 			keyBindings.PrevMusic.main = Keyboard.X; keyBindings.PrevMusic.alt = -1;
 			keyBindings.NextMusic.main = Keyboard.C; keyBindings.NextMusic.alt = -1;
-			keyBindings.MusicForAll.main = Keyboard.G; keyBindings.MusicForAll.alt = -1;
+			//keyBindings.MusicForAll.main = Keyboard.G; keyBindings.MusicForAll.alt = -1;
 			keyBindings.Activate.main = Keyboard.A; keyBindings.Activate.alt = -1;
 			//keyBindings..main = Keyboard; keyBindings..alt = -1;
 		}

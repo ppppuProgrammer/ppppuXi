@@ -5,16 +5,17 @@ package modifications
 	 * to the ppppu program
 	 * @author 
 	 */
-	public class ModArchive extends Mod implements IDisposable
+	public class ModArchive extends Mod
 	{
+		
 		protected var modsList:Vector.<Mod> = new Vector.<Mod>();
+		
 		public function ModArchive() 
 		{
-			
+			modType = MOD_ARCHIVE;
 		}
 		
 		public function GetModsList():Vector.<Mod> { return modsList; }
-	
 		public override function Dispose():void
 		{
 			//Call the dispose function of all the mods in the list

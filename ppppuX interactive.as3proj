@@ -83,6 +83,7 @@
     <hidden path="src\NewCharacterManager.as" />
     <hidden path="src\Old Copy of AnimatedCharacter.as" />
     <hidden path="src\Old Copy of CharacterManager.as" />
+    <hidden path="src\OldMusicPlayer.as" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />

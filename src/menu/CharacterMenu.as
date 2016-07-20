@@ -15,11 +15,11 @@ package menu
 		private const LIST_WIDTH:Number = 50;
 		
 		private var characterList:CharacterList;
-		private var charChangeModeButton:PushButton;
+		private var charChangeModeButton:CharacterSelectModeButton;
 		
 		//consts
 		public static const characterIconSize:Number = 35;
-		public function CharacterMenu() 
+		public function CharacterMenu(initialCharacterSwitchMode:String="Normal") 
 		{
 			name = "Character Menu";
 			characterList = new CharacterList(this);
@@ -28,8 +28,14 @@ package menu
 			characterList.listItemHeight = characterIconSize;
 			characterList.setSize(characterIconSize+10,  characterIconSize * MAX_LIST_ITEMS_DISPLAYED);
 			
-			charChangeModeButton = new PushButton(this, 0, characterList.y + characterList.height + 5);
-			charChangeModeButton.setSize(characterIconSize,  characterIconSize);
+			charChangeModeButton = new CharacterSelectModeButton(this, 0, characterList.y + characterList.height + 5);
+			
+			charChangeModeButton.normalIcon = new NormalRotationIcon();
+			charChangeModeButton.randomIcon = new RandomRotationIcon;
+			charChangeModeButton.singleIcon = new SingleCharIcon;
+			charChangeModeButton.Initialize(initialCharacterSwitchMode);
+			//charChangeModeButton.mode = 2;
+			charChangeModeButton.setSize(characterIconSize+10,  characterIconSize+10);
 			//characterList.addEventListener(Event.SELECT, CharacterSelected);
 			//characterList.addEventListener(MouseEvent.RIGHT_CLICK, SetCharacterLock);
 		}
@@ -42,6 +48,11 @@ package menu
 		public function AddEventListenerToCharList(eventType:String, func:Function):void
 		{
 			characterList.addEventListener(eventType, func);
+		}
+		
+		public function ChangeModeOfCharacterChangeButton(modeString:String):void
+		{
+			charChangeModeButton.ChangeButtonMode(modeString);
 		}
 		
 		/*Toggles the lock on the currently selected character on the menu. Used when the Keyboard is the input device.

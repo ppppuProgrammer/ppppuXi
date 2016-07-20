@@ -13,10 +13,10 @@ package
 		{
 			sourceSound = new BGM_CMCGC;
 			musicName = "CMC GC"
-			displayInfo = "Cutie Mark Crusaders Go Crusading - MLP FiM";
+			displayInfo = "Cutie Mark Crusaders Go Crusading";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(0);
-			endLoopTime = -(ConvertSamplesToMilliseconds(0) + startTime);
+			startLoopTime = -1;
+			endLoopTime = -1;
 			
 		}
 		

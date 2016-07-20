@@ -8,8 +8,11 @@ package
     {
         public function ToadetteMod()
         {
-            this.characterPayload = new Toadette();
-            this.initialAnimationContainer = new ToadetteAnimations();
+            
+            initialAnimationContainer = new ToadetteAnimations;
+			m_menuIcon = new ToadetteIcon;
+			
+			m_characterName = "Toadette";
         }
     }
 }

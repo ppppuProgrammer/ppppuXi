@@ -8,10 +8,21 @@ package
     {
         public function GardevoirMod()
         {
-            this.characterPayload = new Gardevoir();
-			initialAnimationContainer = new GardevoirAnimations();
+            
+			initialAnimationContainer = new GardevoirAnimations;
 			initialAnimationContainer.x = -98.75;
 			initialAnimationContainer.y = 174;
+			
+			m_topLeftDiamondColor = CreateColorTransformFromHex(0xFFFFFF);
+			m_centerDiamondColor = CreateColorTransformFromHex(0xCCCCCC);
+			m_bottomRightDiamondColor = CreateColorTransformFromHex(0x999999);
+			m_outerDiamondColor = CreateColorTransformFromHex(0xFF0000);
+			m_backlightColor = CreateColorTransformFromHex(0x999999);
+			
+			m_menuIcon = new GardevoirIcon;
+			
+			m_characterName = "Gardevoir";
+			m_preferredMusicName = "Route 1";
         }
     }
 }

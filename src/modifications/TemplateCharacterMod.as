@@ -7,12 +7,10 @@ package modifications
 	 */
 	public class TemplateCharacterMod extends Mod
 	{
-		this.modType = Mod.MOD_TEMPLATECHARACTER;
 		public function TemplateCharacterMod() 
 		{
-			
+			modType = Mod.MOD_TEMPLATECHARACTER;
 		}
-		
 		public function Dispose():void
 		{
 			

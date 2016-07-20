@@ -23,7 +23,8 @@ package
 		
 		private var m_name:String;
 		
-		private var m_title:String;
+		//Optional string that will be used instead of the name when the music player's menu gives information on the playing music.
+		private var m_displayInfo:String;
 		
 		private var m_sourceSound:Sound; //The Sound that contains audio data needed to play music
 		
@@ -32,9 +33,10 @@ package
 		private var m_extractedSamples:Number;
 		private var m_currentSamplePosition:Number;
 		
-		public function Music(sourceSound:Sound, musicTitle:String, loopStartPoint:Number = 0, loopEndPoint:Number = 0, musicStartPoint:Number = 0)
+		public function Music(sourceSound:Sound, musicName:String, musicInfo:String, loopStartPoint:Number = 0, loopEndPoint:Number = 0, musicStartPoint:Number = 0)
 		{
-			m_title = musicTitle;
+			m_name = musicName;
+			m_displayInfo = musicInfo;
 			m_sourceSound = sourceSound;
 			
 			if (loopEndPoint == 0)
@@ -109,9 +111,15 @@ package
 		{
 			return m_musicStartTime;
 		}
-		public function GetMusicTitle():String
+		
+		public function GetMusicName():String
 		{
-			return m_title;
+			return m_name;
+		}
+		
+		public function GetMusicInfo():String
+		{
+			return m_displayInfo;
 		}
 		public function GetLoopStart():Number
 		{

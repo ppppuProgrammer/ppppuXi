@@ -43,7 +43,7 @@ package menu
 			
 			//animationList.rolloverColor = 0xEEEEEE;
 			
-			randomAnimationButton = new RandomAnimationButton(this, 0, animationList.y + animationList.height + 10, "?");
+			randomAnimationButton = new RandomAnimationButton(this, 0, animationList.y + animationList.height, "?");
 			randomAnimationButton.setSize(45, 45);
 			randomAnimationButton.name = "Random Animation Button";
 			modeLabel = new Label(this, 5, 0, "Mode:\nChange");
@@ -111,6 +111,11 @@ package menu
 		public function SetAnimationList(locks:Vector.<Boolean>):void
 		{
 			animationList.ResetList(locks);
+		}
+		
+		public function Change9ItemsDisplayedOnList(next9Items:Boolean = true):void
+		{
+			animationList.ChangeAnimationItemsShown(next9Items);
 		}
 		
 		public function ChangeSelectedItem(index:int, moveScrollBar:Boolean=true):void

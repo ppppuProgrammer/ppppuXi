@@ -36,7 +36,7 @@
 		protected var m_backlightColor:ColorTransform = new ColorTransform();
 		
 		//The name of the music to play for the character.
-		protected var m_defaultMusicName:String = "Beep Block Skyway";
+		protected var m_preferredMusicName:String = "Beep Block Skyway";
 		
 		public var test:MovieClip;
 		//private var m_playAnimationId:int = 0;
@@ -63,8 +63,36 @@
 		
 		private var displayArea:Sprite = new Sprite();
 		
-		public function AnimatedCharacter() 
+		public function AnimatedCharacter(characterData:Object=null) 
 		{
+			if (characterData == null) { return; }
+			
+
+			m_topLeftDiamondColor = characterData.tlColor;
+			m_centerDiamondColor = characterData.cenColor;
+			m_bottomRightDiamondColor = characterData.brColor
+			m_outerDiamondColor = characterData.outColor;
+			m_backlightColor = characterData.lightColor;
+			
+			SetBackgroundColorsToDefault();
+			m_menuIcon = characterData.icon;
+			m_preferredMusicName = characterData.perferredMusic;
+			m_name = characterData.name;
+			
+			var animation:MovieClip = characterData.animation;
+			if (animation != null)
+			{
+				if ( animation.numChildren > 1)
+				{
+					AddAnimation(animation);
+				}
+				else if(animation.numChildren == 1)
+				{
+					AddAnimationsFromMovieClip(animation);
+				}
+			}
+			animation.stopAllMovieClips();
+			animation = null;
 			
 		}
 		
@@ -86,7 +114,7 @@
 		public function GetName():String	{return m_name;}
 		public function GetIcon():Sprite	{ return m_menuIcon; }
 		
-		public function GetDefaultMusicName():String	{return m_defaultMusicName;}
+		public function GetPreferredMusicName():String	{return m_preferredMusicName;}
 		
 		public function UpdateBackgroundColors():void
 		{
@@ -495,7 +523,7 @@
 			return m_idTargets;
 		}
 		
-		protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform
+		/*protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform
 		{
 			var ct:ColorTransform = new ColorTransform();
 			ct.color = colorValue;
@@ -506,7 +534,7 @@
 				ct.alphaOffset = alpha;
 			}
 			return ct;
-		}
+		}*/
 	}
 
 }

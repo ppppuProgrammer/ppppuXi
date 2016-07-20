@@ -21,7 +21,6 @@ package
 	import flash.ui.Keyboard;
 	import CharacterManager;
 	import menu.MainMenu;
-	import MenuButton;
 	import modifications.*;
 	import flash.display.Sprite;
 	import flash.text.TextField;
@@ -66,7 +65,7 @@ package
 		private var startupLoadFreeze:Boolean = true;
 		
 		//Settings related
-		public var settingsSaveFile:SharedObject = SharedObject.getLocal("ppppSuperWiiU_Interactive");
+		public var settingsSaveFile:SharedObject = SharedObject.getLocal("ppppuXi");
 		
 		public var userSettings:UserSettings = new UserSettings();
 		
@@ -77,7 +76,7 @@ package
 		private var mainMenu:MainMenu;
 		
 		//Timing
-		private var totalRunFrames:int = 0;
+		private var totalRunFrames:uint = 0;
 		
 		//Music
 		private var musicPlayer:MusicPlayer = new MusicPlayer();
@@ -147,6 +146,8 @@ package
 			mainStage.x = (stage.stageWidth - mainStage.CharacterLayer.width /*- characterManager.MENUBUTTONSIZE/2*/) / 2;
 			mainStage.CharacterLayer.addChild(characterManager);
 			
+			LoadUserSettings();
+			
 			mainMenu = new MainMenu(characterManager, null/*characterManager.musicPlayer*/, userSettings);
 			addChild(mainMenu);
 			mainMenu.Initialize();
@@ -156,7 +157,12 @@ package
 			helpScreenMC = new HelpScreen();
 			//setup movie clips before we start using them.
 			SetupHelpMovieClip();
-			LoadUserSettings();
+			
+			var bbsMusicMod:M_BeepBlockSkyway = new M_BeepBlockSkyway();
+			addChild(bbsMusicMod);
+			removeChild(bbsMusicMod);
+			ProcessMod(bbsMusicMod);
+			
 			if (startupMods != null)
 			{
 				for (var i:int = 0, l:int = startupMods.length; i < l; ++i)
@@ -208,7 +214,7 @@ package
 		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
 		private function RunLoop(e:Event):void
 		{
-			var frameNum:int = totalRunFrames; //The current frame that the main stage is at.
+			var frameNum:uint = totalRunFrames; //The current frame that the main stage is at.
 
 			if(frameNum == 0)
 			{
@@ -220,6 +226,7 @@ package
 				{
 					mainStage.gotoAndStop("Start");
 					PlayBackgroundAnimations();
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic(0, frameNum));
 				}
 			}
 			
@@ -229,6 +236,7 @@ package
 				//trace("Frame: " + totalRunFrames);
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
+				
 				if (userSettings.firstTimeRun == true)
 				{
 					UpdateKeyBindsForHelpScreen();
@@ -335,6 +343,7 @@ package
 				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
 				{
 					var charSwitchingAllowed:Boolean = characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
+					mainMenu.UpdateModeForCharacterSwitchButton(charSwitchingAllowed ? "Normal" : "Single" );
 					userSettings.UpdateCharacterSwitching(charSwitchingAllowed);
 					userSettings.UpdateRandomCharacterSelecting(characterManager.IsRandomlySelectingCharacter());
 					//if(characterManager.GetRandomSelectStatus() && !characterManager.GetCharSwitchStatus())
@@ -342,24 +351,20 @@ package
 						//characterManager.SetRandomSelectStatus(false);
 					//}
 				}
-				/*else if(keyPressed == keyBindings.PrevAnimPage.main || keyPressed == keyBindings.PrevAnimPage.alt)
+				else if(keyPressed == keyBindings.PrevAnimPage.main || keyPressed == keyBindings.PrevAnimPage.alt)
 				{
 					//Try to go to the previous page of animations
-					characterManager.GotoPrevAnimationPage();
+					mainMenu.ChangeThe9ItemsDisplayedForAnimations(false);
 				}
 				else if(keyPressed == keyBindings.NextAnimPage.main || keyPressed == keyBindings.NextAnimPage.alt)
 				{
 					//Try to go to the next page of animations
-					characterManager.GotoNextAnimationPage();
-				}*/
+					mainMenu.ChangeThe9ItemsDisplayedForAnimations(true);
+				}
 				else if(keyPressed == keyBindings.AnimLockMode.main || keyPressed == keyBindings.AnimLockMode.alt)
 				{
 					//toggle animation lock/goto mode
-					mainMenu.ToggleAnimationMenuKeyboardMode();
-					//characterManager.ToggleAnimationLockMode();
-					//query menu for lock mode
-					//set menu's lock mode too its inverse
-					
+					mainMenu.ToggleAnimationMenuKeyboardMode();					
 				}
 				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
 				{
@@ -370,29 +375,25 @@ package
 				{
 					//Go to the character who the menu cursor is on
 					mainMenu.SelectCharacter();
-					//mainMenu.SwitchToSelectedCharacter();
-					//userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
-					//characterManager.GotoSelectedMenuCharacter(characterManager.GetMenuCursorPosition());
-					//settingsSaveFile.flush();
 				}
 				else if(keyPressed == keyBindings.CharCursorPrev.main || keyPressed == keyBindings.CharCursorPrev.alt)
 				{
 					//Move menu cursor to the character above
-					//characterManager.MoveMenuCursorToPrevPos();
 					mainMenu.MoveCharacterSelector(-1);
 				}
 				else if(keyPressed == keyBindings.CharCursorNext.main || keyPressed == keyBindings.CharCursorNext.alt)
 				{
 					//Move menu cursor to the character below
-					//characterManager.MoveMenuCursorToNextPos();
 					mainMenu.MoveCharacterSelector(1);
 				}
 				else if(keyPressed == keyBindings.RandomChar.main || keyPressed == keyBindings.RandomChar.alt)
 				{
 					//Toggles random character switching
 					var randomCharSelect:Boolean = characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
+					mainMenu.UpdateModeForCharacterSwitchButton(randomCharSelect ? "Random" : "Normal");
 					userSettings.UpdateCharacterSwitching(characterManager.AreCharacterSwitchesAllowed());
 					userSettings.UpdateRandomCharacterSelecting(randomCharSelect);
+					
 				}
 				else if(keyPressed == keyBindings.Menu.main || keyPressed == keyBindings.Menu.alt)
 				{
@@ -434,17 +435,19 @@ package
 				}
 				else if(keyPressed == keyBindings.PrevMusic.main || keyPressed == keyBindings.PrevMusic.alt)
 				{
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(totalRunFrames));
 					//characterManager.ChangeMusicForCurrentCharacter(false);
 				}
 				else if(keyPressed == keyBindings.NextMusic.main || keyPressed == keyBindings.NextMusic.alt)
 				{
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(totalRunFrames));
 					//characterManager.ChangeMusicForCurrentCharacter(true);
 				}
-				else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
+				/*else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
 				{
 					//characterManager.SetCurrentMusicForAllCharacters();
 					//characterManager.MusicForEachOrAll();
-				}
+				}*/
 				else if(keyPressed == keyBindings.Activate.main || keyPressed == keyBindings.Activate.alt)
 				{
 					//characterManager.SetCurrentMusicForAllCharacters();
@@ -458,7 +461,7 @@ package
 			}
 			keyDownStatus[keyEvent.keyCode] = true;
 		}
-	
+		[inline]
 		public function ChangeBackgroundVisibility(visible:Boolean, playFrameNum:int):void
 		{
 			userSettings.UpdateShowBackground(visible);
@@ -467,13 +470,14 @@ package
 			{
 				this.scrollRect = null;
 				
-				mainStage.CharacterLayer.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
+				mainStage.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
 					
 				StopBackgroundAnimations();
 			}
 			else
 			{
-				mainStage.CharacterLayer.scrollRect = null;
+				mainStage.scrollRect = null;
+				//mainStage.CharacterLayer.scrollRect = null;
 				PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
 			}
 			
@@ -485,9 +489,10 @@ package
 			//settingsSaveFile.flush();
 			
 			//Do not make the light visible if the background isn't being shown
-			if (!(!userSettings.showBackground && visible))
+			if (!userSettings.showBackground && visible)
 			{
-				mainStage.BacklightBG.visible = visible;
+				mainStage.BacklightBG.visible = false;
+				return;
 			}
 			if(!visible)
 			{
@@ -554,20 +559,18 @@ package
 			
 			var modType:int = mod.GetModType();
 			
-			if (modType == Mod.MOD_ANIMATION)
-			{
-				//Not used in interactive versions
-			}
-			else if (modType == Mod.MOD_ANIMATEDCHARACTER)
+			if (modType == Mod.MOD_ANIMATEDCHARACTER)
 			{
 				var animCharacterMod:AnimatedCharacterMod = mod as AnimatedCharacterMod;
 				if (animCharacterMod)
 				{
-					var characterName:String = animCharacterMod.GetCharacter().GetName();
-					if (characterManager.AddCharacter(animCharacterMod.GetCharacter()))
+					var characterData:Object = animCharacterMod.GetCharacterData();
+					var character:AnimatedCharacter = new AnimatedCharacter(characterData);
+					//var characterName:String = characterData;
+					if (characterManager.AddCharacter(character))
 					{
-						mainMenu.AddIconToCharacterMenu(animCharacterMod.GetCharacter().GetIcon());
-						TryToLoadCharacterSettings(characterName);
+						mainMenu.AddIconToCharacterMenu(characterData.icon);
+						TryToLoadCharacterSettings(characterData.name);
 					}
 				}
 				
@@ -590,7 +593,7 @@ package
 				var music:MusicMod = mod as MusicMod;
 				if (music)
 				{
-					//musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime());
+					musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime());
 				}
 			}
 			else if (modType == Mod.MOD_ASSETS)
@@ -645,10 +648,10 @@ package
 			}
 			//if (userSettings.limitRenderArea == true) { ToggleDrawLimiter(); }
 			ChangeBackgroundVisibility(userSettings.showBackground, 0);
-			if (userSettings.showBackground == true)
+			/*if (userSettings.showBackground == true)
 			{
 				mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
-			}
+			}*/
 			SetBackLight(userSettings.backlightOn, 0);	
 			
 			//characterManager.GotoSelectedMenuCharacter(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
@@ -772,7 +775,7 @@ package
 			{
 				keybindingObj = userSettings.keyBindings.Music;
 			}
-			else if (textFieldName == "CharDefMusicText")
+			else if (textFieldName == "CharPrefMusicText")
 			{
 				keybindingObj = userSettings.keyBindings.CharTheme;
 			}
@@ -784,10 +787,10 @@ package
 			{
 				keybindingObj = userSettings.keyBindings.NextMusic;
 			}
-			else if (textFieldName == "MusicForAllText")
+			/*else if (textFieldName == "MusicForAllText")
 			{
 				keybindingObj = userSettings.keyBindings.MusicForAll;
-			}
+			}*/
 			else if (textFieldName == "ActivateText")
 			{
 				keybindingObj = userSettings.keyBindings.Activate;
@@ -846,7 +849,7 @@ package
 		/*Most animations run for 120 frames / 4 seconds. The mainstage movie clip has over 120 frames though, so some calculations
 		 * are necessary to derive the frame number that an animation should be set to.*/
 		[inline]
-		private function GetFrameNumberToSetForAnimation():int
+		private function GetFrameNumberToSetForAnimation():uint
 		{
 			return (totalRunFrames % 120);
 		}
@@ -876,13 +879,16 @@ package
 		[inline]
 		private function PlayBackgroundAnimations(startFrame:int = 1):void
 		{
-			mainStage.OuterDiamondBG.gotoAndPlay(startFrame);
-			mainStage.InnerDiamondBG.gotoAndPlay(startFrame);
-			mainStage.TransitionDiamondBG.gotoAndPlay(startFrame);
-			mainStage.BacklightBG.gotoAndPlay(startFrame);
-			if (userSettings.backlightOn == true)
+			if (userSettings.showBackground == true)
 			{
-				mainStage.BacklightBG.visible = true;
+				mainStage.OuterDiamondBG.gotoAndPlay(startFrame);
+				mainStage.InnerDiamondBG.gotoAndPlay(startFrame);
+				mainStage.TransitionDiamondBG.gotoAndPlay(startFrame);
+				mainStage.BacklightBG.gotoAndPlay(startFrame);
+				if (userSettings.backlightOn == true)
+				{
+					mainStage.BacklightBG.visible = true;
+				}
 			}
 		}
 		

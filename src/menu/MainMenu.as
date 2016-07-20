@@ -1,6 +1,7 @@
 package menu 
 {
 	import com.bit101.components.PushButton;
+	import events.CharacterModeChangedEvent;
 	import events.LockEvent;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -22,10 +23,11 @@ package menu
 		
 		private var characterMenu:CharacterMenu;
 		private var animationMenu:AnimationMenu;
+		private var musicMenu:MusicMenu;
 		
 		/*Tells what frame the currently playing animation should be on. The only exception to this are animations that require a 
 		 * transition to be accessed.*/
-		private var currentFrameForAnimation:int = 0;
+		private var currentFrameForAnimation:uint = 0;
 		
 		private var settingsButton:PushButton;
 		private var keyConfig:Config;
@@ -42,11 +44,25 @@ package menu
 		
 		public function Initialize():void
 		{
-			characterMenu = new CharacterMenu();
+			var startCharSwitchMode:String = null;
+			if (userSettings.randomlySelectCharacter == true && userSettings.allowCharacterSwitches == true)
+			{
+				startCharSwitchMode = "Random";
+			}
+			else if (userSettings.randomlySelectCharacter == false && userSettings.allowCharacterSwitches == true)
+			{
+				startCharSwitchMode = "Normal";
+			}
+			if (userSettings.randomlySelectCharacter == false && userSettings.allowCharacterSwitches == false)
+			{
+				startCharSwitchMode = "Single";
+			}
+			characterMenu = new CharacterMenu(startCharSwitchMode);
 			addChild(characterMenu);
 			
 			addEventListener(Event.SELECT, SelectHandler, true);
 			addEventListener(LockEvent.LOCK, LockHandler, true);
+			addEventListener(CharacterModeChangedEvent.CHARACTER_MODE_CHANGE, CharacterAutoSelectHandler, true);
 			
 			//characterMenu.AddEventListenerToCharList(Event.SELECT, CharacterSelected);
 			//characterMenu.AddEventListenerToCharList(events.LockEvent.LOCK, SetCharacterLock);
@@ -62,6 +78,12 @@ package menu
 			animationMenu.x = stage.stageWidth - animationMenu.width;
 			//animationMenu.AddEventListenerToAnimList(Event.SELECT, AnimationSelected);
 			//characterMenu
+			musicMenu = new MusicMenu(this, 0, 690);
+		}
+		
+		public function UpdateModeForCharacterSwitchButton(modeString:String):void
+		{
+			characterMenu.ChangeModeOfCharacterChangeButton(modeString);
 		}
 		
 		public function SetupMenusForCharacter(charId:int, characterSettings:Object):void
@@ -101,6 +123,32 @@ package menu
 			else if (e.target.name == "Animation Select List")
 			{
 				SetAnimationLock(e);
+			}
+			e.stopPropagation();
+		}
+		
+		private function CharacterAutoSelectHandler(e:Event):void
+		{
+			var charModeEvent:CharacterModeChangedEvent = e as CharacterModeChangedEvent;
+			if (charModeEvent != null)
+			{
+				switch(charModeEvent.mode)
+				{
+					case "Normal":
+						characterManager.SetAllowingCharacterSwitching(true);
+						characterManager.SetIfRandomlySelectingCharacter(false);
+						break;
+					case "Single":
+						characterManager.SetAllowingCharacterSwitching(false);
+						characterManager.SetIfRandomlySelectingCharacter(false);
+						break;
+					case "Random":
+						characterManager.SetAllowingCharacterSwitching(false);
+						characterManager.SetIfRandomlySelectingCharacter(true);
+						break;
+				}
+				userSettings.UpdateCharacterSwitching(characterManager.AreCharacterSwitchesAllowed());
+				userSettings.UpdateRandomCharacterSelecting(characterManager.IsRandomlySelectingCharacter());
 			}
 			e.stopPropagation();
 		}
@@ -284,6 +332,11 @@ package menu
 			return itemTrueIndex;
 		}
 		
+		public function ChangeThe9ItemsDisplayedForAnimations(showNext9Items:Boolean):void
+		{
+			animationMenu.Change9ItemsDisplayedOnList(showNext9Items);
+		}
+		//}
 		
 		/* Character Menu*/
 		//{
@@ -352,7 +405,7 @@ package menu
 		//{
 		
 		
-		public function UpdateFrameForAnimationCounter(frame:int):void
+		public function UpdateFrameForAnimationCounter(frame:uint):void
 		{
 			currentFrameForAnimation = frame;
 		}
@@ -365,6 +418,14 @@ package menu
 		
 		//}
 		
+		/* Music Menu*/
+		//{
+		public function ChangeMusicMenuDisplayedInfo(text:String):void
+		{
+			if (text == null) { return;}
+			musicMenu.ChangeMusicInfoDisplay(text);
+		}
+		//}
 	}
 
 }

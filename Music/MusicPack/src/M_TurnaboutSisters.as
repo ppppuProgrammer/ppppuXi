@@ -12,10 +12,10 @@ package
 		{
 			sourceSound = new BGM_TurnaboutSisters;
 			musicName = "Turnabout Sisters";
-			displayInfo = "Turnabout Sisters 2001 - Phoenix Wright Ace Attorney";
+			displayInfo = "Turnabout Sisters 2001";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(0) + startTime;
-			endLoopTime= (ConvertSamplesToMilliseconds(0) + startTime);
+			startLoopTime = -1;
+			endLoopTime= -1;
 		}
 		
 	}

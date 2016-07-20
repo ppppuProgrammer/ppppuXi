@@ -85,6 +85,16 @@ package menu
 			invalidate();
 			//dispatchEvent(new Event(Event.SELECT));
 		}
+		
+		public function ChangeAnimationItemsShown(next9Items:Boolean):void
+		{
+			if (next9Items == true)
+			{_scrollbar.value += 9;}
+			else
+			{_scrollbar.value -= 9; }
+			
+			invalidate();
+		}
 	}
 
 }

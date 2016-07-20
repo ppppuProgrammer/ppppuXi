@@ -27,7 +27,6 @@ package modifications
 		//The mod will add in an animation template. Prefix is "TANIM"
 		public static const MOD_TEMPLATEANIMATION:int = 6;
 		
-		
 		protected var modType:int = MOD_UNDEFINED;
 		//Upon creation, a ppppuMod will listen for an added to stage event and when added to the stage will invoke the first frame function.
 		//That function is where the content will be generated for use then added into the main program.
@@ -35,7 +34,6 @@ package modifications
 		{
 			this.addEventListener(Event.ADDED_TO_STAGE, FirstFrame);
 		}
-		
 		//Function to be implemented by any sub classes. This is where the subclass will do any work necessary to get the data ready to
 		//be read by the ppppu program
 		protected function FirstFrame(e:Event):void

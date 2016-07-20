@@ -15,10 +15,9 @@ package modifications
 		
 		public function TemplateAnimationMod() 
 		{
-			modType = Mod.MOD_ANIMATION; 
+			modType = Mod.MOD_TEMPLATEANIMATION; 
 			timelinesData = new Vector.<Object>();
 		}
-		
 		public function GetDataForTimelinesCreation():Vector.<Object>
 		{
 			return timelinesData;

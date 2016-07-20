@@ -1,6 +1,7 @@
 package modifications 
 {
 	import flash.media.Sound;
+	import flash.events.Event;
 	/**
 	 * ...
 	 * @author 
@@ -15,15 +16,24 @@ package modifications
 		protected var startLoopTime:Number = 0;
 		//Time in milliseconds of where  the end loop of the music is. Upon reaching this, the playhead will be set to the start loop time.
 		protected var endLoopTime:Number = -1;
-		/*The name used to refer to the music instance. This is used by characters to denote their default song. Checks involving the name
+		/*The name used to refer to the music instance. This is used by characters to denote their preferred song. Checks involving the name
 		 * are case insensitive, so 2 different music mods named "BgM" and "BGM" will conflict and the first one loaded will only be used.*/
 		protected var musicName:String = "";
 		//The text to display on the music player when the music is playing
 		protected var displayInfo:String = "";
 		
+		
 		public function MusicMod() 
 		{
 			modType = Mod.MOD_MUSIC;
+		}
+		override protected function FirstFrame(e:Event):void
+		{
+			super.FirstFrame(e);
+			if (displayInfo == null || displayInfo.length == 0)
+			{
+				displayInfo = musicName;
+			}
 		}
 		
 		public override function Dispose():void
