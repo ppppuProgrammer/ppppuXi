@@ -147,11 +147,11 @@ package menu
 			var numItems:int = Math.ceil(_height / _listItemHeight);
 			numItems = Math.min(numItems, _items.length);
 			
-			if (offset + numItems >= value)
+			if (offset /*+ numItems*/ >= value)
 			{
 				_scrollbar.value = value - numItems +1;
 			}
-			else if (offset + numItems <= value)
+			else if (offset + numItems -1 <= value)
 			{
 				_scrollbar.value = value;
 			}

@@ -480,15 +480,13 @@ package
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = visible;
 			if (!visible)
 			{
-				this.scrollRect = null;
-				
-				mainStage.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
+				mainStage.CharacterLayer.scrollRect = new Rectangle(0, 0, mainStage.CharacterLayer.getChildAt(0).width, stage.stageHeight);
 					
 				StopBackgroundAnimations();
 			}
 			else
 			{
-				mainStage.scrollRect = null;
+				mainStage.CharacterLayer.scrollRect = null;
 				//mainStage.CharacterLayer.scrollRect = null;
 				PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
 				/*if (userSettings.backlightOn)

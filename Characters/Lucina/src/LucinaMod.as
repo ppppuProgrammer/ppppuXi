@@ -23,7 +23,7 @@ package
 			m_menuIcon = new LucinaIcon;
 			
 			m_characterName = "Lucina";
-			m_preferredMusicName = " FE Spa";
+			m_preferredMusicName = "FE Spa";
         }
     }
 }

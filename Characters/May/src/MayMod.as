@@ -22,7 +22,7 @@ package
 			m_menuIcon = new MayIcon;
 			
 			m_characterName = "May";
-			m_preferredMusicName = "Miror B. Battle - Pokemon MayD";
+			m_preferredMusicName = "Miror B";
         }
     }
 }

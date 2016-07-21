@@ -17,11 +17,12 @@ package
 	import avmplus.DescribeTypeJSON;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
+	import flash.display.DisplayObjectContainer;
 	/**
 	 * Class for the key input configuration menus of ppppu interactive/NX
 	 * @author 
 	 */
-	public class Config extends Sprite
+	public class Config extends Panel
 	{
 		
 		//private var m_parent:MovieClip;
@@ -29,7 +30,7 @@ package
 		public const m_height:Number = 640;
 		private var buttonAwaitingKeyInput:PushButton=null;
 		private var userSettings:UserSettings;
-		private var p_config:Panel;
+		//private var this:Panel;
 		private const UNASSIGNED_TEXT:String = "Unassigned";
 		private var _labelPosY:Number = 0;
 		private function get labelPosY():Number { var value:Number = _labelPosY;  _labelPosY += 10;  return value; }
@@ -41,8 +42,10 @@ package
 		
 		private var warningText:Label;
 		
-		public function Config(/*parentMC:MovieClip,*/ settings:UserSettings) 
+		//public function Config(/*parentMC:MovieClip,*/ settings:UserSettings) 
+		public function Config(settings:UserSettings, parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number =  0)
 		{
+			super(parent, xpos, ypos);
 			//m_parent = parentMC;
 			userSettings = settings;
 			keyDict = GetKeyboardDict();
@@ -51,57 +54,57 @@ package
 		
 		private function InitMenu():void
 		{
-			p_config = new Panel();
-			addChild(p_config);
-			p_config.setSize(m_width, m_height);
-			p_config.addEventListener(MouseEvent.CLICK, PanelClickHandler,true);
+			//this = new Panel();
+			//addChild(this);
+			this.setSize(m_width, m_height);
+			this.addEventListener(MouseEvent.CLICK, PanelClickHandler,true);
 			var posY_multiplier:int = 3;
 			
 			var labelsPosX:Number = 5;
 			
 			//Labels
-			var l_description:Label = new Label(p_config, m_width / 4, posY_multiplier * labelPosY, "key configuration");
+			var l_description:Label = new Label(this, m_width / 4, posY_multiplier * labelPosY, "key configuration");
 			var txtFormat:TextFormat = l_description.textField.getTextFormat();
 			txtFormat.size = 24;
 			txtFormat.font = "Super Mario 256";
 			l_description.textField.setTextFormat(txtFormat);
 			l_description.setSize(100, 20);
-			var l_description2:Label = new Label(p_config, 0, posY_multiplier * labelPosY, "Click a box to change the key for a function. Press Escape to clear a key.");
+			var l_description2:Label = new Label(this, 0, posY_multiplier * labelPosY, "Click a box to change the key for a function. Press Escape to clear a key.");
 			l_description2.x = (m_width - l_description2.width) / 2;
 			//Character
-			var l_lockChar:Label = new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Lock selected character");
-			var l_switchChar:Label = new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Switch to selected character");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Automatic character switch toggle");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Random character select toggle");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Character cursor up");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Character cursor down");
+			var l_lockChar:Label = new Label(this, labelsPosX, posY_multiplier*labelPosY, "Lock selected character");
+			var l_switchChar:Label = new Label(this, labelsPosX, posY_multiplier*labelPosY, "Switch to selected character");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Automatic character switch toggle");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Random character select toggle");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Character cursor up");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Character cursor down");
 			//Animation
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Previous animation page");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Next animation page");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Animation menu switch/lock mode toggle");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Previous animation page");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Next animation page");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Animation menu switch/lock mode toggle");
 			//Misc
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Show/hide menus");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Show/hide help");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change help page");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Backlight ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Background ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Music ON/OFF");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Use character's preferred music");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change to previous music");
-			new Label(p_config, labelsPosX, posY_multiplier*labelPosY, "Change to next music");
-			//new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Toggle same music for all characters mode");
-			new Label(p_config, labelsPosX, (posY_multiplier * labelPosY), "Activate scene transition if available");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Show/hide menus");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Show/hide help");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Change help page");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Backlight ON/OFF");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Background ON/OFF");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Music ON/OFF");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Use character's preferred music");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Change to previous music");
+			new Label(this, labelsPosX, posY_multiplier*labelPosY, "Change to next music");
+			//new Label(this, labelsPosX, (posY_multiplier * labelPosY), "Toggle same music for all characters mode");
+			new Label(this, labelsPosX, (posY_multiplier * labelPosY), "Activate scene transition if available");
 			
-			warningText = new Label(p_config, 40, m_height - 20, "");
+			warningText = new Label(this, 40, m_height - 20, "");
 			var warningTxtFormat:TextFormat = warningText.textField.getTextFormat();
 			warningText.textField.textColor = 0xFF0000;
 			warningTxtFormat.size = 14;
 			warningText.textField.setTextFormat(warningTxtFormat);
 			
-			CreateButtons(p_config, keyFunctionsList);
+			CreateButtons(this, keyFunctionsList);
 			
 			//Exit button
-			var exitButton:PushButton = new PushButton(p_config, m_width - 32, 0, "X", CloseHandler);
+			var exitButton:PushButton = new PushButton(this, m_width - 32, 0, "X", CloseHandler);
 			exitButton.setSize(32, 32);
 		}
 		
@@ -143,7 +146,7 @@ package
 					return;
 				}
 			}
-			p_config.removeEventListener(MouseEvent.CLICK, PanelClickHandler);
+			this.removeEventListener(MouseEvent.CLICK, PanelClickHandler);
 			/*Changes the focus from the exit button. This is done because if the exit button has the stage's focus when the ppppuConfig instance
 			removes itself from its parent, the stage completely loses focus and requires the user to click anywhere to regain focus.*/
 			stage.focus = this;
@@ -221,14 +224,14 @@ package
 				if (keybinds[keyFunctionsList[i]].main == keycode)
 				{
 					keybinds[keyFunctionsList[i]].main = -1;
-					button = (p_config.content.getChildByName(keyFunctionsList[i] + "_main") as PushButton);
+					button = (this.content.getChildByName(keyFunctionsList[i] + "_main") as PushButton);
 					button.label = KeyCodeToString(-1);
 					return;
 				}
 				else if (keybinds[keyFunctionsList[i]].alt == keycode)
 				{
 					keybinds[keyFunctionsList[i]].alt = -1;
-					button = (p_config.content.getChildByName(keyFunctionsList[i] + "_alt") as PushButton);
+					button = (this.content.getChildByName(keyFunctionsList[i] + "_alt") as PushButton);
 					button.label = KeyCodeToString(-1);
 					return;
 				}

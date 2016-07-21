@@ -40,6 +40,7 @@ package menu
 			musicPlayer = bgmPlayer;
 			userSettings = settings;
 			keyConfig = new Config(userSettings);
+			
 		}
 		
 		public function Initialize():void
@@ -80,6 +81,8 @@ package menu
 			//characterMenu
 			musicMenu = new MusicMenu(this, 0, 690, ClickHandler);
 			musicMenu.UpdateMusicEnabledButton(userSettings.playMusic);
+			
+			keyConfig.x = (stage.stageWidth - keyConfig.width) / 2;
 		}
 		
 		public function UpdateModeForCharacterSwitchButton(modeString:String):void

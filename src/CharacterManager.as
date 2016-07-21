@@ -207,6 +207,10 @@
 				character.SetLockOnAnimation(animFrame, animLockObject[animFrame]);
 			}
 			m_characterLocks[charId] = settings.locked;
+			if (settings.locked == true)
+			{
+				++m_unswitchableCharactersNum;
+			}
 			var animSelect:int = settings.animationSelect;
 			if (animSelect == 0)
 			{
