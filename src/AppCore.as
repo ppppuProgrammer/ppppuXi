@@ -419,6 +419,8 @@ package
 					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
 					mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
 					userSettings.playMusic = musicEnabled;
+					var displayText:String = musicPlayer.PlayMusic( -2, totalRunFrames);
+					mainMenu.ChangeMusicMenuDisplayedInfo(displayText);
 					//characterManager.ToggleMusicPlay();
 				}
 				else if(keyPressed == keyBindings.CharPreferredMusic.main || keyPressed == keyBindings.CharPreferredMusic.alt)

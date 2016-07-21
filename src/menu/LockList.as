@@ -63,27 +63,28 @@ package menu
 		}
 		
 		//locks/unlocks an item of a specified index. Returns the new locked value for the item.
-		public function ToggleItemLock(index:int):void
+		/*public function ToggleItemLock(index:int):void
 		{
 			if (index > -1 && index < _itemHolder.numChildren)
 			{
 				var item:LockListItem = (_itemHolder.getChildAt(index) as LockListItem);
 				item.locked = !item.locked;
 			}
-		}
+		}*/
 		
-		public function SetItemLock(lockIndex:int, value:Boolean):void
+		/*public function SetItemLock(lockIndex:int, value:Boolean):void
 		{
 			var numItems:int = Math.ceil(_height / _listItemHeight);
 			numItems = Math.min(numItems, _items.length);
-			if (lockIndex < numItems)
-			{
-				var item:LockListItem = _itemHolder.getChildAt(lockIndex) as LockListItem;
+			//if (lockIndex < numItems)
+			//{
+				var item:LockListItem = _itemHolder.getChildAt(lockIndex-_scrollbar.value) as LockListItem;
 				item.locked = value;
-			}
-		}
+				//item.draw();
+			//}
+		}*/
 		
-		public function SetItemLocks(locks:Vector.<Boolean>):void
+		/*public function SetItemLocks(locks:Vector.<Boolean>):void
 		{
 			var numItems:int = Math.ceil(_height / _listItemHeight);
 			numItems = Math.min(numItems, _items.length);
@@ -92,7 +93,7 @@ package menu
                 var item:LockListItem = _itemHolder.getChildAt(i) as LockListItem;
 				item.locked = locks[i];
 			}
-		}
+		}*/
 		
 		/**
 		 * Creates all the list items based on data.

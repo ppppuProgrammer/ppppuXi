@@ -134,7 +134,10 @@ package menu
 		
 		public function ChangeLockOnItem(index:int, lock:Boolean):void
 		{
-			animationList.SetItemLock(index, lock);
+			animationList.items[index].locked = lock;
+			animationList.draw();
+			//animationList.SetItemLock(index, lock);
+			//animationList.ForceItemRedrawThisFrame();
 		}
 	}
 

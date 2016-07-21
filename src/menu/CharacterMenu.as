@@ -58,14 +58,14 @@ package menu
 		/*Toggles the lock on the currently selected character on the menu. Used when the Keyboard is the input device.
 		 * Returns the selected index of the character list.*/
 		
-		public function ToggleLockOnMenuCursor():int
+		/*public function ToggleLockOnMenuCursor():int
 		{
 			if (characterList.menuCursorIndex > -1)
 			{
 				characterList.ToggleItemLock(characterList.menuCursorIndex);
 			}
 			return characterList.menuCursorIndex;
-		}
+		}*/
 		
 		public function GetSelectedIndex():int
 		{

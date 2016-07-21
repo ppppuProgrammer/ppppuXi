@@ -293,7 +293,7 @@ package menu
 					//For keyboard input the animation items need to be manually updated to reflect any changes.
 					if (e == null)
 					{
-						UpdateAnimationIndexSelected(index); 
+						UpdateAnimationIndexSelected(index, false); 
 					}
 					else
 					{
