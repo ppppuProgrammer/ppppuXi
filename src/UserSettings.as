@@ -21,7 +21,7 @@ package
 		public var playOneSongForAllCharacters:Boolean = false;
 		public var globalSongTitle:String = "Beep Block Skyway";
 		//The latest version of the user settings. Change this whenever there is a modification with the class properties (renaming, adding/removing)
-		public const SAVE_VERSION:int = 5;
+		public const SAVE_VERSION:int = 6;
 		//The version of the settings that this settings object was created for.
 		public var version:int = SAVE_VERSION;
 		public function UserSettings() 
@@ -42,10 +42,10 @@ package
 			//keyBindings.DisplayLimit = new Object();
 			keyBindings.Background = new Object();
 			keyBindings.Music = new Object();
-			keyBindings.CharTheme = new Object();
+			keyBindings.CharPreferredMusic = new Object();
 			keyBindings.PrevMusic = new Object();
 			keyBindings.NextMusic = new Object();
-			keyBindings.MusicForAll = new Object();
+			//keyBindings.MusicForAll = new Object();
 			keyBindings.Activate = new Object();
 			//Set up default key bindings
 			keyBindings.LockChar.main = Keyboard.LEFT; keyBindings.LockChar.alt = -1;
@@ -64,7 +64,7 @@ package
 			//keyBindings.DisplayLimit.main = Keyboard.P; keyBindings.DisplayLimit.alt = -1;
 			keyBindings.Background.main = Keyboard.B; keyBindings.Background.alt = -1;
 			keyBindings.Music.main = Keyboard.M; keyBindings.Music.alt = -1;
-			keyBindings.CharTheme.main = Keyboard.N; keyBindings.CharTheme.alt = -1;
+			keyBindings.CharPreferredMusic.main = Keyboard.N; keyBindings.CharPreferredMusic.alt = -1;
 			keyBindings.PrevMusic.main = Keyboard.X; keyBindings.PrevMusic.alt = -1;
 			keyBindings.NextMusic.main = Keyboard.C; keyBindings.NextMusic.alt = -1;
 			//keyBindings.MusicForAll.main = Keyboard.G; keyBindings.MusicForAll.alt = -1;

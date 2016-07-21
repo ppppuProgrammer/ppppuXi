@@ -459,6 +459,11 @@
 			//Invalid id, so technically the char id given does not have any animations.
 			return false;
 		}
+		
+		public function GetPreferredMusicForCurrentCharacter():String
+		{
+			return m_currentCharacter.GetPreferredMusicName();
+		}
 	}
 
 }

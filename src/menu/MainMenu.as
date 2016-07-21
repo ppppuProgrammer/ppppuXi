@@ -63,7 +63,7 @@ package menu
 			addEventListener(Event.SELECT, SelectHandler, true);
 			addEventListener(LockEvent.LOCK, LockHandler, true);
 			addEventListener(CharacterModeChangedEvent.CHARACTER_MODE_CHANGE, CharacterAutoSelectHandler, true);
-			
+			//musicMenu.addEventListener(MouseEvent.CLICK, ClickHandler, true);
 			//characterMenu.AddEventListenerToCharList(Event.SELECT, CharacterSelected);
 			//characterMenu.AddEventListenerToCharList(events.LockEvent.LOCK, SetCharacterLock);
 			
@@ -78,7 +78,8 @@ package menu
 			animationMenu.x = stage.stageWidth - animationMenu.width;
 			//animationMenu.AddEventListenerToAnimList(Event.SELECT, AnimationSelected);
 			//characterMenu
-			musicMenu = new MusicMenu(this, 0, 690);
+			musicMenu = new MusicMenu(this, 0, 690, ClickHandler);
+			musicMenu.UpdateMusicEnabledButton(userSettings.playMusic);
 		}
 		
 		public function UpdateModeForCharacterSwitchButton(modeString:String):void
@@ -151,6 +152,44 @@ package menu
 				userSettings.UpdateRandomCharacterSelecting(characterManager.IsRandomlySelectingCharacter());
 			}
 			e.stopPropagation();
+		}
+		
+		private function ClickHandler(e:Event):void
+		{
+			var displayText:String;
+			switch(e.target.name)
+			{
+				case "Preferred Music Button":
+					var preferredMusicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
+					if (preferredMusicId > -1)
+					{
+						displayText = musicPlayer.PlayMusic(preferredMusicId, currentFrameForAnimation);
+						userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					}
+					else
+					{
+						displayText = null;
+					}
+					break;
+				case "Music Toggle Button":
+					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
+					musicMenu.UpdateMusicEnabledButton(musicEnabled);
+					userSettings.playMusic = musicEnabled;
+					displayText = musicPlayer.PlayMusic(-2, currentFrameForAnimation); 
+					break;
+				case "Next Music Button":
+					displayText = musicPlayer.ChangeToNextMusic(currentFrameForAnimation);
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					break;
+				case "Previous Music Button":
+					displayText = musicPlayer.ChangeToPrevMusic(currentFrameForAnimation);
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					break;
+			}
+			//Unlike the other event handlers DO NOT STOP PROPAGATION. This will cause select events to not
+			//be dispatch as certain elements, such as list items, will not receive the click event necessary
+			//to cause the dispatch.
+			ChangeMusicMenuDisplayedInfo(displayText);
 		}
 		//}
 		
@@ -420,10 +459,16 @@ package menu
 		
 		/* Music Menu*/
 		//{
+		[inline]
 		public function ChangeMusicMenuDisplayedInfo(text:String):void
 		{
 			if (text == null) { return;}
 			musicMenu.ChangeMusicInfoDisplay(text);
+		}
+		
+		public function UpdateMusicEnabledButtonForMusicMenu(enabled:Boolean):void
+		{
+			musicMenu.UpdateMusicEnabledButton(enabled);
 		}
 		//}
 	}

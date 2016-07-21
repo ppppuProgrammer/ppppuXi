@@ -37,7 +37,7 @@ package
 		public static var keyDict:Dictionary;
 		private var keyFunctionsList:Vector.<String> = new < String > ["LockChar", "GotoChar", "AutoCharSwitch", "RandomChar", 
 			"CharCursorPrev", "CharCursorNext", "PrevAnimPage", "NextAnimPage", "AnimLockMode", "Menu", "Help", "NextHelpPage",
-			"Backlight", "Background", "Music", "CharTheme", "PrevMusic", "NextMusic", "Activate"];
+			"Backlight", "Background", "Music", "CharPreferredMusic", "PrevMusic", "NextMusic", "Activate"];
 		
 		private var warningText:Label;
 		

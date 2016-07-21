@@ -148,7 +148,7 @@ package
 			
 			LoadUserSettings();
 			
-			mainMenu = new MainMenu(characterManager, null/*characterManager.musicPlayer*/, userSettings);
+			mainMenu = new MainMenu(characterManager, musicPlayer, userSettings);
 			addChild(mainMenu);
 			mainMenu.Initialize();
 			
@@ -170,7 +170,6 @@ package
 					ProcessMod(startupMods[i]);
 				}
 			}
-			
 			mainStage.play();
 			
 			
@@ -199,7 +198,7 @@ package
 			
 			//time
 			var buildAfterNoon:Boolean = (time.indexOf("PM") != -1) ? true : false;
-			var hour:String = String( int(time.substring(0, time.indexOf(":"))) + buildAfterNoon ? 12 : 0);
+			var hour:String = String( int(time.substring(0, time.indexOf(":"))) + (buildAfterNoon ? 12 : 0));
 			if (hour.length == 1) { hour = 0 + hour; }
 			var minute:String = time.substring(time.indexOf(":") + 1, time.indexOf(" "));
 			if (minute.length == 1) {  minute = 0 + minute; }
@@ -225,8 +224,10 @@ package
 				else
 				{
 					mainStage.gotoAndStop("Start");
+					ChangeBackgroundVisibility(userSettings.showBackground);
+					SetBackLight(userSettings.backlightOn);
 					PlayBackgroundAnimations();
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic(0, frameNum));
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic(-2, frameNum));
 				}
 			}
 			
@@ -407,18 +408,27 @@ package
 				}
 				else if(keyPressed == keyBindings.Backlight.main || keyPressed == keyBindings.Backlight.alt)
 				{
-					SetBackLight(!userSettings.backlightOn, GetFrameNumberToSetForAnimation());
+					SetBackLight(!userSettings.backlightOn);
 				}
 				else if(keyPressed == keyBindings.Background.main || keyPressed == keyBindings.Background.alt)
 				{
-					ChangeBackgroundVisibility(!userSettings.showBackground, ((mainStage.currentFrame - 2)% 120) + 1);
+					ChangeBackgroundVisibility(!userSettings.showBackground);
 				}
 				else if(keyPressed == keyBindings.Music.main || keyPressed == keyBindings.Music.alt)
 				{
+					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
+					mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
+					userSettings.playMusic = musicEnabled;
 					//characterManager.ToggleMusicPlay();
 				}
-				else if(keyPressed == keyBindings.CharTheme.main || keyPressed == keyBindings.CharTheme.alt)
+				else if(keyPressed == keyBindings.CharPreferredMusic.main || keyPressed == keyBindings.CharPreferredMusic.alt)
 				{
+					var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
+					if (musicId > -1)
+					{
+						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, totalRunFrames);
+						mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
+					}
 					//characterManager.UseDefaultMusicForCurrentCharacter();
 				}
 				else if(keyPressed == keyBindings.NextHelpPage.main || keyPressed == keyBindings.NextHelpPage.alt)
@@ -436,11 +446,13 @@ package
 				else if(keyPressed == keyBindings.PrevMusic.main || keyPressed == keyBindings.PrevMusic.alt)
 				{
 					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(totalRunFrames));
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					//characterManager.ChangeMusicForCurrentCharacter(false);
 				}
 				else if(keyPressed == keyBindings.NextMusic.main || keyPressed == keyBindings.NextMusic.alt)
 				{
 					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(totalRunFrames));
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					//characterManager.ChangeMusicForCurrentCharacter(true);
 				}
 				/*else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
@@ -462,7 +474,7 @@ package
 			keyDownStatus[keyEvent.keyCode] = true;
 		}
 		[inline]
-		public function ChangeBackgroundVisibility(visible:Boolean, playFrameNum:int):void
+		public function ChangeBackgroundVisibility(visible:Boolean):void
 		{
 			userSettings.UpdateShowBackground(visible);
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = visible;
@@ -479,11 +491,15 @@ package
 				mainStage.scrollRect = null;
 				//mainStage.CharacterLayer.scrollRect = null;
 				PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
+				/*if (userSettings.backlightOn)
+				{
+					SetBackLight(userSettings.backlightOn);
+				}*/
 			}
 			
 		}
 		
-		private function SetBackLight(visible:Boolean, playFrameNum:int):void
+		private function SetBackLight(visible:Boolean):void
 		{
 			userSettings.UpdateShowingBacklight(visible);
 			//settingsSaveFile.flush();
@@ -500,12 +516,9 @@ package
 			}
 			else
 			{
-				if(playFrameNum < 1)
-				{
-					playFrameNum = 1;
-				}
-				mainStage.BacklightBG.gotoAndPlay(playFrameNum);
+				mainStage.BacklightBG.gotoAndPlay(GetFrameNumberToSetForAnimation());
 			}
+			mainStage.BacklightBG.visible = visible;
 		}
 		
 		private function ToggleHelpScreen():void
@@ -594,6 +607,24 @@ package
 				if (music)
 				{
 					musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime());
+					if (music.GetName() == userSettings.globalSongTitle)
+					{
+						var chosenMusicId:int = musicPlayer.GetMusicIdByName(music.GetName());
+						if (chosenMusicId > -1)
+						{ 
+							//If totalRunFrames is 0 then the RunLoop has no started yet. This means that
+							//the music player should not have been told to play music yet, so use the SetInitialMusicToPlay function.
+							if (totalRunFrames == 0)
+							{
+								musicPlayer.SetInitialMusicToPlay(chosenMusicId);
+							}
+							else
+							{
+								musicPlayer.PlayMusic(chosenMusicId, totalRunFrames); 
+							}
+							
+						}
+					}	
 				}
 			}
 			else if (modType == Mod.MOD_ASSETS)
@@ -647,16 +678,19 @@ package
 				settingsSaveFile.data.ppppuSettings = userSettings;
 			}
 			//if (userSettings.limitRenderArea == true) { ToggleDrawLimiter(); }
-			ChangeBackgroundVisibility(userSettings.showBackground, 0);
+			
 			/*if (userSettings.showBackground == true)
 			{
 				mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
 			}*/
-			SetBackLight(userSettings.backlightOn, 0);	
+				
 			
 			//characterManager.GotoSelectedMenuCharacter(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
 			characterManager.SetAllowingCharacterSwitching(userSettings.allowCharacterSwitches);
 			characterManager.SetIfRandomlySelectingCharacter(userSettings.randomlySelectCharacter);
+			musicPlayer.SetIfMusicIsEnabled(userSettings.playMusic);
+			var chosenMusicId:int = musicPlayer.GetMusicIdByName(userSettings.globalSongTitle);
+			if (chosenMusicId > -1) { musicPlayer.SetInitialMusicToPlay(chosenMusicId);}
 			//if (!userSettings.playMusic) { characterManager.ToggleMusicPlay(); }
 			
 			//characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
@@ -777,7 +811,7 @@ package
 			}
 			else if (textFieldName == "CharPrefMusicText")
 			{
-				keybindingObj = userSettings.keyBindings.CharTheme;
+				keybindingObj = userSettings.keyBindings.CharPreferredMusic;
 			}
 			else if (textFieldName == "PrevMusicText")
 			{
@@ -855,14 +889,17 @@ package
 		}
 		private function AnimationTransitionOccured(e:Event):void
 		{
+			
 			StopBackgroundAnimations();
 			addEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
+			musicPlayer.StopMusic(totalRunFrames);
 		}
 		
 		private function ExitingLinkedAnimation(e:Event):void
 		{
 			removeEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
 			PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
+			musicPlayer.PlayMusic( -2, totalRunFrames);
 		}
 		[inline]
 		private function StopBackgroundAnimations():void

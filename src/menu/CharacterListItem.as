@@ -9,6 +9,7 @@ package menu
 	public class CharacterListItem extends LockListItem 
 	{
 		protected var _menuCursorOver:Boolean;
+		protected var _menuCursorColor:uint = 0x0000FF;
 		public function CharacterListItem(parent:DisplayObjectContainer=null, xpos:Number=0, ypos:Number=0, data:Object=null) 
 		{
 			super(parent, xpos, ypos, data);
@@ -35,9 +36,13 @@ package menu
 			{
 				graphics.beginFill(_selectedColor);
 			}
-			else if(_mouseOver || _menuCursorOver)
+			else if(_mouseOver)
 			{
 				graphics.beginFill(_rolloverColor);
+			}
+			else if (_menuCursorOver)
+			{
+				graphics.beginFill(_menuCursorColor);
 			}
 			else
 			{
@@ -47,6 +52,18 @@ package menu
 			graphics.endFill();
 		}
 		
+		/**
+		 * Sets/gets the menu cursor's background color for list items.
+		 */
+		public function set menuCursorColor(value:uint):void
+		{
+			_menuCursorColor = value;
+			invalidate();
+		}
+		public function get menuCursorColor():uint
+		{
+			return _menuCursorColor;
+		}
 	}
 
 }
