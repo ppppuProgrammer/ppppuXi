@@ -55,6 +55,7 @@
   <!-- SWC Libraries -->
   <libraryPaths>
     <element path="ppppuX-BaseAssets.swc" />
+    <element path="lib\sw3.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

@@ -32,6 +32,7 @@ package
 		private var m_soundData:ByteArray = new ByteArray();
 		private var m_extractedSamples:Number;
 		private var m_currentSamplePosition:Number;
+		public var debug_currentTimePosition:Number=0;
 		
 		public function Music(sourceSound:Sound, musicName:String, musicInfo:String, loopStartPoint:Number = 0, loopEndPoint:Number = 0, musicStartPoint:Number = 0)
 		{
@@ -85,11 +86,17 @@ package
 		public function SetPlayheadPosition(timeInMillisec:Number):void
 		{
 			m_currentSamplePosition = ConvertMillisecTimeToSample(timeInMillisec);
+			debug_currentTimePosition = timeInMillisec;
 		}
 		
 		public function GetPlayheadPosition():Number
 		{
 			return ConvertSampleTimeToMillisec(m_currentSamplePosition);
+		}
+		
+		public function DEBUG_GetCurrentSamplePosition():int
+		{
+			return m_currentSamplePosition;
 		}
 		
 		public function GetSourceSound():Sound
@@ -160,8 +167,10 @@ package
 				m_extractedSamples +=  m_sourceSound.extract(m_soundData, SAMPLES_PER_REQUEST - m_extractedSamples, m_currentSamplePosition);
 			}
 			m_currentSamplePosition += m_extractedSamples;
+			debug_currentTimePosition += (m_extractedSamples / 44.1)/ 2;
 			
 			event.data.writeBytes(m_soundData);
+			trace(m_name + "is at sample " + m_currentSamplePosition);
 		}
 		private function ConvertMillisecTimeToSample(timeMs:Number):Number
 		{

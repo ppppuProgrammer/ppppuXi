@@ -430,6 +430,7 @@ package
 					{
 						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, totalRunFrames);
 						mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
+						userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					}
 					//characterManager.UseDefaultMusicForCurrentCharacter();
 				}
@@ -467,10 +468,10 @@ package
 					//characterManager.SetCurrentMusicForAllCharacters();
 					characterManager.ActivateAnimationChange();
 				}
-				/*else if(keyPressed == Keyboard.E)
+				else if(keyPressed == Keyboard.END)
 				{
-					characterManager.DEBUG_TestMusicLoop();
-				}*/
+					musicPlayer.DEBUG_GoToMusicLastSection();
+				}
 				keyDownStatus[keyPressed] = true;
 			}
 			keyDownStatus[keyEvent.keyCode] = true;

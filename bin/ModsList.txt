@@ -33,3 +33,6 @@ ARCH_MusicPack.swf
 #Music mods
 #M_CMCTheme.swf
 
+#Animation mods
+ANIM_ZeldaTPAnalAlt.swf
+

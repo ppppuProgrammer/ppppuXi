@@ -2,6 +2,8 @@ package modifications
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	/**
 	 * Base class to be used for any class that will load in new content into ppppu.
 	 * @author 
@@ -39,12 +41,26 @@ package modifications
 		protected function FirstFrame(e:Event):void
 		{
 			this.removeEventListener(Event.ADDED_TO_STAGE, FirstFrame);
+			//If the mod's parent is the stage then someone attempted to directly load the mod swf through a flash player.
+			//Put up a message telling the user not to do this.
+			if (this.parent == stage)
+			{
+				var startupError:TextField = new TextField();
+				startupError.multiline = true;
+				startupError.wordWrap = true;
+				var textFormat:TextFormat = new TextFormat(null, 16, 0);
+				startupError.defaultTextFormat = textFormat;
+				startupError.text = "This swf is a mod for ppppuXi and is not meant to be loaded standalone.\n" +
+				"Have this mod loaded by the main ppppuXi swf to access its contents.";
+				startupError.width = 400;
+				startupError.height = 400;
+				this.addChild(startupError);
+			}
 		}
-		
 		public function GetModType():int { return modType; }
 	
 		//Abstract function meant to be overwritten for the needs of any Mod subclasses
-		public function Dispose():void{}
+		public function Dispose():void {  }
 		
 	}
 

@@ -139,6 +139,8 @@
 			var playheadPosition:Number;
 			var roundFactor:Number = 1000.0 / 30.0;
 			var jumpAheadTime:Number;
+			
+			var debugMsg:String="\n";
 			if (musicId > -1 && musicId < m_musicCollection.length && m_canPlayMusic == true)
 			{
 				//stop music
@@ -147,16 +149,20 @@
 					m_musicLastPlayedFrame[m_currentlyPlayingMusicId] = currentFrame;
 					m_mainSoundChannel.stop();
 					m_musicCollection[m_currentlyPlayingMusicId].Stop();
+					
+					trace("Stopped music on animation frame " + ((currentFrame % 120)+1) + "; soundChannel position:" + m_mainSoundChannel.position + " " + m_musicCollection[m_currentlyPlayingMusicId].GetMusicName() + ": " + m_musicCollection[m_currentlyPlayingMusicId].GetPlayheadPosition()  + "\nCurrent sample position is " + m_musicCollection[m_currentlyPlayingMusicId].DEBUG_GetCurrentSamplePosition() + " stop time(millisec) is " + m_musicCollection[m_currentlyPlayingMusicId].debug_currentTimePosition);
 					m_mainSoundChannel = null;
 					m_currentlyPlayingMusicId = -1;
 				}
 				
 				bgm = m_musicCollection[musicId];
+				debugMsg += bgm.GetMusicName();
 				//If music hasn't started yet, set the playhead position to be at the start time.
 				if (bgm.GetPlayheadPosition() == 0)
 				{
 					bgm.SetPlayheadPosition(bgm.GetMusicStartTime());
 				}
+				
 				currentAnimationFrame = (currentFrame % 120)+1;
 				/*To keep the animation and music synced, do a check to see what part of the 4 second "block"
 				 * the music was stopped on. If it was before the frame (out of 120) that the animation is on now, just set the music forward a bit to match the position.
@@ -169,20 +175,30 @@
 				
 				//last frame the music was played is less than the frame the animation is in, advance the music just enough to match
 				playheadPosition = bgm.GetPlayheadPosition();
+				debugMsg += ":\nCurrentPlayheadPosition is " + bgm.GetPlayheadPosition();
+				debugMsg += "\nCurrent Animation Frame is " + currentAnimationFrame; 
+				debugMsg += "\nCurrent sample position is " + bgm.DEBUG_GetCurrentSamplePosition();
+				debugMsg += "\nCurrent time position is " + bgm.debug_currentTimePosition + "("+bgm.debug_currentTimePosition/1000+"sec)";
 				//Round down the playhead position to the last frame.
 				playheadPosition = Math.floor(playheadPosition / roundFactor) * roundFactor;
 				lastAnimationFrame = (m_musicLastPlayedFrame[musicId] % 120) + 1;
-				
+				debugMsg += "\nLast Animation Frame is " + lastAnimationFrame; 
+				debugMsg += "\nPlayhead's adjusted position is " + playheadPosition;
 				if (lastAnimationFrame <= currentAnimationFrame)
 				{
 					jumpAheadTime = (currentAnimationFrame - lastAnimationFrame) * roundFactor;
+					debugMsg += "\nJumping ahead by " + (currentAnimationFrame - lastAnimationFrame) + " frames";
 					bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime);
 				}
 				else //Last frame the music was played on is greater than the frame the animation is in, need to jump to the next 4 second block for the music.
 				{
 					jumpAheadTime = (120 - currentAnimationFrame) * roundFactor;
+					debugMsg += "\nJumping ahead by " + (120 - currentAnimationFrame) + " frames";
 					bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime );
 				}
+				debugMsg += "\nPlayhead jumped ahead by " + jumpAheadTime + " milliseconds";
+				debugMsg += "\nPlayhead's new position is " + bgm.GetPlayheadPosition();
+				debugMsg += "\nNew sample position is " + bgm.DEBUG_GetCurrentSamplePosition();
 				m_mainSoundChannel = bgm.Play();
 				m_currentlyPlayingMusicId = musicId;	
 			}
@@ -192,6 +208,7 @@
 				if (m_canPlayMusic && m_currentlyPlayingMusicId > -1)
 				{
 					bgm = m_musicCollection[m_currentlyPlayingMusicId];
+					debugMsg += bgm.GetMusicName();
 					//If music hasn't started yet, set the playhead position to be at the start time.
 					if (bgm.GetPlayheadPosition() == 0)
 					{
@@ -201,9 +218,11 @@
 					
 					//last frame the music was played is less than the frame the animation is in, advance the music just enough to match
 					playheadPosition = bgm.GetPlayheadPosition();
+					debugMsg += ":\nCurrentPlayheadPosition is " + bgm.GetPlayheadPosition();
 					//Round down the playhead position to the last frame.
 					playheadPosition = Math.floor(playheadPosition / roundFactor) * roundFactor;
 					lastAnimationFrame = (m_musicLastPlayedFrame[m_currentlyPlayingMusicId] % 120) + 1;
+					debugMsg += "\nPlayhead's adjusted position is " + playheadPosition;
 					if (lastAnimationFrame <= currentAnimationFrame)
 					{
 						jumpAheadTime = (currentAnimationFrame - lastAnimationFrame) * roundFactor;
@@ -214,6 +233,8 @@
 						jumpAheadTime = (120 - currentAnimationFrame) * roundFactor;
 						bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime );
 					}
+					debugMsg += "\nPlayhead jumped ahead by " + jumpAheadTime + " milliseconds";
+					debugMsg += "\nPlayhead's new position is " + bgm.GetPlayheadPosition();
 					m_mainSoundChannel = bgm.Play();
 				}
 				else //Stop the currently playing song but don't change m_currentlyPlayingMusicId
@@ -242,7 +263,7 @@
 				//If music can't play then don't change the currently playing music
 				m_currentlyPlayingMusicId = -1;
 			}
-			
+			trace(debugMsg);
 			if (m_canPlayMusic == true)
 			{
 				if (m_currentlyPlayingMusicId == -1)
@@ -443,14 +464,14 @@
 			return m_musicCollection[m_currentlyPlayingMusicId].GetMusicInfo();
 		}
 		//Debug functions
-		/*public function DEBUG_GoToMusicLastSection():void
+		public function DEBUG_GoToMusicLastSection():void
 		{
 			if(m_currentlyPlayingMusicId > -1)
 			{
-				var musicToPlay:Music = m_characterMusic[m_currentlyPlayingMusicId];
-				musicToPlay.SetPlayheadPosition(musicToPlay.GetLoopEnd() - 4000);
+				var bgm:Music = m_musicCollection[m_currentlyPlayingMusicId];
+				bgm.SetPlayheadPosition(bgm.GetLoopEnd() - 4000);
 			}
 			
-		}*/
+		}
 	}
 }

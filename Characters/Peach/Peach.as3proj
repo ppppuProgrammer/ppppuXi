@@ -6,7 +6,7 @@
     <movie input="" />
     <movie path="..\..\bin\ACHAR_Peach.swf" />
     <movie fps="30" />
-    <movie width="800" />
+    <movie width="400" />
     <movie height="600" />
     <movie version="18" />
     <movie minorVersion="0" />
@@ -54,7 +54,6 @@
   <!-- SWC Libraries -->
   <libraryPaths>
     <element path="peach.swc" />
-    <element path="..\..\BaseAssets.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

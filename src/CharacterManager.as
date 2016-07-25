@@ -79,6 +79,7 @@
 					character.AddAnimationsFromMovieClip(animationContainer);
 				}
 			}
+			animationContainer.stopAllMovieClips();
 			
 		}
 		
