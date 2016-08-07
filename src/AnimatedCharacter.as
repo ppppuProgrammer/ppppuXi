@@ -433,11 +433,6 @@
 		
 		public function GotoFrameAndPlayForCurrentAnimation(animationFrame:int):void
 		{
-			//StopAnimation();
-			//select the animation to play
-			//AddCharacterToDisplay();
-			//m_charAnimations.gotoAndStop(m_playAnimationFrame);
-			//if (displayArea.numChildren > 0) { displayArea.removeChildren();}
 			if (m_currentAnimationId < 0 || m_charAnimations.length == 0)	{ return; }
 			
 			//and set this animation's frame number to reflect where it would be if animations weren't changed on a whim
@@ -449,15 +444,6 @@
 				animation.gotoAndPlay(animationFrame);
 				//animation.play();
 			}
-			//test.gotoAndStop(m_currentAnimationId);
-			//(test.getChildAt(0) as MovieClip).gotoAndPlay(animationFrame);
-			/*if (test.numChildren == 1 )
-			{
-				displayArea.addChild(test.getChildAt(0));
-			}
-			(test).gotoAndStop(m_currentAnimationId+1);
-			(displayArea.getChildAt(0) as MovieClip).gotoAndPlay(animationFrame);
-			trace(displayArea.getChildAt(0).toString());*/
 			
 			
 		}

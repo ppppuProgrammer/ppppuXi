@@ -14,9 +14,9 @@ package
 			sourceSound = new BGM_BurningTown_RR;
 			musicName = "Burning Town RR";
 			displayInfo = "Burning Town - Risky's Revenge";
-			startTime = ConvertSamplesToMilliseconds(0);
-			startLoopTime = ConvertSamplesToMilliseconds(0);
-			endLoopTime = ConvertSamplesToMilliseconds(0);
+			startTime = ConvertSamplesToMilliseconds(576);
+			startLoopTime = ConvertSamplesToMilliseconds(1013838+576);
+			endLoopTime = ConvertSamplesToMilliseconds(5600209);
 		}
 		
 	}

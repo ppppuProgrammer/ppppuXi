@@ -6,6 +6,10 @@ package
 	import com.greensock.loading.SWFLoader;
 	import events.AnimationTransitionEvent;
 	import events.ExitLinkedAnimationEvent;
+	import flash.events.TimerEvent;
+	import flash.system.System;
+	import flash.utils.Timer;
+	import flash.utils.getTimer;
 	
 	import events.ChangeBackgroundEvent;
 	import events.SaveRequestEvent;
@@ -75,14 +79,36 @@ package
 		//private var musicPlayer:MusicPlayer = new MusicPlayer();
 		private var mainMenu:MainMenu;
 		
-		//Timing
+		/*Timing*/
+		/*The total amount of frames that the program has been running for. Due to being reliant on the enter frame event
+		 * this number can end up being off from where it should be when slowdown happens.*/
 		private var totalRunFrames:uint = 0;
+		/*A correctional variable that keeps track of what frame the program should be on given its execution time.
+		* When the intended run frame is ahead of the totalRunFrames, animation frame skipping will be done to keep
+		* animations in sync with the music.*/
+		private var intendedRunFrame:uint = 0;
+		private var totalRunTime:Number = 0;
+		private var lastUpdateTime:Number = 0;
+		/*The maximum amount of frames an animation can fall out of sync behind the music
+		* before any animations are jumped ahead to resync.*/
+		private const ANIMATION_MAX_FRAMES_BEHIND_MUSIC:int = 2;
+		private var updatesSinceLastSkip:int = 0;
+		private const updatesUntilCompleteResync:int = 60;
+		//private var runLoopTimer:Timer;
 		
 		//Music
 		private var musicPlayer:MusicPlayer = new MusicPlayer();
 		
 		private const appName:String = "ppppuXi beta";
 		
+		//
+		//private var Debug_runTime:Number = 0;
+		
+		/*The amount of frames to wait before the runloop can actually allow the animations to be added to the stage.
+		* The intent is to give Flash time to "warm up", finish up any garbage collection and any other tasks that
+		* could interfere with a smooth start for the animations.*/
+		private var runloopDelayCountdown:int = 60;
+		private var timeRunLoopDelayCountdown:Number = 60*33.3;
 		//Constructor
 		public function AppCore() 
 		{
@@ -112,6 +138,8 @@ package
 			mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
 			addEventListener(events.SaveRequestEvent.SAVE_SHARED_OBJECT, SaveSettingsToDisk);
 			//settingsSaveFile.clear();
+			
+			//Debug_Timer.addEventListener(TimerEvent.TIMER, Debug_TimerHandler);
 		}
 		
 		//Sets up the various aspects of the flash to get it ready for performing.
@@ -120,9 +148,7 @@ package
 			//var msBounds:Rectangle = mainStage.getBounds(mainStage);
 			//var mainStagePlacementX:Number = ((mainStage.stage.stageWidth - msBounds.right));
 			//mainStage.x = mainStagePlacementX;
-			//Add the key listeners
-			stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyPressCheck);
-			stage.addEventListener(KeyboardEvent.KEY_UP, KeyReleaseCheck);
+			
 			
 			addEventListener(ChangeBackgroundEvent.CHANGE_BACKGROUND, ChangeBackgroundColors, true);
 			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, AnimationTransitionOccured, true);
@@ -149,6 +175,7 @@ package
 			LoadUserSettings();
 			
 			mainMenu = new MainMenu(characterManager, musicPlayer, userSettings);
+			mainMenu.visible = false;
 			addChild(mainMenu);
 			mainMenu.Initialize();
 			
@@ -170,6 +197,10 @@ package
 					ProcessMod(startupMods[i]);
 				}
 			}
+			System.pauseForGCIfCollectionImminent(0);
+			//runLoopTimer = new Timer(1000 / stage.frameRate);
+			//runLoopTimer.addEventListener(TimerEvent.TIMER, TimeBasedRunLoop);
+			//runLoopTimer.start();
 			mainStage.play();
 			
 			
@@ -210,67 +241,102 @@ package
 			Version.BUILDNUMBER + " Build date: " + finalBuildDate;
 		}
 
-		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
+		//Modified "frame skipping" run loop.
 		private function RunLoop(e:Event):void
 		{
-			var frameNum:uint = totalRunFrames; //The current frame that the main stage is at.
+			//var frameNum:uint = totalRunFrames; //The current frame that the main stage is at.
 
-			if(frameNum == 0)
+			if(totalRunFrames == 0)
 			{
-				if (characterManager.GetTotalNumOfCharacters() == 0)
+				if (characterManager.GetTotalNumOfCharacters() == 0 || runloopDelayCountdown > 0)
 				{
 					mainStage.stopAllMovieClips();
+					if(runloopDelayCountdown > 0){--runloopDelayCountdown;}
 				}
 				else
 				{
+					//Add the key listeners
+					stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyPressCheck);
+					stage.addEventListener(KeyboardEvent.KEY_UP, KeyReleaseCheck);
+					
+					if (userSettings.firstTimeRun == true)
+					{
+						UpdateKeyBindsForHelpScreen();
+						ToggleHelpScreen(); //Show the help screen
+						ShowMenu(true);
+						userSettings.firstTimeRun = false;
+						settingsSaveFile.data.ppppuSettings = userSettings;
+						settingsSaveFile.flush();
+					}
+					else
+					{
+						if (userSettings.showMenu)
+						{
+							ShowMenu(userSettings.showMenu);
+						}
+					}
+					
 					mainStage.gotoAndStop("Start");
 					ChangeBackgroundVisibility(userSettings.showBackground);
 					SetBackLight(userSettings.backlightOn);
 					PlayBackgroundAnimations();
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic(-2, frameNum));
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, intendedRunFrame));
+					lastUpdateTime = getTimer();
 				}
 			}
 			
 			if (mainStage.currentFrame == flashStartFrame)
 			{
+				var currentUpdateTime:Number = getTimer();
+				var delta:Number = currentUpdateTime - lastUpdateTime;
+				totalRunTime += delta;
+				//trace("current: " + currentUpdateTime + ", last: " + lastUpdateTime + ", delta: " + delta + ", total: " + totalRunTime);
+				lastUpdateTime = currentUpdateTime;
+				
 				++totalRunFrames;
-				//trace("Frame: " + totalRunFrames);
+				++updatesSinceLastSkip;
+				intendedRunFrame = (totalRunTime / (1000.0 / stage.frameRate)) + 1;
+				//character switch skip check
+				var skippedCharacterSwitchFrame:Boolean = false;
+				
+				if (intendedRunFrame > totalRunFrames + ANIMATION_MAX_FRAMES_BEHIND_MUSIC && characterManager.CheckIfTransitionLockIsActive() == false)
+				{
+					//For when the animation falls too far behind and needs to be immediately resynced.
+					trace(totalRunFrames + ", " + intendedRunFrame + "; Animation has fallen " + (intendedRunFrame - totalRunFrames) + " frames behind");
+					if (intendedRunFrame - totalRunFrames > 120 - ((totalRunFrames-1) % 120)+1)
+					{
+						skippedCharacterSwitchFrame = true;
+					}
+					totalRunFrames = intendedRunFrame;
+					SkipFramesForAnimations(totalRunFrames);
+					updatesSinceLastSkip = 0;
+				}
+				else if (updatesSinceLastSkip >= updatesUntilCompleteResync && intendedRunFrame > totalRunFrames)
+				{
+					//If the animation is behind a bit but not enough to force an immediate resync.
+					//After a period of time the animation will be resynced.
+					trace("delayed resync");
+					totalRunFrames = intendedRunFrame;
+					SkipFramesForAnimations(totalRunFrames);
+					updatesSinceLastSkip = 0;
+				}
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
 				
-				if (userSettings.firstTimeRun == true)
-				{
-					UpdateKeyBindsForHelpScreen();
-					ToggleHelpScreen(); //Show the help screen
-					ShowMenu(true);
-					//characterManager.ToggleMenu();
-					userSettings.firstTimeRun = false;
-					settingsSaveFile.data.ppppuSettings = userSettings;
-					settingsSaveFile.flush();
-				}
-				else
-				{
-					if (userSettings.showMenu)
-					{
-						ShowMenu(userSettings.showMenu);
-						//characterManager.ToggleMenu();
-					}
-				}
-
 				mainStage.CharacterLayer.visible = true;
 				if (userSettings.showBackground == true)
 				{
 					mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = true;
 				}
-				
-				/*mainStage.OuterDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.InnerDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.TransitionDiamondBG.gotoAndPlay(animationFrame);
-				mainStage.BacklightBG.gotoAndPlay(animationFrame);*/
+				//trace("Run time" + Debug_runTime + ", frame: " + totalRunFrames + ", expected run time: " + totalRunFrames *  33.3 +
+				//", music position: " + musicPlayer.m_musicCollection[musicPlayer.m_currentlyPlayingMusicId].debug_currentTimePosition);
+				//Use m_mainSoundChannel.position to get position, using the music object's sample position is way off in terms of accuracy (1.2 secs ahead).
+				//trace(totalRunFrames + ", sound chan position: " + musicPlayer.m_mainSoundChannel.position + ", music currentPosition: " + musicPlayer.debug_CurrentMusic.debug_currentTimePosition);
 
-				if(frameNum % 120 == 0) //Add character clip
+				
+				if(animationFrame == 1 || skippedCharacterSwitchFrame == true) //Add character clip
 				{
-					
+					//trace(totalRunFrames + ", " + intendedRunFrame);
 					//frameNum != 7 is so Peach is the first character displayed on start
 					if(characterManager.AreCharacterSwitchesAllowed())
 					{
@@ -278,14 +344,14 @@ package
 						 * This is so the initial character set (which is the last character on screen the previous
 						 * time the program was ran or the first character loaded if the settings save file wasn't found)
 						 * isn't switch from and give them a chance to be seen as intended.*/
-						if (frameNum != 0)
+						if (totalRunFrames != 0)
 						{
 							characterManager.CharacterSwitchLogic();
 							//trace("Switched at " + totalRunFrames);
 						}
 					}
 					
-					var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter();
+					var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter(animationFrame);
 					if (charsWereSwitched == true)
 					{
 						
@@ -304,6 +370,109 @@ package
 				}
 			}
 		}
+		
+		//The "heart beat" of the flash. Ran every frame to monitor and react to certain, often frame sensitive, events
+		//private function RunLoop(e:Event):void
+		//{
+			//var frameNum:uint = totalRunFrames; //The current frame that the main stage is at.
+//
+			//if(frameNum == 0)
+			//{
+				//if (characterManager.GetTotalNumOfCharacters() == 0 || runloopDelayCountdown > 0)
+				//{
+					//mainStage.stopAllMovieClips();
+					//if(runloopDelayCountdown > 0){--runloopDelayCountdown;}
+				//}
+				//else
+				//{
+					////Add the key listeners
+					//stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyPressCheck);
+					//stage.addEventListener(KeyboardEvent.KEY_UP, KeyReleaseCheck);
+					//
+					//if (userSettings.firstTimeRun == true)
+					//{
+						//UpdateKeyBindsForHelpScreen();
+						//ToggleHelpScreen(); //Show the help screen
+						//ShowMenu(true);
+						//userSettings.firstTimeRun = false;
+						//settingsSaveFile.data.ppppuSettings = userSettings;
+						//settingsSaveFile.flush();
+					//}
+					//else
+					//{
+						//if (userSettings.showMenu)
+						//{
+							//ShowMenu(userSettings.showMenu);
+						//}
+					//}
+					//
+					//mainStage.gotoAndStop("Start");
+					//ChangeBackgroundVisibility(userSettings.showBackground);
+					//SetBackLight(userSettings.backlightOn);
+					//PlayBackgroundAnimations();
+					//mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, intendedRunFrame));
+					//lastUpdateTime = getTimer();
+				//}
+			//}
+			//
+			//if (mainStage.currentFrame == flashStartFrame)
+			//{
+				//var currentUpdateTime:Number = getTimer();
+				//var delta:Number = currentUpdateTime - lastUpdateTime;
+				//totalRunTime += delta;
+				//trace("current: " + currentUpdateTime + ", last: " + lastUpdateTime + ", delta: " + delta + ", total: " + totalRunTime);
+				//lastUpdateTime = currentUpdateTime;
+				//
+				//++totalRunFrames;
+				//var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
+				//mainMenu.UpdateFrameForAnimationCounter(animationFrame);
+				//
+				//mainStage.CharacterLayer.visible = true;
+				//if (userSettings.showBackground == true)
+				//{
+					//mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = true;
+				//}
+				////trace("Run time" + Debug_runTime + ", frame: " + totalRunFrames + ", expected run time: " + totalRunFrames *  33.3 +
+				////", music position: " + musicPlayer.m_musicCollection[musicPlayer.m_currentlyPlayingMusicId].debug_currentTimePosition);
+				////Use m_mainSoundChannel.position to get position, using the music object's sample position is way off in terms of accuracy (1.2 secs ahead).
+				//trace(totalRunFrames + ", sound chan position: " + musicPlayer.m_mainSoundChannel.position + ", music currentPosition: " + musicPlayer.debug_CurrentMusic.debug_currentTimePosition);
+//
+				//if(frameNum % 120 == 0) //Add character clip
+				//{
+					//
+					////frameNum != 7 is so Peach is the first character displayed on start
+					//if(characterManager.AreCharacterSwitchesAllowed())
+					//{
+						///* The first run frame should not have the character switch logic run.
+						 //* This is so the initial character set (which is the last character on screen the previous
+						 //* time the program was ran or the first character loaded if the settings save file wasn't found)
+						 //* isn't switch from and give them a chance to be seen as intended.*/
+						//if (frameNum != 0)
+						//{
+							//characterManager.CharacterSwitchLogic();
+							////trace("Switched at " + totalRunFrames);
+						//}
+					//}
+					//
+					//var charsWereSwitched:Boolean = characterManager.UpdateAndDisplayCurrentCharacter();
+					//if (charsWereSwitched == true)
+					//{
+						//
+						//userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
+						//mainMenu.SetCharacterSelectorAndUpdate(characterManager.GetIdOfCurrentCharacter());
+						//
+					//}
+					///*Updates the menu to match the automatically selected animation. Do not call 
+					//MainMenu::SelectAnimation() as that is for user input and takes relative index of the list item,
+					//unlike the below code which uses the absolute index.*/
+					//var animId:int = characterManager.GetCurrentAnimationIdOfCharacter();
+					////Need to get the index that targets the given animation id. 
+					//var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
+					//var target:int = currentCharacterIdTargets.indexOf(animId);
+					//mainMenu.UpdateAnimationIndexSelected(target, charsWereSwitched);
+				//}
+			//}
+		//}
 		
 		//Activated if a key is detected to be released. Sets the keys "down" status to false
 		private function KeyReleaseCheck(keyEvent:KeyboardEvent):void
@@ -419,7 +588,7 @@ package
 					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
 					mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
 					userSettings.playMusic = musicEnabled;
-					var displayText:String = musicPlayer.PlayMusic( -2, totalRunFrames);
+					var displayText:String = musicPlayer.PlayMusic( -2, intendedRunFrame);
 					mainMenu.ChangeMusicMenuDisplayedInfo(displayText);
 					//characterManager.ToggleMusicPlay();
 				}
@@ -428,7 +597,7 @@ package
 					var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
 					if (musicId > -1)
 					{
-						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, totalRunFrames);
+						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, intendedRunFrame);
 						mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
 						userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					}
@@ -451,11 +620,13 @@ package
 					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(totalRunFrames));
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					//characterManager.ChangeMusicForCurrentCharacter(false);
+					//trace(Debug_runTime);
 				}
 				else if(keyPressed == keyBindings.NextMusic.main || keyPressed == keyBindings.NextMusic.alt)
 				{
 					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(totalRunFrames));
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					//trace(Debug_runTime);
 					//characterManager.ChangeMusicForCurrentCharacter(true);
 				}
 				/*else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
@@ -621,7 +792,7 @@ package
 							}
 							else
 							{
-								musicPlayer.PlayMusic(chosenMusicId, totalRunFrames); 
+								musicPlayer.PlayMusic(chosenMusicId, intendedRunFrame); 
 							}
 							
 						}
@@ -886,21 +1057,21 @@ package
 		[inline]
 		private function GetFrameNumberToSetForAnimation():uint
 		{
-			return (totalRunFrames % 120);
+			return ((intendedRunFrame-1) % 120)+1;
 		}
 		private function AnimationTransitionOccured(e:Event):void
 		{
 			
 			StopBackgroundAnimations();
 			addEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
-			musicPlayer.StopMusic(totalRunFrames);
+			musicPlayer.StopMusic(intendedRunFrame);
 		}
 		
 		private function ExitingLinkedAnimation(e:Event):void
 		{
 			removeEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
 			PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
-			musicPlayer.PlayMusic( -2, totalRunFrames);
+			musicPlayer.PlayMusic( -2, intendedRunFrame);
 		}
 		[inline]
 		private function StopBackgroundAnimations():void
@@ -949,5 +1120,23 @@ package
 		{
 			mainMenu.visible = visible;
 		}
+		
+		/*Used to make sure that the animation is synced up with the music. If the animation falls behind by more than
+		2 frames then it is pushed forward to the approximate frame it should be on given the music's position.*/
+		private function SkipFramesForAnimations(trueTotalRunFrame:uint):void
+		{
+			var frameAnimationsShouldBeOn:uint = (trueTotalRunFrame) % 120;
+			if (frameAnimationsShouldBeOn == 0) { frameAnimationsShouldBeOn == 120; }
+			mainStage.OuterDiamondBG.gotoAndPlay(frameAnimationsShouldBeOn);
+			mainStage.InnerDiamondBG.gotoAndPlay(frameAnimationsShouldBeOn);
+			mainStage.TransitionDiamondBG.gotoAndPlay(frameAnimationsShouldBeOn);
+			mainStage.BacklightBG.gotoAndPlay(frameAnimationsShouldBeOn);
+			characterManager.ChangeFrameOfCurrentAnimation(frameAnimationsShouldBeOn);
+		}
+		
+		/*private function Debug_TimerHandler(e:TimerEvent):void
+		{
+			Debug_runTime += Debug_Timer.delay;
+		}*/
 	}
 }

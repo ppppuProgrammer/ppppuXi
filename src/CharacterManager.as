@@ -412,7 +412,7 @@
 		}
 		
 		[inline]
-		private function CheckIfTransitionLockIsActive():Boolean
+		public function CheckIfTransitionLockIsActive():Boolean
 		{
 			if (m_currentCharacter == null) { return false;}
 			return transitionLockout == true || m_currentCharacter.IsStillInLinkedAnimation();

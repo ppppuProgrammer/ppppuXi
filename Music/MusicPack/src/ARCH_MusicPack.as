@@ -1,6 +1,6 @@
 package
 {
-	import modifications.ModArchive
+	import modifications.ModArchive;
 	import flash.display.Sprite;
 	import flash.events.Event;
 

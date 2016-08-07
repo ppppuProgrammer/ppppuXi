@@ -32,7 +32,8 @@ package
 		private var m_soundData:ByteArray = new ByteArray();
 		private var m_extractedSamples:Number;
 		private var m_currentSamplePosition:Number;
-		public var debug_currentTimePosition:Number=0;
+		public var debug_currentTimePosition:Number = 0;
+		private var m_soundChannel:SoundChannel;
 		
 		public function Music(sourceSound:Sound, musicName:String, musicInfo:String, loopStartPoint:Number = 0, loopEndPoint:Number = 0, musicStartPoint:Number = 0)
 		{
@@ -141,12 +142,19 @@ package
 		public function Play():SoundChannel
 		{
 			m_playSound.addEventListener(SampleDataEvent.SAMPLE_DATA, SendSampleData);
-			return m_playSound.play();
+			m_soundChannel = m_playSound.play();
+			return m_soundChannel;
 		}
 		
 		public function Stop():void
 		{
-			m_playSound.removeEventListener(SampleDataEvent.SAMPLE_DATA, SendSampleData);
+			if (m_soundChannel != null)
+			{
+				m_soundChannel.stop();
+				m_playSound.removeEventListener(SampleDataEvent.SAMPLE_DATA, SendSampleData);
+				m_currentSamplePosition = ConvertMillisecTimeToSample(m_soundChannel.position);
+				m_soundChannel = null;
+			}
 		}
 		
 		public function SendSampleData(event:SampleDataEvent):void
@@ -167,10 +175,10 @@ package
 				m_extractedSamples +=  m_sourceSound.extract(m_soundData, SAMPLES_PER_REQUEST - m_extractedSamples, m_currentSamplePosition);
 			}
 			m_currentSamplePosition += m_extractedSamples;
-			debug_currentTimePosition += (m_extractedSamples / 44.1)/ 2;
+			debug_currentTimePosition += (m_extractedSamples / 44.1);
 			
 			event.data.writeBytes(m_soundData);
-			trace(m_name + "is at sample " + m_currentSamplePosition);
+			//trace(m_name + "is at sample " + m_currentSamplePosition);
 		}
 		private function ConvertMillisecTimeToSample(timeMs:Number):Number
 		{
@@ -182,6 +190,7 @@ package
 		
 		private function ConvertSampleTimeToMillisec(timeSample:Number):Number
 		{
+			//for stereo 44100hz music, conversion is samples / 44100 / 2
 			return (timeSample / FLASH_SOUND_OUTPUT_SAMPLE_RATE) * 1000.0;
 		}
 	}
