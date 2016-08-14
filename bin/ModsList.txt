@@ -3,6 +3,9 @@
 # Lines that start with a # are ignored.
 # Start a line with # to disallow a file from being loaded. Likewise remove the # to allow it to be loaded.
 
+# Animated Character mods should be loaded first, as Animation Mods will fail to add their animations if the character
+# they are for were not loaded at the time of processing the Animation mod.
+
 #Animated Character mods
 ACHAR_Peach.swf
 ACHAR_Rosalina.swf
@@ -34,5 +37,4 @@ ARCH_MusicPack.swf
 #M_CMCTheme.swf
 
 #Animation mods
-ANIM_ZeldaTPAnalAlt.swf
 

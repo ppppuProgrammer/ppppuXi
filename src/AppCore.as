@@ -1,5 +1,7 @@
 package  
 {
+	import com.bit101.components.Label;
+	import com.bit101.components.Panel;
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.DataLoader;
 	import com.greensock.loading.LoaderMax;
@@ -251,10 +253,41 @@ package
 				if (characterManager.GetTotalNumOfCharacters() == 0 || runloopDelayCountdown > 0)
 				{
 					mainStage.stopAllMovieClips();
-					if(runloopDelayCountdown > 0){--runloopDelayCountdown;}
+					if (runloopDelayCountdown > 0) {--runloopDelayCountdown; }
+					//If no characters were loaded then the program can't run.
+					if (runloopDelayCountdown == 0 && characterManager.GetTotalNumOfCharacters() == 0)
+					{
+						if (this.getChildByName("ErrorMsgPanel") == null)
+						{
+							//Need to tell the user why the program will not run.
+							var errorMessage:String = "There must be one character mod loaded in order to start." + 
+							"\nEnsure that ModsList.txt is in the same folder" +
+							"\nppppuXi.swf is in and that there is at least" +
+							"\none Animated Character mod set to be loaded.";
+							var errorPanel:Panel = new Panel(this);
+							errorPanel.name = "ErrorMsgPanel";
+							var errorTextLabel:Label = new Label(errorPanel, 5, 5, errorMessage);
+							
+							var tf:TextFormat = errorTextLabel.textField.getTextFormat();
+							tf.size = 14;
+							tf.color = 0x000000;
+
+							errorTextLabel.textField.defaultTextFormat = tf;
+							errorTextLabel.draw();
+							errorPanel.setSize(errorTextLabel.textField.textWidth + 10, errorTextLabel.textField.textHeight + 10);
+							errorPanel.x = (stage.stageWidth - errorPanel.width)/2;
+							errorPanel.y = (stage.stageHeight - errorPanel.height)/2;
+						}
+					}
 				}
 				else
 				{
+					var msgPanel:DisplayObject = this.getChildByName("ErrorMsgPanel");
+					if (msgPanel != null)
+					{
+						this.removeChild(msgPanel);
+						msgPanel = null;
+					}
 					//Add the key listeners
 					stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyPressCheck);
 					stage.addEventListener(KeyboardEvent.KEY_UP, KeyReleaseCheck);
@@ -280,7 +313,7 @@ package
 					ChangeBackgroundVisibility(userSettings.showBackground);
 					SetBackLight(userSettings.backlightOn);
 					PlayBackgroundAnimations();
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, intendedRunFrame));
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation()));
 					lastUpdateTime = getTimer();
 				}
 			}
@@ -302,7 +335,7 @@ package
 				if (intendedRunFrame > totalRunFrames + ANIMATION_MAX_FRAMES_BEHIND_MUSIC && characterManager.CheckIfTransitionLockIsActive() == false)
 				{
 					//For when the animation falls too far behind and needs to be immediately resynced.
-					trace(totalRunFrames + ", " + intendedRunFrame + "; Animation has fallen " + (intendedRunFrame - totalRunFrames) + " frames behind");
+					//trace(totalRunFrames + ", " + intendedRunFrame + "; Animation has fallen " + (intendedRunFrame - totalRunFrames) + " frames behind");
 					if (intendedRunFrame - totalRunFrames > 120 - ((totalRunFrames-1) % 120)+1)
 					{
 						skippedCharacterSwitchFrame = true;
@@ -315,13 +348,13 @@ package
 				{
 					//If the animation is behind a bit but not enough to force an immediate resync.
 					//After a period of time the animation will be resynced.
-					trace("delayed resync");
+					//trace("delayed resync");
 					totalRunFrames = intendedRunFrame;
 					SkipFramesForAnimations(totalRunFrames);
 					updatesSinceLastSkip = 0;
 				}
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
-				mainMenu.UpdateFrameForAnimationCounter(animationFrame);
+				mainMenu.UpdateTimingsForAnimation(animationFrame, GetCompletionTimeForAnimation());
 				
 				mainStage.CharacterLayer.visible = true;
 				if (userSettings.showBackground == true)
@@ -333,7 +366,6 @@ package
 				//Use m_mainSoundChannel.position to get position, using the music object's sample position is way off in terms of accuracy (1.2 secs ahead).
 				//trace(totalRunFrames + ", sound chan position: " + musicPlayer.m_mainSoundChannel.position + ", music currentPosition: " + musicPlayer.debug_CurrentMusic.debug_currentTimePosition);
 
-				
 				if(animationFrame == 1 || skippedCharacterSwitchFrame == true) //Add character clip
 				{
 					//trace(totalRunFrames + ", " + intendedRunFrame);
@@ -344,7 +376,7 @@ package
 						 * This is so the initial character set (which is the last character on screen the previous
 						 * time the program was ran or the first character loaded if the settings save file wasn't found)
 						 * isn't switch from and give them a chance to be seen as intended.*/
-						if (totalRunFrames != 0)
+						if (totalRunFrames != 1)
 						{
 							characterManager.CharacterSwitchLogic();
 							//trace("Switched at " + totalRunFrames);
@@ -410,7 +442,7 @@ package
 					//ChangeBackgroundVisibility(userSettings.showBackground);
 					//SetBackLight(userSettings.backlightOn);
 					//PlayBackgroundAnimations();
-					//mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, intendedRunFrame));
+					//mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation()));
 					//lastUpdateTime = getTimer();
 				//}
 			//}
@@ -588,7 +620,7 @@ package
 					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
 					mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
 					userSettings.playMusic = musicEnabled;
-					var displayText:String = musicPlayer.PlayMusic( -2, intendedRunFrame);
+					var displayText:String = musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation());
 					mainMenu.ChangeMusicMenuDisplayedInfo(displayText);
 					//characterManager.ToggleMusicPlay();
 				}
@@ -597,7 +629,7 @@ package
 					var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
 					if (musicId > -1)
 					{
-						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, intendedRunFrame);
+						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, GetCompletionTimeForAnimation());
 						mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
 						userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					}
@@ -617,14 +649,14 @@ package
 				}
 				else if(keyPressed == keyBindings.PrevMusic.main || keyPressed == keyBindings.PrevMusic.alt)
 				{
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(totalRunFrames));
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(GetCompletionTimeForAnimation()));
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					//characterManager.ChangeMusicForCurrentCharacter(false);
 					//trace(Debug_runTime);
 				}
 				else if(keyPressed == keyBindings.NextMusic.main || keyPressed == keyBindings.NextMusic.alt)
 				{
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(totalRunFrames));
+					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(GetCompletionTimeForAnimation()));
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					//trace(Debug_runTime);
 					//characterManager.ChangeMusicForCurrentCharacter(true);
@@ -639,10 +671,10 @@ package
 					//characterManager.SetCurrentMusicForAllCharacters();
 					characterManager.ActivateAnimationChange();
 				}
-				else if(keyPressed == Keyboard.END)
+				/*else if(keyPressed == Keyboard.END)
 				{
-					musicPlayer.DEBUG_GoToMusicLastSection();
-				}
+					musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
+				}*/
 				keyDownStatus[keyPressed] = true;
 			}
 			keyDownStatus[keyEvent.keyCode] = true;
@@ -792,7 +824,7 @@ package
 							}
 							else
 							{
-								musicPlayer.PlayMusic(chosenMusicId, intendedRunFrame); 
+								musicPlayer.PlayMusic(chosenMusicId, GetCompletionTimeForAnimation()); 
 							}
 							
 						}
@@ -1059,6 +1091,13 @@ package
 		{
 			return ((intendedRunFrame-1) % 120)+1;
 		}
+		
+		[inline]
+		private function GetCompletionTimeForAnimation():Number
+		{
+			return totalRunTime % 4000;
+		}
+		
 		private function AnimationTransitionOccured(e:Event):void
 		{
 			
@@ -1071,7 +1110,7 @@ package
 		{
 			removeEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
 			PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
-			musicPlayer.PlayMusic( -2, intendedRunFrame);
+			musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation());
 		}
 		[inline]
 		private function StopBackgroundAnimations():void

@@ -9,17 +9,16 @@ package
 	 * Only music that has a sample rate of 44.1kHz and stereo channels are guaranteed to work properly*/
 	public class Music
 	{
-		private static const SAMPLES_PER_REQUEST:int = 8192;
+		private static const SAMPLES_PER_REQUEST:int = 8192/2;
 		public static const FLASH_SOUND_OUTPUT_SAMPLE_RATE:int = 44100;
 		
-		public var m_musicStartTime:Number; //Time position in milliseconds to start from when sound is first played.
-		public var m_musicStartSampleNumber:Number;
+		private var m_musicStartTime:Number; //Time position in milliseconds to start from when sound is first played.
 		
-		public var m_loopStartTime:Number; //Time position in milliseconds to go to when the loop end position has been reached
-		public var m_loopStartSampleNumber:Number;
+		private var m_loopStartTime:Number; //Time position in milliseconds to go to when the loop end position has been reached
+		private var m_loopStartSampleNumber:Number;
 		
-		public var m_loopEndTime:Number; //Time position in milliseconds that is considered the end of the song. Upon reaching this time, the music will jump back to the indicated loop start time
-		public var m_loopEndSampleNumber:Number;
+		private var m_loopEndTime:Number; //Time position in milliseconds that is considered the end of the song. Upon reaching this time, the music will jump back to the indicated loop start time
+		private var m_loopEndSampleNumber:Number;
 		
 		private var m_name:String;
 		
@@ -32,7 +31,7 @@ package
 		private var m_soundData:ByteArray = new ByteArray();
 		private var m_extractedSamples:Number;
 		private var m_currentSamplePosition:Number;
-		public var debug_currentTimePosition:Number = 0;
+
 		private var m_soundChannel:SoundChannel;
 		
 		public function Music(sourceSound:Sound, musicName:String, musicInfo:String, loopStartPoint:Number = 0, loopEndPoint:Number = 0, musicStartPoint:Number = 0)
@@ -60,8 +59,7 @@ package
 			{
 				m_musicStartTime = 0;
 			}
-			m_musicStartSampleNumber = ConvertMillisecTimeToSample(m_musicStartTime);
-			m_currentSamplePosition = m_musicStartSampleNumber;
+			m_currentSamplePosition = ConvertMillisecTimeToSample(m_musicStartTime);
 			
 			if (loopStartPoint >= 0)
 			{
@@ -87,7 +85,7 @@ package
 		public function SetPlayheadPosition(timeInMillisec:Number):void
 		{
 			m_currentSamplePosition = ConvertMillisecTimeToSample(timeInMillisec);
-			debug_currentTimePosition = timeInMillisec;
+			//debug_currentTimePosition = timeInMillisec;
 		}
 		
 		public function GetPlayheadPosition():Number
@@ -142,7 +140,7 @@ package
 		public function Play():SoundChannel
 		{
 			m_playSound.addEventListener(SampleDataEvent.SAMPLE_DATA, SendSampleData);
-			m_soundChannel = m_playSound.play();
+			m_soundChannel = m_playSound.play(ConvertSampleTimeToMillisec(m_currentSamplePosition));
 			return m_soundChannel;
 		}
 		
@@ -153,6 +151,7 @@ package
 				m_soundChannel.stop();
 				m_playSound.removeEventListener(SampleDataEvent.SAMPLE_DATA, SendSampleData);
 				m_currentSamplePosition = ConvertMillisecTimeToSample(m_soundChannel.position);
+				//trace(this.m_name + " stopped at " + m_soundChannel.position);
 				m_soundChannel = null;
 			}
 		}
@@ -160,6 +159,10 @@ package
 		public function SendSampleData(event:SampleDataEvent):void
 		{
 			m_soundData.clear();
+			/*if (m_soundChannel)
+			{
+			trace("Lat: " + String((event.position / 44.1) - m_soundChannel.position));
+			}*/
 			var samplesToExtract:Number = SAMPLES_PER_REQUEST;
 			if (m_currentSamplePosition + SAMPLES_PER_REQUEST >= this.m_loopEndSampleNumber)
 			{
@@ -175,7 +178,7 @@ package
 				m_extractedSamples +=  m_sourceSound.extract(m_soundData, SAMPLES_PER_REQUEST - m_extractedSamples, m_currentSamplePosition);
 			}
 			m_currentSamplePosition += m_extractedSamples;
-			debug_currentTimePosition += (m_extractedSamples / 44.1);
+			//debug_currentTimePosition += (m_extractedSamples / 44.1);
 			
 			event.data.writeBytes(m_soundData);
 			//trace(m_name + "is at sample " + m_currentSamplePosition);

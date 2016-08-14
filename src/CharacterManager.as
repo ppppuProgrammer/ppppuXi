@@ -469,6 +469,14 @@
 		{
 			return m_currentCharacter.GetPreferredMusicName();
 		}
+		
+		/*public function DEBUG_CharacterAnimationFrameCheck():void
+		{
+			if (m_currentCharacter)
+			{
+				m_currentCharacter.DEBUG_TraceCurrentFrame();
+			}
+		}*/
 	}
 
 }

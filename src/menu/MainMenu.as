@@ -28,6 +28,8 @@ package menu
 		/*Tells what frame the currently playing animation should be on. The only exception to this are animations that require a 
 		 * transition to be accessed.*/
 		private var currentFrameForAnimation:uint = 0;
+		private var currentTimeForAnimation:Number=0.0;
+		
 		
 		private var settingsButton:PushButton;
 		private var keyConfig:Config;
@@ -166,7 +168,7 @@ package menu
 					var preferredMusicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
 					if (preferredMusicId > -1)
 					{
-						displayText = musicPlayer.PlayMusic(preferredMusicId, currentFrameForAnimation);
+						displayText = musicPlayer.PlayMusic(preferredMusicId, currentTimeForAnimation);
 						userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					}
 					else
@@ -178,14 +180,14 @@ package menu
 					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
 					musicMenu.UpdateMusicEnabledButton(musicEnabled);
 					userSettings.playMusic = musicEnabled;
-					displayText = musicPlayer.PlayMusic(-2, currentFrameForAnimation); 
+					displayText = musicPlayer.PlayMusic(-2, currentTimeForAnimation); 
 					break;
 				case "Next Music Button":
-					displayText = musicPlayer.ChangeToNextMusic(currentFrameForAnimation);
+					displayText = musicPlayer.ChangeToNextMusic(currentTimeForAnimation);
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					break;
 				case "Previous Music Button":
-					displayText = musicPlayer.ChangeToPrevMusic(currentFrameForAnimation);
+					displayText = musicPlayer.ChangeToPrevMusic(currentTimeForAnimation);
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
 					break;
 			}
@@ -447,9 +449,10 @@ package menu
 		//{
 		
 		
-		public function UpdateFrameForAnimationCounter(frame:uint):void
+		public function UpdateTimingsForAnimation(frame:uint, time:Number):void
 		{
 			currentFrameForAnimation = frame;
+			currentTimeForAnimation = time;
 		}
 		
 		public function OpenSettingsWindow(e:MouseEvent):void

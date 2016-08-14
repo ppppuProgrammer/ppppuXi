@@ -521,6 +521,11 @@
 			}
 			return ct;
 		}*/
+		
+		/*public function DEBUG_TraceCurrentFrame():void
+		{
+			trace("Character frame: " + m_currentlyPlayingAnimation.currentFrame);
+		}*/
 	}
 
 }

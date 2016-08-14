@@ -7,7 +7,6 @@
 	import flash.events.Event; 
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
-	//import ppppu.Music;
 	
 	public class MusicPlayer 
 	{
@@ -19,39 +18,18 @@
 		//Keep track of the name - Id relation of the music added to the player
 		private var m_musicIdLookup:Dictionary;
 		private var initialMusicSetUsed:Boolean = false;
-		//private var m_globalMusicId:int = -1;
-		//private var m_characterDefaultMusicId:Vector.<int>;
-		//private var m_playGlobalMusic:Boolean = false;
-		/*Holds the value of the last frame to be played for the music of a certain id. Used to keep the music
-		* synced with the animation as it can be determined whether to go to the next 4 second block of music
-		* or to jump the play head forward a bit in the case of the music being switched from then switched back within the same 4 second block.
-		* -1 indicates that the music has not been played at all.*/
-		private var m_musicLastPlayedFrame:Vector.<uint>; 
-		//private var m_selectedMusicForCharacter:Vector.<int>; 
-		/*Indicates which music by id to play when a character is in music select mode.
-		This is indicated by the bool in m_playCharacterMusic[charId] being set to false*/
 		
 		private var m_currentlyPlayingMusicId:int = -1; //-1 means no song has been played yet, any other corresponds to an index for an object in m_characterMusic
 		public var m_mainSoundChannel:SoundChannel; //Sound channel used by the currently playing Sound
 
 		//Time in milliseconds between the character switch transition. Used for music time rounding purposes to keep it in sync with the animation.
 		private const MUSICSEGMENTTIMEMILLI:int = 4000;
-		public var debug_CurrentMusic:Music;
-		//private var appCurrentFrame:int;
-		//public const DEFAULTSONGTITLE:String = "Beep Block Skyway";
 		//Sets up the vectors in the music manager. This should be done after all characters have been added and locked in.
 		public function MusicPlayer()
 		{
 			m_musicCollection = new Vector.<Music>();
-			//m_characterDefaultMusicId = new Vector.<int>();
-			//m_selectedMusicForCharacter = new Vector.<int>();
-			m_musicLastPlayedFrame = new Vector.<uint>();
+
 			m_musicIdLookup = new Dictionary();
-			/*for (var j:int = 0; j < numberOfCharacters; ++j) 
-			{
-				m_selectedMusicForCharacter[j] = -1;
-				m_characterDefaultMusicId[j] = -1;
-			}*/
 		}
 		
 		public function AddMusic(soundData:Sound, musicName:String, musicInfo:String, loopStartTimeMs:Number=0, loopEndTimeMs:Number=0, musicStartTimeMs:Number=0):void
@@ -79,25 +57,12 @@
 						{
 							return;
 						}
-						
-						//Old same music checking
-						/*if (m_musicCollection[i].Equals(MusicObj) == true)
-						{
-							m_characterDefaultMusicId[characterId] = i;
-							m_selectedMusicForCharacter[characterId] = i;
-							return;
-						}*/
 					}
 				}
 				
-				//m_playCharacterMusic[characterId] = true;
 				var musicId:int = m_musicCollection.length;
 				m_musicCollection[musicId] = MusicObj;
 				m_musicIdLookup[musicName] = musicId;
-				m_musicLastPlayedFrame[musicId] = 0;
-				//m_syncingSoundChannels[musicId] = null;
-				//m_characterDefaultMusicId[characterId] = musicId;
-				//m_selectedMusicForCharacter[characterId] = musicId;
 			}
 		}
 		
@@ -113,57 +78,36 @@
 		}
 		
 		/*Attempts to play a certain music track based on it's id.
-		 * CurrentFrame - the total amount of frames that the program has been run for.
+		 * currentTimeIntoAnimation - the amount of time that the current animation has completed. Expects animations to last for 4 seconds.
 		 * if musicId is -2 then it invokes a context based action involving whether music can play or not.
-		 * if Music can play then it will resume playing music based on the currentplayingmusicid. If music can't play then it'll
+		 * if Music can play then it will resume playing music based on the currentplayingmusicid. If music playing isn't allowed then it'll
 		 * stop playing the currently playing music but not set it to -1, which indicates that no music has been selected.
 		 * */
-		public function PlayMusic( musicId:int, currentFrame:uint /*, characterId:int=-1,*/):String
+		
+		//public function PlayMusic( musicId:int, currentFrame:uint /*, characterId:int=-1,*/):String
+		public function PlayMusic( musicId:int, currentTimeIntoAnimation:Number):String
 		{
+			//trace("time:" + currentTimeIntoAnimation);
 			//If music is allowed to play and the music id given is already playing then exit the function.
 			//Return null as there were no changes to the music 
 			if (musicId == m_currentlyPlayingMusicId && musicId > -1 && m_canPlayMusic == true) { return null; }
 			
-			/*if (m_currentlyPlayingMusicId > -1)
-			{
-				m_musicLastPlayedFrame[m_currentlyPlayingMusicId] = currentFrame;
-				m_mainSoundChannel.stop();
-				m_musicCollection[m_currentlyPlayingMusicId].Stop();
-				m_mainSoundChannel = null;
-				m_currentlyPlayingMusicId = -1;
-			}*/
-			
 			var bgm:Music;
-			var currentAnimationFrame:int;
-			var lastAnimationFrame:int;
 			var playheadPosition:Number;
-			var roundFactor:Number = 1000.0 / 30.0;
-			var jumpAheadTime:Number;
 			
-			var debugMsg:String="\n";
 			if (musicId > -1 && musicId < m_musicCollection.length && m_canPlayMusic == true)
 			{
 				//stop music
 				if (m_currentlyPlayingMusicId > -1)
 				{
-					m_musicLastPlayedFrame[m_currentlyPlayingMusicId] = currentFrame;
-					m_mainSoundChannel.stop();
-					m_musicCollection[m_currentlyPlayingMusicId].Stop();
-					
-					//trace("Stopped music on animation frame " + ((currentFrame % 120)+1) + "; soundChannel position:" + m_mainSoundChannel.position + " " + m_musicCollection[m_currentlyPlayingMusicId].GetMusicName() + ": " + m_musicCollection[m_currentlyPlayingMusicId].GetPlayheadPosition()  + "\nCurrent sample position is " + m_musicCollection[m_currentlyPlayingMusicId].DEBUG_GetCurrentSamplePosition() + " stop time(millisec) is " + m_musicCollection[m_currentlyPlayingMusicId].debug_currentTimePosition);
-					m_mainSoundChannel = null;
+					StopMusic(currentTimeIntoAnimation);
+
 					m_currentlyPlayingMusicId = -1;
 				}
 				
 				bgm = m_musicCollection[musicId];
-				debugMsg += bgm.GetMusicName();
-				//If music hasn't started yet, set the playhead position to be at the start time.
-				if (bgm.GetPlayheadPosition() == 0)
-				{
-					bgm.SetPlayheadPosition(bgm.GetMusicStartTime());
-				}
 				
-				currentAnimationFrame = (currentFrame % 120)+1;
+				//currentAnimationFrame = currentFrame;
 				/*To keep the animation and music synced, do a check to see what part of the 4 second "block"
 				 * the music was stopped on. If it was before the frame (out of 120) that the animation is on now, just set the music forward a bit to match the position.
 				 * If it was on or after the frame the animation is on, move to the next "block" for the music and then set the playhead's position to match that position.
@@ -175,30 +119,33 @@
 				
 				//last frame the music was played is less than the frame the animation is in, advance the music just enough to match
 				playheadPosition = bgm.GetPlayheadPosition();
-				//debugMsg += ":\nCurrentPlayheadPosition is " + bgm.GetPlayheadPosition();
-				//debugMsg += "\nCurrent Animation Frame is " + currentAnimationFrame; 
-				//debugMsg += "\nCurrent sample position is " + bgm.DEBUG_GetCurrentSamplePosition();
-				//debugMsg += "\nCurrent time position is " + bgm.debug_currentTimePosition + "("+bgm.debug_currentTimePosition/1000+"sec)";
 				//Round down the playhead position to the last frame.
-				playheadPosition = Math.floor(playheadPosition / roundFactor) * roundFactor;
-				lastAnimationFrame = (m_musicLastPlayedFrame[musicId] % 120) + 1;
-				//debugMsg += "\nLast Animation Frame is " + lastAnimationFrame; 
-				//debugMsg += "\nPlayhead's adjusted position is " + playheadPosition;
-				if (lastAnimationFrame <= currentAnimationFrame)
+				var musicPositionInAnimation:Number = playheadPosition % MUSICSEGMENTTIMEMILLI;
+				//Here's how to visualize how animation and music timing works. [] represents a 4 second blocks of time for the music
+				//[0-4][4-8][8-12][12-16][16-20]
+				//Animation time is how far into a 4 second block that an animation is in.
+				if (musicPositionInAnimation <= currentTimeIntoAnimation)
 				{
-					jumpAheadTime = (currentAnimationFrame - lastAnimationFrame) * roundFactor;
-					//debugMsg += "\nJumping ahead by " + (currentAnimationFrame - lastAnimationFrame) + " frames";
-					bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime);
+					//Music's (last) position into the animation is less than the current time the animation is into.
+					//Only need to move up the music's position a bit. To help visualize:
+					//[0-4][4-8][8-12][12-16][16-20]
+					//Music was last at 2.5s when the play was requested, animation is 3 seconds done.
+					//Music just needs to be set to be in the same time as the animation in it's current block
+					//so music is set to be at 3 seconds in (this does not include the time skipped due to the start point for music)
+					bgm.SetPlayheadPosition(playheadPosition + (currentTimeIntoAnimation - musicPositionInAnimation));
 				}
-				else //Last frame the music was played on is greater than the frame the animation is in, need to jump to the next 4 second block for the music.
+				else
 				{
-					jumpAheadTime = (120 - currentAnimationFrame) * roundFactor;
-					//debugMsg += "\nJumping ahead by " + (120 - currentAnimationFrame) + " frames";
-					bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime );
+					//Music's (last) position is after the time that the animation is in. Need to skip to the next 4 second
+					//section for the music then set it to match the time into animation. To help visualize:
+					//[0-4][4-8][8-12][12-16][16-20]
+					//Music was last at 2.5 seconds, Animation is 1.5 seconds done
+					//The music should not rewind to match the position of the animation. So it must be set to its next block.
+					//Music is now changed to the 4-8 second block, starting at 4 seconds. Then the amount of time the animation
+					//has completed is added, making the music be 5.5 seconds in.
+					//playheadPosition = (Math.ceil(playheadPosition / 4.0) * 4.0) + currentTimeIntoAnimation;
+					bgm.SetPlayheadPosition((Math.round(playheadPosition / MUSICSEGMENTTIMEMILLI) * MUSICSEGMENTTIMEMILLI) + currentTimeIntoAnimation);
 				}
-				//debugMsg += "\nPlayhead jumped ahead by " + jumpAheadTime + " milliseconds";
-				//debugMsg += "\nPlayhead's new position is " + bgm.GetPlayheadPosition();
-				//debugMsg += "\nNew sample position is " + bgm.DEBUG_GetCurrentSamplePosition();
 				m_mainSoundChannel = bgm.Play();
 				m_currentlyPlayingMusicId = musicId;	
 			}
@@ -208,40 +155,23 @@
 				if (m_canPlayMusic && m_currentlyPlayingMusicId > -1)
 				{
 					bgm = m_musicCollection[m_currentlyPlayingMusicId];
-					debugMsg += bgm.GetMusicName();
-					//If music hasn't started yet, set the playhead position to be at the start time.
-					if (bgm.GetPlayheadPosition() == 0)
-					{
-						bgm.SetPlayheadPosition(bgm.GetMusicStartTime());
-					}
-					currentAnimationFrame = (currentFrame % 120)+1;
-					
-					//last frame the music was played is less than the frame the animation is in, advance the music just enough to match
+
 					playheadPosition = bgm.GetPlayheadPosition();
-					//debugMsg += ":\nCurrentPlayheadPosition is " + bgm.GetPlayheadPosition();
-					//Round down the playhead position to the last frame.
-					playheadPosition = Math.floor(playheadPosition / roundFactor) * roundFactor;
-					lastAnimationFrame = (m_musicLastPlayedFrame[m_currentlyPlayingMusicId] % 120) + 1;
-					//debugMsg += "\nPlayhead's adjusted position is " + playheadPosition;
-					if (lastAnimationFrame <= currentAnimationFrame)
+					var musicPositionInAnimation:Number = playheadPosition % MUSICSEGMENTTIMEMILLI;
+					if (musicPositionInAnimation <= currentTimeIntoAnimation)
 					{
-						jumpAheadTime = (currentAnimationFrame - lastAnimationFrame) * roundFactor;
-						bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime);
+						bgm.SetPlayheadPosition(playheadPosition + (currentTimeIntoAnimation - musicPositionInAnimation));
 					}
-					else //Last frame the music was played on is greater than the frame the animation is in, need to jump to the next 4 second block for the music.
+					else
 					{
-						jumpAheadTime = (120 - currentAnimationFrame) * roundFactor;
-						bgm.SetPlayheadPosition(playheadPosition + jumpAheadTime );
+						bgm.SetPlayheadPosition((Math.round(playheadPosition / MUSICSEGMENTTIMEMILLI) * MUSICSEGMENTTIMEMILLI) + currentTimeIntoAnimation);
 					}
-					//debugMsg += "\nPlayhead jumped ahead by " + jumpAheadTime + " milliseconds";
-					//debugMsg += "\nPlayhead's new position is " + bgm.GetPlayheadPosition();
 					m_mainSoundChannel = bgm.Play();
 				}
 				else //Stop the currently playing song but don't change m_currentlyPlayingMusicId
 				{
 					if (m_currentlyPlayingMusicId > -1)
 					{
-						m_musicLastPlayedFrame[m_currentlyPlayingMusicId] = currentFrame;
 						m_musicCollection[m_currentlyPlayingMusicId].Stop();
 					}
 					if (m_mainSoundChannel)
@@ -255,16 +185,17 @@
 			{
 				if (m_currentlyPlayingMusicId > -1)
 				{
-					m_musicLastPlayedFrame[m_currentlyPlayingMusicId] = currentFrame;
 					m_musicCollection[m_currentlyPlayingMusicId].Stop();
 				}
-				m_mainSoundChannel.stop();
-				m_mainSoundChannel = null;
+				if (m_mainSoundChannel != null)
+				{
+					m_mainSoundChannel.stop();
+					m_mainSoundChannel = null;
+				}
 				//If music can't play then don't change the currently playing music
-				m_currentlyPlayingMusicId = -1;
+				//m_currentlyPlayingMusicId = -1;
 			}
-			debug_CurrentMusic = bgm;
-			//trace(debugMsg);
+
 			if (m_canPlayMusic == true)
 			{
 				if (m_currentlyPlayingMusicId == -1)
@@ -282,11 +213,11 @@
 			}
 		}
 		
-		public function StopMusic(currentFrame:uint):void
+		//public function StopMusic(currentFrame:uint):void
+		public function StopMusic(currentTime:Number):void
 		{
 			if (m_currentlyPlayingMusicId > -1)
 			{
-				m_musicLastPlayedFrame[m_currentlyPlayingMusicId] = currentFrame;
 				m_mainSoundChannel.stop();
 				m_musicCollection[m_currentlyPlayingMusicId].Stop();
 				m_mainSoundChannel = null;
@@ -300,58 +231,21 @@
 			SoundMixer.soundTransform = soundT;
 		}
 		
-		/*public function ToggleMusicSelectionMode(currentCharId:int, animationFrame:int):void //Toggles between the selectable music or character specific music playing.
-		{
-			//m_playCharacterMusic[currentCharId] = !m_playCharacterMusic[currentCharId];
-			if(m_playCharacterMusic[currentCharId] == true) //Play the character's default music if true
-			{
-				m_selectedMusicForCharacter[currentCharId] = m_characterDefaultMusicId[currentCharId];
-			}
-			PlayMusic(currentCharId, animationFrame);
-		}*/
-		
-		public function ChangeToPrevMusic(animationFrame:int):String
+		public function ChangeToPrevMusic(animationTime:Number):String
 		{
 			var prevMusicId:int = m_currentlyPlayingMusicId - 1;
 			if (prevMusicId < 0) { prevMusicId = m_musicCollection.length - 1; }
 			
-			return PlayMusic(prevMusicId, animationFrame);
+			return PlayMusic(prevMusicId, animationTime);
 		}
 		
-		public function ChangeToNextMusic(animationFrame:int):String
+		public function ChangeToNextMusic(animationTime:Number):String
 		{
 			var nextMusicId:int = m_currentlyPlayingMusicId + 1;
 			if (nextMusicId >= m_musicCollection.length) { nextMusicId = 0; }
 			
-			return PlayMusic(nextMusicId, animationFrame);
+			return PlayMusic(nextMusicId, animationTime);
 		}
-		
-		/*public function ChangeSelectedMusicForCharacter(charId:int, musicId:int):void
-		{
-			if (m_playGlobalMusic == false)
-			{
-				m_selectedMusicForCharacter[charId] = musicId;
-			}
-			else
-			{
-				m_globalMusicId = musicId;
-			}
-		}*/
-		
-		/*public function ChangeGlobalMusic(musicId:int):void
-		{
-			m_globalMusicId = musicId;
-		}*/
-		
-		/*public function GetCurrentMusicIdForCharacter(charId:int):int
-		{
-			return m_selectedMusicForCharacter[charId];
-		}*/
-		
-		/*public function GetGlobalCurrentMusicId():int
-		{
-			return m_globalMusicId;
-		}*/
 		
 		public function GetMusicIdByName(name:String):int
 		{
@@ -366,68 +260,6 @@
 			return -1;
 		}
 		
-		/*public function ChangePlayGlobalSongStatus(status:Boolean):void
-		{
-			m_playGlobalMusic = status;
-		}
-		public function GetGlobalSongStatus():Boolean
-		{
-			return m_playGlobalMusic;
-		}*/
-		
-		/* //Obsolete function
-		public function ChangeToCurrentMusicForAllCharacters():void
-		{
-			if (m_currentlyPlayingMusicId < -1 || m_currentlyPlayingMusicId >= m_characterMusic.length)
-			{
-				return;
-			}
-
-			for (var i:int = 0, l:int = m_selectedMusicForCharacter.length; i < l; i++) 
-			{
-				m_selectedMusicForCharacter[i] = m_currentlyPlayingMusicId;
-			}
-		}*/
-		/*public function ControlDefaultMusicVolume(musicVolume:Number):void
-		{
-			var soundT:SoundTransform = new SoundTransform();
-			soundT.volume = musicVolume;
-			m_mainMovieClip.soundTransform = soundT;
-		}*/
-		
-		/*public function ControlCharacterMusicVolume(musicVolume:Number):void
-		{
-			var soundT:SoundTransform = new SoundTransform();
-			soundT.volume = musicVolume;
-			m_mainSoundChannel.soundTransform = soundT;
-		}
-		
-		public function ToggleGlobalPlayMusicStatus() : Boolean
-		{
-			m_playMusic = !m_playMusic;
-			var titleToUse:String;
-			if (m_playMusic)
-			{
-				if(m_currentlyPlayingMusicId >= 0 && m_currentlyPlayingMusicId < m_musicCollection.length)
-				{
-					titleToUse = m_musicCollection[m_currentlyPlayingMusicId].GetMusicTitle();
-				}
-				else if (m_currentlyPlayingMusicId == -1)
-				{
-					titleToUse = "Beep Block Skyway";
-				}
-				else
-				{
-					titleToUse = "Unknown";
-				}
-			}
-			else 
-			{
-				titleToUse = "Music off";
-			}
-			//ChangeDisplayedMusicTitle(titleToUse, !m_playMusic);
-			return IsMusicPlaying();
-		}*/
 		//returns whether any music is allowed to be played/heard
 		public function IsMusicPlaying() : Boolean
 		{
@@ -439,19 +271,6 @@
 			m_canPlayMusic = musicEnabled;
 			return m_canPlayMusic;
 		}
-		/*public function GetPlayCharacterMusicStatus(charId:int):Boolean
-		{
-			return m_playCharacterMusic[charId];
-		}*/
-		
-		//Changes the text that displays the name of the music playing. By default it can only change when the music is not muted but forceChange can override this behavior
-		/*private function ChangeDisplayedMusicTitle(newMusicTitle:String, forceChange:Boolean=false):void
-		{
-			if (m_playMusic == true || forceChange == true)
-			{
-				m_musicInfoDisplay.text = newMusicTitle.toLowerCase();
-			}
-		}*/
 		
 		public function GetNameOfCurrentMusic():String
 		{
@@ -465,27 +284,35 @@
 			return m_musicCollection[m_currentlyPlayingMusicId].GetMusicInfo();
 		}
 		//Debug functions
-		public function DEBUG_GoToMusicLastSection():void
+		public function DEBUG_GoToMusicLastSection(currentTimeIntoAnimation:Number):void
 		{
 			if(m_currentlyPlayingMusicId > -1)
 			{
 				var bgm:Music = m_musicCollection[m_currentlyPlayingMusicId];
-				bgm.SetPlayheadPosition(bgm.GetLoopEnd() - 4000);
+				var musicPlayTime:Number = bgm.GetLoopEnd() - bgm.GetMusicStartTime();
+				var playheadPosition:Number = musicPlayTime - (MUSICSEGMENTTIMEMILLI * 2);
+				//trace("playhead's base position " + playheadPosition);
+				//bgm.SetPlayheadPosition(playheadPosition);
+				//trace("music position jumping to " + musicPlayTime);
+				//Round down the playhead position to the last frame.
+				var musicPositionInAnimation:Number = playheadPosition % MUSICSEGMENTTIMEMILLI;
+				//trace("time animation has completed " + currentTimeIntoAnimation);
+				//trace(musicPositionInAnimation);
+				
+				
+				if (musicPositionInAnimation <= currentTimeIntoAnimation)
+				{
+					trace((currentTimeIntoAnimation - musicPositionInAnimation));
+					bgm.SetPlayheadPosition(bgm.GetMusicStartTime() + playheadPosition + (currentTimeIntoAnimation - musicPositionInAnimation));
+				}
+				else
+				{
+					bgm.SetPlayheadPosition(bgm.GetMusicStartTime() + (Math.round(playheadPosition / MUSICSEGMENTTIMEMILLI) * MUSICSEGMENTTIMEMILLI) + currentTimeIntoAnimation);
+				}
+				//trace(bgm.GetPlayheadPosition());
+				//trace(m_mainSoundChannel.position);
 			}
 			
-		}
-		
-		//Returns the current position of the music, excluding the skipped parts before the start time. This value
-		//is obtained by taking the position the sound channel the music is playing through and subtracting
-		//the start time from the music (as everything before this point is skipped and should not be counted as "played")
-		public function GetPlayTimeForCurrentMusic():Number
-		{
-			var soundCurrentTime:Number = m_mainSoundChannel.position;
-			/*Need to subtract the start time for the music as everything before this point is never played. 
-			 * To illustrate, imagine a music object with a start time of 1 second. Now the music reaches a position of 
-			 * 5 seconds (not 5 seconds of playing but 4 seconds). */
-			return soundCurrentTime - m_musicCollection[m_currentlyPlayingMusicId].GetMusicStartTime();
-			//var time:Number = soundCurrentTime - m_musicCollection[m_currentlyPlayingMusicId].GetMusicStartTime();
 		}
 	}
 }
