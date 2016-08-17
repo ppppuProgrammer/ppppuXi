@@ -250,9 +250,10 @@
 			return m_randomizePlayAnim;
 		}
 		
-		public function RandomizePlayAnim():void
+		//Returns the animation id that was selected
+		public function RandomizePlayAnim(forceRandomization:Boolean=false):void
 		{
-			if(m_randomizePlayAnim)
+			if(m_randomizePlayAnim || forceRandomization == true)
 			{
 				//Randomly select a number out of the number of accessible animations
 				var accessibleAnimationCount:int = GetNumberOfAccessibleAnimations();
@@ -272,7 +273,9 @@
 						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
 					}
 				}
-				ChangeAnimationIndexToPlay(randomAnimIndex);
+				m_currentAnimationId = randomAnimIndex;
+				
+				//ChangeAnimationIndexToPlay(randomAnimIndex);
 			}
 		}
 		
@@ -332,7 +335,8 @@
 					}
 					++unlockedAnimNum;
 				}
-				ChangeAnimationIndexToPlay(unlockedAnimNum);
+				m_currentAnimationId = unlockedAnimNum;
+				//ChangeAnimationIndexToPlay(unlockedAnimNum);
 			}
 		}
 		
@@ -488,7 +492,16 @@
 		* */
 		public function ChangeAnimationIndexToPlay(animIndex:int=-1):void
 		{
+			
 			if (animIndex > -1)	{ m_currentAnimationId = animIndex /*+ 1*/; }
+			
+			/*If the animation index does not correspond to an actual animation, in a case such as 
+			 * adding an extra animation for one playthrough then locking that extra animation then 
+			 * removing it for the next playthrough, then it needs to be randomly selected*/
+			if (m_currentAnimationId >= GetTotalNumberOfAnimations())
+			{
+				RandomizePlayAnim(true);
+			}
 			
 			if (displayArea.numChildren == 1) 
 			{ 

@@ -470,6 +470,21 @@
 			return m_currentCharacter.GetPreferredMusicName();
 		}
 		
+		//Checks the character's animations to make sure at least 1 animation that is not an end link animation is accessible.
+		//If there are none, unlock every animation that is not an end link.
+		public function CheckLocksForCurrentCharacter():void
+		{
+			var currCharacter:AnimatedCharacter = m_currentCharacter;
+			var accessibleAnimationCount:int = currCharacter.GetNumberOfAccessibleAnimations();
+			if (accessibleAnimationCount == 0)
+			{
+				for (var i:int = 0; i < accessibleAnimationCount; ++i)
+				{
+					currCharacter.SetLockOnAnimation(i, false);
+				}
+				
+			}
+		}
 		/*public function DEBUG_CharacterAnimationFrameCheck():void
 		{
 			if (m_currentCharacter)

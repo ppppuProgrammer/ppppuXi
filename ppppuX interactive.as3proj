@@ -89,9 +89,7 @@
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">
-
-cmd.exe /C python "$(ProjectDir)\MakeBuildCopy.py" "$(OutputDir)" "$(OutputName)" "$(BuildConfig)" "$(TimeStamp)"</postBuildCommand>
+  <postBuildCommand alwaysRun="False">cmd.exe /C python "$(ProjectDir)\MakeBuildCopy.py" "$(OutputDir)" "$(OutputName)" "$(BuildConfig)" "$(TimeStamp)"</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="True" />
