@@ -15,8 +15,8 @@ package
 			musicName = "2 AM";
 			displayInfo = "2:00 A.M. - Super Smash Bros. Brawl";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(190538+576);
-			endLoopTime = -(ConvertSamplesToMilliseconds(618) + startTime);
+			startLoopTime = 8000; //8 seconds
+			//endLoopTime = -1;
 			
 		}
 		

@@ -15,8 +15,8 @@ package
 			musicName = "Miror B";
 			displayInfo = "Miror B. Battle - Pokemon XD";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(871773) + startTime;
-			endLoopTime= (ConvertSamplesToMilliseconds(2989939) + startTime);
+			startLoopTime = 20000; // 20 seconds
+			//endLoopTime= (ConvertSamplesToMilliseconds(2989939) + startTime);
 			
 		}
 		

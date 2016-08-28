@@ -232,7 +232,7 @@ package menu
 			}
 			else
 			{
-				characterMenu.SetListSelectorPosition(characterManager.GetIdOfCurrentCharacter());
+				characterMenu.SetListSelectorPosition(characterManager.GetIdOfCurrentCharacter(),true);
 			}
 			/*if (e == null)
 			{
@@ -265,7 +265,7 @@ package menu
 					UpdateAnimationIndexSelected(index);
 					//Update the random animation button to be selected.
 					animationMenu.SetSelectOnRandomAnimationButton(true);
-					userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), 0);
+					userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), "RANDOM");
 					return;
 				}
 				else if (relativeListIndex > -1)
@@ -299,7 +299,7 @@ package menu
 					}
 					else
 					{
-						userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), index);
+						userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), characterManager.GetNameOfAnimationByIdForCharacter(characterMenu.GetSelectedIndex(), index));
 					}
 				}
 				//Update the random animation button to no longer be selected.
@@ -357,7 +357,7 @@ package menu
 				animationMenu.ChangeLockOnItem(index, newLock);
 			}
 			userSettings.UpdateSettingForCharacter_AnimationLock(
-				characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), index, newLock);
+				characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), characterManager.GetNameOfAnimationByIdForCharacter(characterMenu.GetSelectedIndex(), index), newLock);
 			
 		}
 		

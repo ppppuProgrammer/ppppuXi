@@ -15,9 +15,8 @@ package
 			musicName = "Mission Final";
 			displayInfo = "Mission Final - Metroid Prime";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(90252+576);
-			endLoopTime = (ConvertSamplesToMilliseconds(3967612+576) /*+ startTime*/);
-			
+			startLoopTime = 8000; //8 seconds
+			//endLoopTime = -1;
 		}
 		
 	}

@@ -32,13 +32,13 @@
 			m_musicIdLookup = new Dictionary();
 		}
 		
-		public function AddMusic(soundData:Sound, musicName:String, musicInfo:String, loopStartTimeMs:Number=0, loopEndTimeMs:Number=0, musicStartTimeMs:Number=0):void
+		public function AddMusic(soundData:Sound, musicName:String, musicInfo:String, loopStartTimeMs:Number=0, loopEndTimeMs:Number=0, musicStartTimeMs:Number=0):Boolean
 		{
 			if(soundData != null)
 			{
 				if(soundData.bytesTotal == 0)
 				{
-					return;//Sound did not load, do not add it to the character music vector
+					return false;//Sound did not load, do not add it to the character music vector
 				}
 				
 				//Values lower than 0 mean to calculate the loop end point by adding the [negative] given loop end point's value to the bgm's length.
@@ -55,7 +55,7 @@
 						//Music checking only cares that 2 songs don't have to same name.
 						if (m_musicCollection[i].GetMusicInfo().toLowerCase() == musicName.toLowerCase())
 						{
-							return;
+							return false;
 						}
 					}
 				}
@@ -63,7 +63,9 @@
 				var musicId:int = m_musicCollection.length;
 				m_musicCollection[musicId] = MusicObj;
 				m_musicIdLookup[musicName] = musicId;
+				return true;
 			}
+			return false;
 		}
 		
 		//A one shot function. Sets the music id to start the music player with. After that this function is unusable

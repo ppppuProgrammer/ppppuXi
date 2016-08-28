@@ -15,8 +15,8 @@ package
 			sourceSound = new BGM_WFTrainingMenu;
 			displayInfo = "Training Menu - Wii Fit";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(1415850) + startTime;
-			endLoopTime = (ConvertSamplesToMilliseconds(3527735) + startTime);
+			startLoopTime = 36000; //36 seconds
+			//endLoopTime = -1;
 			
 		}
 		

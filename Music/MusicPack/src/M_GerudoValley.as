@@ -15,8 +15,8 @@ package
 			musicName = "Gerudo Valley";
 			displayInfo = "Gerudo Valley (Remix) - Smash 4";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(723190+576);
-			endLoopTime =- (ConvertSamplesToMilliseconds(647) + startTime);
+			startLoopTime = 16000;
+			//endLoopTime = -1;
 			
 		}
 		

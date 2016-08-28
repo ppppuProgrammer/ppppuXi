@@ -8,6 +8,8 @@
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
+	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
 	/**
 	 * ...
 	 * @author 
@@ -25,6 +27,9 @@
 		private var m_currentlyPlayingAnimation:MovieClip = null;
 		//The id of the characters animation collection that is slated to play or is playing currently. -1 indicates nothing is playing.
 		private var m_currentAnimationId:int = -1;
+		
+		private var m_animationNames:Dictionary = new Dictionary();
+		
 		/*Background colors*/
 		//The current colors of the background elements for the character
 		protected var m_backgroundColors:Object;
@@ -38,7 +43,6 @@
 		//The name of the music to play for the character.
 		protected var m_preferredMusicName:String = "Beep Block Skyway";
 		
-		public var test:MovieClip;
 		//private var m_playAnimationId:int = 0;
 		//Indicates whether the animation to play is to be randomly chosen.
 		private var m_randomizePlayAnim:Boolean = true;
@@ -90,10 +94,10 @@
 				{
 					AddAnimationsFromMovieClip(animation);
 				}
+				animation.stopAllMovieClips();
+				animation = null;
 			}
-			animation.stopAllMovieClips();
-			animation = null;
-			
+
 		}
 		
 		//Resets the background colors object to the default values set for the character.
@@ -109,7 +113,7 @@
 			return m_backgroundColors;
 		}
 		
-		public function IsValidCharacter():Boolean	{return (m_name != null && m_menuIcon != null);}
+		public function IsValidCharacter():Boolean	{return (m_name != null && m_menuIcon != null && m_charAnimations.length > 0);}
 		
 		public function GetName():String	{return m_name;}
 		public function GetIcon():Sprite	{ return m_menuIcon; }
@@ -151,7 +155,6 @@
 		This is so we can get the constructor for the animation, create a new instance and save that into the animations vector.*/
 		public function AddAnimationsFromMovieClip(animationCollection:MovieClip):void
 		{
-			//TODO: Reactivate commented out code.
 			for (var i:int = 1; i <= animationCollection.totalFrames; ++i)
 			{
 				animationCollection.gotoAndStop(i);
@@ -172,8 +175,9 @@
 					label = null;
 				}
 				var animationClass:Class = Object(animationCollection.getChildAt(0)).constructor;
+				var animationName:String = getQualifiedClassName(animationClass);
 				var animation:DisplayObject = new animationClass();
-				if (animation && (animation as MovieClip).totalFrames > 1)
+				if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames))
 				{
 					(animation as MovieClip).stop();
 					if (isLinkedEndAnimation == false)
@@ -182,7 +186,7 @@
 						m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
 						m_animationLabel[animationIndex] = label; //add label
 						m_lockedAnimation[m_lockedAnimation.length] = false;
-						
+						m_animationNames[animationName] = animationIndex;
 					}
 					else if (isLinkedEndAnimation == true && label != null)
 					{
@@ -210,14 +214,16 @@
 			var animationIndex:int = m_charAnimations.length;
 			
 			var animationClass:Class = Object(initialAnimation).constructor;
+			var animationName:String = getQualifiedClassName(animationClass);
 			var animation:MovieClip = new animationClass();
-			if (animation && (animation as MovieClip).totalFrames > 1)
+			if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames)) 
 			{
 				(animation as MovieClip).stop();
 				//add animation
 				m_charAnimations[animationIndex] = animation as MovieClip;
 				m_animationLabel[animationIndex] = null; //add label
 				m_lockedAnimation[m_lockedAnimation.length] = false;
+				m_animationNames[animationName] = animationIndex;
 			}
 			//Allow the original movie clip to be garbage collected
 			initialAnimation = null;
@@ -306,7 +312,7 @@
 		}
 		
 		[inline]
-		private function GetNumberOfLockedAnimations():int
+		public function GetNumberOfLockedAnimations():int
 		{
 			var lockedAnimNum:int = 0;
 			for(var i:int = 0, l:int = m_lockedAnimation.length; i < l; ++i)
@@ -522,6 +528,30 @@
 			return m_idTargets;
 		}
 		
+		public function GetIdOfAnimationName(animationName:String):int
+		{
+			if (animationName in m_animationNames)
+			{
+				return m_animationNames[animationName];
+			}
+			else
+			{
+				//No id for found for the name
+				return -1;
+			}
+		}
+		
+		public function GetNameOfAnimationById(animationId:int):String
+		{
+			for (var name:String in m_animationNames) 
+			{
+				if (m_animationNames[name] == animationId)
+				{
+					return name;
+				}
+			}
+			return null;
+		}
 		/*protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform
 		{
 			var ct:ColorTransform = new ColorTransform();

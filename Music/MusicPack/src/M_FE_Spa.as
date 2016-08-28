@@ -14,8 +14,8 @@ package
 			musicName = "FE Spa";
 			displayInfo = "Main Theme (Spa) - Fire Emblem 13";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(680646) + startTime;
-			endLoopTime = (ConvertSamplesToMilliseconds(1740226) + startTime);
+			startLoopTime = 16000; //16 seconds
+			//endLoopTime = -1;
 		}
 		
 	}

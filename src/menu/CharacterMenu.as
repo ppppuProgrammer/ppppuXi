@@ -87,10 +87,17 @@ package menu
 			characterList.menuCursorIndex = index;
 		}
 		
-		public function SetListSelectorPosition(index:int):void
+		public function SetListSelectorPosition(index:int, disableScrollbarMovement:Boolean = false):void
 		{
 			if (index > characterList.items.length) { index = characterList.items.length - 1; }
-			characterList.selectedIndex = index;
+			if (disableScrollbarMovement == false)
+			{
+				characterList.selectedIndex = index;
+			}
+			else
+			{
+				characterList.ChangeSelectedIndexWithoutMovingScrollBar(index);
+			}
 			//characterList.menuCursorIndex = index;
 		}
 		

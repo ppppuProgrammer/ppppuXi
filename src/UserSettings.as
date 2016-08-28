@@ -18,10 +18,10 @@ package
 		public var currentCharacterName:String = "";
 		public var randomlySelectCharacter:Boolean = false;
 		public var allowCharacterSwitches:Boolean = true;
-		public var playOneSongForAllCharacters:Boolean = false;
+		//public var playOneSongForAllCharacters:Boolean = false;
 		public var globalSongTitle:String = "Beep Block Skyway";
 		//The latest version of the user settings. Change this whenever there is a modification with the class properties (renaming, adding/removing)
-		public const SAVE_VERSION:int = 6;
+		public const SAVE_VERSION:int = 7;
 		//The version of the settings that this settings object was created for.
 		public var version:int = SAVE_VERSION;
 		public function UserSettings() 
@@ -107,8 +107,8 @@ package
 			characterSettings[charName] = new Object();
 			characterSettings[charName].locked = false;
 			characterSettings[charName].animationLocked = new Object();
-			characterSettings[charName].playMusicTitle = globalSongTitle;
-			characterSettings[charName].animationSelect = 0; //0 is randomly choose, value > 0 is a specific animation
+			//characterSettings[charName].playMusicTitle = globalSongTitle;
+			characterSettings[charName].animationSelect = "RANDOM"; //String of the class name for the animation. "RANDOM" is used when an animation is being randomly selected. //0 is randomly choose, value > 0 is a specific animation
 		} 
 		
 		public function UpdateSettingForCharacter_Lock(characterName:String, value:Boolean):void
@@ -116,17 +116,17 @@ package
 			characterSettings[characterName].locked = value;
 		}
 		
-		public function UpdateSettingForCharacter_AnimationLock(characterName:String, animationId:int, value:Boolean):void
+		public function UpdateSettingForCharacter_AnimationLock(characterName:String, animationName:String, value:Boolean):void
 		{
-			characterSettings[characterName].animationLocked[animationId] = value;
+			characterSettings[characterName].animationLocked[animationName] = value;
 		}
 		
-		public function UpdateSettingForCharacter_Music(characterName:String, value:String):void
+		/*public function UpdateSettingForCharacter_Music(characterName:String, value:String):void
 		{
 			characterSettings[characterName].playMusicTitle = value;
-		}
+		}*/
 		
-		public function UpdateSettingForCharacter_SelectedAnimation(characterName:String, value:int):void
+		public function UpdateSettingForCharacter_SelectedAnimation(characterName:String, value:String):void
 		{
 			characterSettings[characterName].animationSelect = value;
 		}
@@ -161,7 +161,7 @@ package
 				//Since the keybinding config can only be accessed from the menu, need to change a few things if the user did something to prevent them access to the config and menus.
 				showMenu = true;
 			}
-			if ("playOneSongForAllCharacters" in obj) { playOneSongForAllCharacters = obj.playOneSongForAllCharacters; }
+			//if ("playOneSongForAllCharacters" in obj) { playOneSongForAllCharacters = obj.playOneSongForAllCharacters; }
 			if ("globalSongTitle" in obj) { globalSongTitle = obj.globalSongTitle;}
 			// = obj.;
 		}

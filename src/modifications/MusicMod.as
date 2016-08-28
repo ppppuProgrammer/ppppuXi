@@ -69,7 +69,7 @@ package modifications
 		//Helper function to convert samples to milliseconds, assuming a sample rate of 44100 hz
 		protected function ConvertSamplesToMilliseconds(sampleNum:Number):Number
 		{
-			return (sampleNum / 44100.0) * 1000.0;
+			return (sampleNum / 44.1);
 		}
 	}
 }

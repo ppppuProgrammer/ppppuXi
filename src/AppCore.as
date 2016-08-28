@@ -8,9 +8,11 @@ package
 	import com.greensock.loading.SWFLoader;
 	import events.AnimationTransitionEvent;
 	import events.ExitLinkedAnimationEvent;
-	import flash.events.TimerEvent;
+	import flash.events.UncaughtErrorEvent;
 	import flash.system.System;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
+	import flash.utils.getQualifiedClassName;
 	import flash.utils.getTimer;
 	
 	import events.ChangeBackgroundEvent;
@@ -32,6 +34,7 @@ package
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextFieldType;
+	import mx.logging.*;
 	/**
 	 * Responsible for managing all the various aspects of ppppuNX (and interactive). 
 	 * @author ppppuProgrammer
@@ -41,16 +44,11 @@ package
 		public var mainStage:MainStage;
 		//Keeps track of what keys were pressed and/or held down
 		private var keyDownStatus:Array = [];
-		//private var characterList:Vector.<Character> = new <Character>[new PeachCharacter/*, new RosalinaCharacter*/];
-		//private const defaultCharacter:Character = characterList[0];
-		//private const defaultCharacterName:String = defaultCharacter.GetName();
-		//private var currentCharacter:Character = defaultCharacter;
-		//private var m_useBacklight:Boolean = true;
-		//private var m_showBackground:Boolean = true;
-		//private var characterNameList:Vector.<String> = new <String>["Peach"/*, "Rosalina"*/];
-		//private const defaultCharacter:String = characterNameList[0];
-		//private var currentCharacter:String = defaultCharacter;
-		//private var currentAnimationIndex:uint = 0;
+		
+		/*A function lookup table that holds keycodes as the key and various Keypress_ functions as the value.
+		* Used to execute the appropriate function in the event of a key press.*/
+		private var keypressFunctionLookup:Dictionary;
+		
 		private var characterManager:CharacterManager;
 		
 		private const flashStartFrame:int = 2;
@@ -64,21 +62,15 @@ package
 		
 		private var displayWidthLimit:int;
 		private var mainStageLoopStartFrame:int;
-		//For stopping animation
-		//private var lastPlayedFrame:int = -1;
-		
-		//Indicates that the program should be "frozen" while the various other swfs are being loaded .  
-		private var startupLoadFreeze:Boolean = true;
 		
 		//Settings related
-		public var settingsSaveFile:SharedObject = SharedObject.getLocal("ppppuXi");
+		public var settingsSaveFile:SharedObject = SharedObject.getLocal("ppppuXi_Settings");
 		
 		public var userSettings:UserSettings = new UserSettings();
 		
 		//Loading
 		private var contentLoader:LoaderMax = new LoaderMax({name:"Content loader"});
 		
-		//private var musicPlayer:MusicPlayer = new MusicPlayer();
 		private var mainMenu:MainMenu;
 		
 		/*Timing*/
@@ -101,14 +93,14 @@ package
 		/*The maximum amount of frames an animation can fall out of sync behind the music
 		* before any animations are jumped ahead to resync.*/
 		private const ANIMATION_MAX_FRAMES_BEHIND_MUSIC:int = 2;
-		//private var updatesSinceLastSkip:int = 0;
-		//private const updatesUntilCompleteResync:int = 60;
-		//private var runLoopTimer:Timer;
 		
 		//Music
 		private var musicPlayer:MusicPlayer = new MusicPlayer();
 		
 		private const appName:String = "ppppuXi beta";
+		
+		//The logging object for this class
+		private var logger:ILogger;
 		
 		//
 		//private var Debug_runTime:Number = 0;
@@ -121,6 +113,12 @@ package
 		//Constructor
 		public function AppCore() 
 		{
+			//Create the logger object that's used by this class to output messages.
+			logger = Log.getLogger("AppCore");
+
+			//Allow any uncaught errors be caught so they can be logged.
+			addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, ErrorCatcher, false, 0);
+			
 			//Create the "main stage" that holds the character template and various other movieclips such as the transition and backlight 
 			mainStage = new MainStage();
 			mainStage.stop();
@@ -153,12 +151,8 @@ package
 		
 		//Sets up the various aspects of the flash to get it ready for performing.
 		public function Initialize(startupMods:Array = null):void
-		{
-			//var msBounds:Rectangle = mainStage.getBounds(mainStage);
-			//var mainStagePlacementX:Number = ((mainStage.stage.stageWidth - msBounds.right));
-			//mainStage.x = mainStagePlacementX;
-			
-			
+		{	
+			logger.info("Initializing ppppuXi");
 			addEventListener(ChangeBackgroundEvent.CHANGE_BACKGROUND, ChangeBackgroundColors, true);
 			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, AnimationTransitionOccured, true);
 			mainStage.MenuLayer.mouseEnabled = true;
@@ -183,6 +177,9 @@ package
 			
 			LoadUserSettings();
 			
+			
+			SetupKeyFunctionLookupTable();
+			
 			mainMenu = new MainMenu(characterManager, musicPlayer, userSettings);
 			mainMenu.visible = false;
 			addChild(mainMenu);
@@ -206,13 +203,59 @@ package
 					ProcessMod(startupMods[i]);
 				}
 			}
+			//Load the settings for all loaded characters
+			InitializeSettingsForCharactersLoadedAtStartup();
+			//Set the first character that is to be picked according to the settings save file
+			var charactersCount:int = characterManager.GetTotalNumOfCharacters();
+			if ("currentCharacterName" in userSettings && userSettings.currentCharacterName.length > 0 && charactersCount > 0)
+			{
+				var characterId:int = characterManager.GetCharacterIdByName(userSettings.currentCharacterName);
+				if (characterManager.IsCharacterLocked(characterId) == true) { characterId = -1;}
+				//If the character wasn't found then iterate through the character list to find an unlocked character to pick.
+				if (characterId == -1) 
+				{ 
+					
+					var needToUnlockAllCharacters:Boolean = false;
+					for (var id:int = 0; id < charactersCount; ++id)
+					{
+						//Initial run of the for loop to see if there is an unlocked character to use
+						if (needToUnlockAllCharacters == false)
+						{
+							if (characterManager.IsCharacterLocked(id) == false)
+							{
+								characterId = id;
+								break;
+							}
+							//Got to the end and an unlocked character was not found, so unlock all characters.
+							if (id + 1 == charactersCount)
+							{
+								logger.warn("All loaded characters were locked. Unlocking all loaded characters.");
+								needToUnlockAllCharacters = true;
+								id = -1;
+							}
+						}
+						else //2nd run of the for loop to unlock all characters.
+						{
+							//Toggle the lock on the character to false and update the user settings to reflect this.
+							var characterName:String = characterManager.GetCharacterNameById(id);
+							userSettings.UpdateSettingForCharacter_Lock(characterName, characterManager.ToggleLockOnCharacter(id));
+							//Update the menu to have it show that the character is locked.
+							mainMenu.SetupMenusForCharacter(id, userSettings.characterSettings[characterName]);
+							//Got to the end and unlocked all characters, set the id of the first character displayed to set to 0.
+							if (id + 1 == charactersCount)
+							{
+								characterId = 0;
+							}
+						}	
+					}
+					
+				}
+				characterManager.SwitchToCharacter(characterId);
+			}
+			
 			System.pauseForGCIfCollectionImminent(0);
-			//runLoopTimer = new Timer(1000 / stage.frameRate);
-			//runLoopTimer.addEventListener(TimerEvent.TIMER, TimeBasedRunLoop);
-			//runLoopTimer.start();
+			
 			mainStage.play();
-			
-			
 		}
 		
 		private function SetupHelpMovieClip():void
@@ -282,7 +325,10 @@ package
 							errorTextLabel.draw();
 							errorPanel.setSize(errorTextLabel.textField.textWidth + 10, errorTextLabel.textField.textHeight + 10);
 							errorPanel.x = (stage.stageWidth - errorPanel.width)/2;
-							errorPanel.y = (stage.stageHeight - errorPanel.height)/2;
+							errorPanel.y = (stage.stageHeight - errorPanel.height) / 2;
+							
+							//Log a concise version of the error message.
+							logger.error("There were no characters mods loaded. ppppuXi needs at least one (1) character mod to run.");
 						}
 					}
 				}
@@ -300,6 +346,7 @@ package
 					
 					if (userSettings.firstTimeRun == true)
 					{
+						logger.info("A new save file for settings is being used.");
 						UpdateKeyBindsForHelpScreen();
 						ToggleHelpScreen(); //Show the help screen
 						ShowMenu(true);
@@ -339,48 +386,32 @@ package
 				//character switch skip check
 				var skippedCharacterSwitchFrame:Boolean = false;
 
-				if (intendedRunFrame > totalRunFrames + ANIMATION_MAX_FRAMES_BEHIND_MUSIC && characterManager.CheckIfTransitionLockIsActive() == false)
+				//Frame skipping can only happen if an end link animation is not playing.
+				if (characterManager.CheckIfTransitionLockIsActive() == false)
 				{
-					//For when the animation falls too far behind and needs to be immediately resynced.
-					
-					if (int((intendedRunFrame - 1) / 120) > int((lastIntendedRunFrame - 1) / 120))
+					if (intendedRunFrame > totalRunFrames + ANIMATION_MAX_FRAMES_BEHIND_MUSIC )
 					{
-						skippedCharacterSwitchFrame = true;
+						//For when the animation falls too far behind and needs to be immediately resynced.
+						
+						if (int((intendedRunFrame - 1) / 120) > int((lastIntendedRunFrame - 1) / 120))
+						{
+							skippedCharacterSwitchFrame = true;
+						}
+						SkipFramesForAnimations(intendedRunFrame);
+						totalRunFrames = intendedRunFrame;
+						//updatesSinceLastSkip = 0;
 					}
-					SkipFramesForAnimations(intendedRunFrame);
-					totalRunFrames = intendedRunFrame;
-					//updatesSinceLastSkip = 0;
-				}
-				else if ((intendedRunFrame - 1) % 120 != 0 && int((intendedRunFrame - 1) / 120) > int((lastIntendedRunFrame - 1) / 120))
-				{
-					//Flash fell behind and the intended run frame has now jumped over a designated character switch frame (every 121 frames)
-					//Force a frame skip and set it so it's known that a character switch was skipped
-					skippedCharacterSwitchFrame = true;
-					SkipFramesForAnimations(intendedRunFrame);
-					totalRunFrames = intendedRunFrame;
-					//updatesSinceLastSkip = 0;
-				}
-				//Delayed sync is disabled due to how often resyncs happen.
-				/*else if (updatesSinceLastSkip >= updatesUntilCompleteResync && intendedRunFrame > totalRunFrames)
-				{
-					//If the animation is behind a bit but not enough to force an immediate resync.
-					//After a period of time the animation will be resynced.
-					//trace("delayed resync");
-					trace("delayed sync - intended: " + intendedRunFrame + ", total: " + totalRunFrames);
-					trace(intendedRunFrame + " - " + totalRunFrames + " > 120 - " + (((totalRunFrames - 1) % 120) + 1) );
-					if (int((intendedRunFrame - 1) / 120) > int((lastIntendedRunFrame - 1) / 120))
+					else if ((intendedRunFrame - 1) % 120 != 0 && int((intendedRunFrame - 1) / 120) > int((lastIntendedRunFrame - 1) / 120))
 					{
-						trace("Skipped char switch");
+						//Flash fell behind and the intended run frame has now jumped over a designated character switch frame (every 121 frames)
+						//Force a frame skip and set it so it's known that a character switch was skipped
 						skippedCharacterSwitchFrame = true;
+						SkipFramesForAnimations(intendedRunFrame);
+						totalRunFrames = intendedRunFrame;
+						//updatesSinceLastSkip = 0;
 					}
-					SkipFramesForAnimations(intendedRunFrame);
-					totalRunFrames = intendedRunFrame;
-					updatesSinceLastSkip = 0;
 				}
-				else
-				{
-					trace("no frame skip, frame: " + totalRunFrames+ ", intended frame: " + intendedRunFrame );
-				}*/
+
 				var animationFrame:uint = GetFrameNumberToSetForAnimation(); //The frame that an animation should be on. Animations are typically 120 frames / 4 seconds long
 				mainMenu.UpdateTimingsForAnimation(animationFrame, GetCompletionTimeForAnimation());
 				
@@ -440,159 +471,9 @@ package
 				return;
 			}*/
 			var keyPressed:int = keyEvent.keyCode;
-			var keyBindings:Object = userSettings.keyBindings;
-			if(keyDownStatus[keyPressed] == undefined || keyDownStatus[keyPressed] == false || (keyPressed == 48 || keyPressed == 96))
+			if(keyPressed in keypressFunctionLookup && (keyDownStatus[keyPressed] == undefined || keyDownStatus[keyPressed] == false || (keyPressed == 48 || keyPressed == 96)))
 			{
-				if((keyPressed == 48 || keyPressed == 96))
-				{
-					mainMenu.SelectAnimation(null, -1);
-				}
-				else if((!(49 > keyPressed) && !(keyPressed > 57)) ||  (!(97 > keyPressed) && !(keyPressed > 105)))
-				{
-					//keypress of 1 has a keycode of 49
-					if(keyPressed > 96)
-					{
-						keyPressed = keyPressed - 48;
-					}
-					//AnimationIndex 
-					
-					var animationIndex:int = keyPressed - 49; 
-					mainMenu.SelectAnimation(null, animationIndex);
-					//characterManager.HandleAnimActionForCurrentCharacter(animationFrame);
-				}
-				else if(keyPressed == keyBindings.AutoCharSwitch.main || keyPressed == keyBindings.AutoCharSwitch.alt)
-				{
-					var charSwitchingAllowed:Boolean = characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
-					mainMenu.UpdateModeForCharacterSwitchButton(charSwitchingAllowed ? "Normal" : "Single" );
-					userSettings.UpdateCharacterSwitching(charSwitchingAllowed);
-					userSettings.UpdateRandomCharacterSelecting(characterManager.IsRandomlySelectingCharacter());
-					//if(characterManager.GetRandomSelectStatus() && !characterManager.GetCharSwitchStatus())
-					//{
-						//characterManager.SetRandomSelectStatus(false);
-					//}
-				}
-				else if(keyPressed == keyBindings.PrevAnimPage.main || keyPressed == keyBindings.PrevAnimPage.alt)
-				{
-					//Try to go to the previous page of animations
-					mainMenu.ChangeThe9ItemsDisplayedForAnimations(false);
-				}
-				else if(keyPressed == keyBindings.NextAnimPage.main || keyPressed == keyBindings.NextAnimPage.alt)
-				{
-					//Try to go to the next page of animations
-					mainMenu.ChangeThe9ItemsDisplayedForAnimations(true);
-				}
-				else if(keyPressed == keyBindings.AnimLockMode.main || keyPressed == keyBindings.AnimLockMode.alt)
-				{
-					//toggle animation lock/goto mode
-					mainMenu.ToggleAnimationMenuKeyboardMode();					
-				}
-				else if(keyPressed == keyBindings.LockChar.main || keyPressed == keyBindings.LockChar.alt)
-				{
-					//(Un)lock the character who the menu cursor is on
-					mainMenu.SetCharacterLock();
-				}
-				else if(keyPressed == keyBindings.GotoChar.main || keyPressed == keyBindings.GotoChar.alt)
-				{
-					//Go to the character who the menu cursor is on
-					mainMenu.SelectCharacter();
-				}
-				else if(keyPressed == keyBindings.CharCursorPrev.main || keyPressed == keyBindings.CharCursorPrev.alt)
-				{
-					//Move menu cursor to the character above
-					mainMenu.MoveCharacterSelector(-1);
-				}
-				else if(keyPressed == keyBindings.CharCursorNext.main || keyPressed == keyBindings.CharCursorNext.alt)
-				{
-					//Move menu cursor to the character below
-					mainMenu.MoveCharacterSelector(1);
-				}
-				else if(keyPressed == keyBindings.RandomChar.main || keyPressed == keyBindings.RandomChar.alt)
-				{
-					//Toggles random character switching
-					var randomCharSelect:Boolean = characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
-					mainMenu.UpdateModeForCharacterSwitchButton(randomCharSelect ? "Random" : "Normal");
-					userSettings.UpdateCharacterSwitching(characterManager.AreCharacterSwitchesAllowed());
-					userSettings.UpdateRandomCharacterSelecting(randomCharSelect);
-					
-				}
-				else if(keyPressed == keyBindings.Menu.main || keyPressed == keyBindings.Menu.alt)
-				{
-					//characterManager.ToggleMenu();
-					mainMenu.visible = !mainMenu.visible;
-					userSettings.UpdateMenuVisibility(mainMenu.visible);
-				}
-				else if(keyPressed == keyBindings.Help.main || keyPressed == keyBindings.Help.alt)
-				{	
-					ToggleHelpScreen();
-				}
-				else if(keyPressed == keyBindings.Backlight.main || keyPressed == keyBindings.Backlight.alt)
-				{
-					SetBackLight(!userSettings.backlightOn);
-				}
-				else if(keyPressed == keyBindings.Background.main || keyPressed == keyBindings.Background.alt)
-				{
-					ChangeBackgroundVisibility(!userSettings.showBackground);
-				}
-				else if(keyPressed == keyBindings.Music.main || keyPressed == keyBindings.Music.alt)
-				{
-					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
-					mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
-					userSettings.playMusic = musicEnabled;
-					var displayText:String = musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation());
-					mainMenu.ChangeMusicMenuDisplayedInfo(displayText);
-					//characterManager.ToggleMusicPlay();
-				}
-				else if(keyPressed == keyBindings.CharPreferredMusic.main || keyPressed == keyBindings.CharPreferredMusic.alt)
-				{
-					var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
-					if (musicId > -1)
-					{
-						var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, GetCompletionTimeForAnimation());
-						mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
-						userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
-					}
-					//characterManager.UseDefaultMusicForCurrentCharacter();
-				}
-				else if(keyPressed == keyBindings.NextHelpPage.main || keyPressed == keyBindings.NextHelpPage.alt)
-				{
-					if(helpScreenMC.currentFrame == helpScreenMC.totalFrames)
-					{
-						helpScreenMC.gotoAndStop(1);
-						UpdateKeyBindsForHelpScreen();
-					}
-					else
-					{
-						helpScreenMC.nextFrame();
-					}
-				}
-				else if(keyPressed == keyBindings.PrevMusic.main || keyPressed == keyBindings.PrevMusic.alt)
-				{
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(GetCompletionTimeForAnimation()));
-					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
-					//characterManager.ChangeMusicForCurrentCharacter(false);
-					//trace(Debug_runTime);
-				}
-				else if(keyPressed == keyBindings.NextMusic.main || keyPressed == keyBindings.NextMusic.alt)
-				{
-					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(GetCompletionTimeForAnimation()));
-					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
-					//trace(Debug_runTime);
-					//characterManager.ChangeMusicForCurrentCharacter(true);
-				}
-				/*else if(keyPressed == keyBindings.MusicForAll.main || keyPressed == keyBindings.MusicForAll.alt)
-				{
-					//characterManager.SetCurrentMusicForAllCharacters();
-					//characterManager.MusicForEachOrAll();
-				}*/
-				else if(keyPressed == keyBindings.Activate.main || keyPressed == keyBindings.Activate.alt)
-				{
-					//characterManager.SetCurrentMusicForAllCharacters();
-					characterManager.ActivateAnimationChange();
-				}
-				/*else if(keyPressed == Keyboard.END)
-				{
-					musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
-				}*/
+				keypressFunctionLookup[keyPressed](keyPressed);
 				keyDownStatus[keyPressed] = true;
 			}
 			keyDownStatus[keyEvent.keyCode] = true;
@@ -611,12 +492,7 @@ package
 			else
 			{
 				mainStage.CharacterLayer.scrollRect = null;
-				//mainStage.CharacterLayer.scrollRect = null;
 				PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
-				/*if (userSettings.backlightOn)
-				{
-					SetBackLight(userSettings.backlightOn);
-				}*/
 			}
 			
 		}
@@ -624,7 +500,6 @@ package
 		private function SetBackLight(visible:Boolean):void
 		{
 			userSettings.UpdateShowingBacklight(visible);
-			//settingsSaveFile.flush();
 			
 			//Do not make the light visible if the background isn't being shown
 			if (!userSettings.showBackground && visible)
@@ -650,25 +525,7 @@ package
 			helpScreenMC.visible = !helpScreenMC.visible;
 		}
 		
-		/*LOADER RELATED FUNCTIONS*/
-		
-		/*private function StartupLoadsComplete(e:LoaderEvent):void
-		{
-			//Add an event listener that'll allow for frame checking.
-			//mainStage.addEventListener(Event.ENTER_FRAME, RunLoop);
-			
-			
-			//mainStage.play();
-			//lastRecordedTime = getTimer();
-			
-			startupLoadFreeze = false;
-			//runTimer = new Timer(1000.0 / stage.frameRate);
-			//runTimer.addEventListener(TimerEvent.TIMER, this.RunLoop);
-			//runTimer.start();
-			e.currentTarget.unload();
-			e.currentTarget.dispose();
-		}*/
-		
+		/*LOADER RELATED FUNCTIONS*/		
 		
 		/*MODIFICATION SYSTEM RELATED FUNCTIONS*/
 		
@@ -690,7 +547,11 @@ package
 		and the mod could not be added.*/
 		private function ProcessMod(mod:Mod/*, modType:int*/):Boolean
 		{
-			if (mod == null)	{ return false; }
+			if (mod == null)
+			{
+				logger.warn(getQualifiedClassName(mod)+ " is not a ppppuXi mod!");
+				return false;
+			}
 			
 			var modType:int = mod.GetModType();
 			
@@ -701,57 +562,71 @@ package
 				{
 					var characterData:Object = animCharacterMod.GetCharacterData();
 					var character:AnimatedCharacter = new AnimatedCharacter(characterData);
-					//var characterName:String = characterData;
-					if (characterManager.AddCharacter(character))
+					var addedCharacterId:int = characterManager.AddCharacter(character);
+					if (addedCharacterId != -1)
 					{
 						mainMenu.AddIconToCharacterMenu(characterData.icon);
-						TryToLoadCharacterSettings(characterData.name);
+						logger.info("Successfully added character: " +  character.GetName());
+						if(totalRunFrames > 0)	{TryToLoadCharacterSettings(addedCharacterId);}
+					}
+					else
+					{
+						logger.warn("Failed to add character: " + character.GetName());
 					}
 				}
-				
 			}
 			else if (modType == Mod.MOD_ANIMATION)
 			{
 				var animationMod:AnimationMod = mod as AnimationMod;
 				if (animationMod != null)
 				{
-					characterManager.AddAnimationsToCharacter(animationMod.GetTargetCharacterName(), 
+					var targetCharacter:String = animationMod.GetTargetCharacterName();
+					characterManager.AddAnimationsToCharacter(targetCharacter, 
 						animationMod.GetAnimationContainer());
 				}
 			}
 			else if (modType == Mod.MOD_TEMPLATECHARACTER)
 			{
 				//Not used in interactive versions
+				logger.error("TemplateCharacter mods are only to be loaded by ppppuNX");
 			}
 			else if (modType == Mod.MOD_MUSIC)
 			{
 				var music:MusicMod = mod as MusicMod;
 				if (music)
 				{
-					musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime());
-					if (music.GetName() == userSettings.globalSongTitle)
+					if (musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime()))
 					{
-						var chosenMusicId:int = musicPlayer.GetMusicIdByName(music.GetName());
-						if (chosenMusicId > -1)
-						{ 
-							//If totalRunFrames is 0 then the RunLoop has no started yet. This means that
-							//the music player should not have been told to play music yet, so use the SetInitialMusicToPlay function.
-							if (totalRunFrames == 0)
-							{
-								musicPlayer.SetInitialMusicToPlay(chosenMusicId);
+						logger.info("music " + music.GetName() + " was successfully added");
+						if (music.GetName() == userSettings.globalSongTitle)
+						{
+							var chosenMusicId:int = musicPlayer.GetMusicIdByName(music.GetName());
+							if (chosenMusicId > -1)
+							{ 
+								//If totalRunFrames is 0 then the RunLoop has no started yet. This means that
+								//the music player should not have been told to play music yet, so use the SetInitialMusicToPlay function.
+								if (totalRunFrames == 0)
+								{
+									musicPlayer.SetInitialMusicToPlay(chosenMusicId);
+								}
+								else
+								{
+									musicPlayer.PlayMusic(chosenMusicId, GetCompletionTimeForAnimation()); 
+								}
+								
 							}
-							else
-							{
-								musicPlayer.PlayMusic(chosenMusicId, GetCompletionTimeForAnimation()); 
-							}
-							
-						}
-					}	
+						}	
+					}
+					else
+					{
+						logger.error("Unable to add music: " + music.GetName());
+					}
 				}
 			}
 			else if (modType == Mod.MOD_ASSETS)
 			{
 				//Not used in interactive versions
+				logger.error("Asset mods are only to be loaded by ppppuNX");
 			}
 			//If the mod type is an archive we'll need to iterate through the mod list it has and process them seperately
 			else if (modType == Mod.MOD_ARCHIVE)
@@ -759,6 +634,7 @@ package
 				var archive:ModArchive = mod as ModArchive;
 				if (archive)
 				{
+					logger.info("\t* Processing archive mod *");
 					var archiveModList:Vector.<Mod> = archive.GetModsList();
 					var childMod:Mod;
 					for (var i:int = 0, l:int = archiveModList.length; i < l; ++i)
@@ -766,6 +642,11 @@ package
 						childMod = archiveModList[i];
 						ProcessMod(childMod);
 					}
+					logger.info("\t* Finished processing archive mod *");
+				}
+				else 
+				{
+					logger.error("Mod was not a valid archive.");
 				}
 			}
 			mod.Dispose();
@@ -781,77 +662,75 @@ package
 				UpdateKeyBindsForHelpScreen();
 			}
 			settingsSaveFile.flush();
+			//Need to update the key function lookup table for the new keycodes
+			SetupKeyFunctionLookupTable();
 		}
 		
 		private function LoadUserSettings():void
 		{
+			logger.info("Loading user settings");
 			if (settingsSaveFile.data.ppppuSettings != null)
 			{
 				if (userSettings.SAVE_VERSION == settingsSaveFile.data.ppppuSettings.version)
 				{
 					userSettings.ConvertFromObject(settingsSaveFile.data.ppppuSettings);
 					//Something went terribly wrong, recreate the user settings
-					if (userSettings == null) { userSettings = new UserSettings(); }
+					
+					if (userSettings == null) 
+					{ 
+						logger.warn("Settings were not loaded correctly. Recreating user settings.");
+						userSettings = new UserSettings(); 
+					}
+					else
+					{
+						logger.info("User Settings were loaded successfully.");
+					}
 				}
 				else
 				{
+					logger.warn("Out of date settings version found, settings have been reset to their default values.");
 					settingsSaveFile.clear();
 				}
 				settingsSaveFile.data.ppppuSettings = userSettings;
 			}
-			//if (userSettings.limitRenderArea == true) { ToggleDrawLimiter(); }
 			
-			/*if (userSettings.showBackground == true)
-			{
-				mainStage.TransitionDiamondBG.visible = mainStage.OuterDiamondBG.visible = mainStage.InnerDiamondBG.visible = false;
-			}*/
-				
-			
-			//characterManager.GotoSelectedMenuCharacter(characterManager.GetCharacterIdByName(userSettings.currentCharacterName));
 			characterManager.SetAllowingCharacterSwitching(userSettings.allowCharacterSwitches);
 			characterManager.SetIfRandomlySelectingCharacter(userSettings.randomlySelectCharacter);
 			musicPlayer.SetIfMusicIsEnabled(userSettings.playMusic);
 			var chosenMusicId:int = musicPlayer.GetMusicIdByName(userSettings.globalSongTitle);
-			if (chosenMusicId > -1) { musicPlayer.SetInitialMusicToPlay(chosenMusicId);}
-			//if (!userSettings.playMusic) { characterManager.ToggleMusicPlay(); }
-			
-			//characterManager.ChangeGlobalMusicForAllCharacters(userSettings.globalSongTitle);
-			//if (userSettings.playOneSongForAllCharacters) { characterManager.MusicForEachOrAll();}
-			//if (userSettings.showMenu == false) { characterManager.ToggleMenu(); }
-			
-			//characterManager.
-			//if (userSettings. == false) { ; }	
-			
+			if (chosenMusicId > -1) { musicPlayer.SetInitialMusicToPlay(chosenMusicId);}			
 		}
-		
-		private function TryToLoadCharacterSettings(characterName:String):void
+		[inline]
+		private function TryToLoadCharacterSettings(characterId:int):void
 		{
+			if (characterId < 0 || characterId >= characterManager.GetTotalNumOfCharacters()) { return; }
+			
+			var characterName:String = characterManager.GetCharacterNameById(characterId);
 			if (userSettings.CheckIfCharacterHasSettings(characterName) == false)
 			{
 				userSettings.CreateSettingsForNewCharacter(characterName);
 			}
 
 			var charId:int = characterManager.GetCharacterIdByName(characterName);
-			if (charId > -1)
+			//processing of character settings
+			var charSettings:Object = userSettings.GetSettingsForCharacter(characterName);
+			
+			//Set up character to use those settings.
+			characterManager.InitializeSettingsForCharacter(charId, charSettings);
+			//Insert something here for menu to update
+			mainMenu.SetupMenusForCharacter(charId, charSettings);
+		}
+		
+		private function InitializeSettingsForCharactersLoadedAtStartup():void
+		{
+			var charSettings:Object;
+			var characterName:String;
+			for (var i:int = 0, l:int = characterManager.GetTotalNumOfCharacters(); i < l; i++) 
 			{
-				//processing of character settings
-				var charSettings:Object = userSettings.GetSettingsForCharacter(characterName);
-				
-				//Set up character to use those settings.
-				characterManager.InitializeSettingsForCharacter(charId, charSettings);
-				//Insert something here for menu to update
-				mainMenu.SetupMenusForCharacter(charId, charSettings);
-				//TODO: Make Music player handle this.
-				//var musicId:int = musicPlayer.GetMusicIdByTitle(charSettings.playMusicTitle);
-				//musicPlayer.ChangeSelectedMusicForCharacter(musicId);
-				//characterManager.ChangeMusicForCharacter(charId, charSettings.playMusicTitle);
-				if (characterName == userSettings.currentCharacterName)
-				{
-					var characterId:int = characterManager.SwitchToCharacter(charId);
-				}
+				TryToLoadCharacterSettings(i);
 			}
-			
-			
+			//Due to start up nonsense there is a possibility of all characters being locked.
+			//Check to be sure that 
 		}
 		
 		public function UpdateKeyBindsForHelpScreen():void
@@ -1092,9 +971,179 @@ package
 			characterManager.ChangeFrameOfCurrentAnimation(frameAnimationsShouldBeOn);
 		}
 		
-		/*private function Debug_TimerHandler(e:TimerEvent):void
+		/* Key Press Functions*/
+		
+		/*Setups the key function lookup table, which is used by the keypressCheck function to execute the appropriate
+		 * keypress_ function based on the key pressed. This must be called whenever the keybinds are changed or the
+		 * lookup table will not reflect the changes made to the keybinds.*/
+		private function SetupKeyFunctionLookupTable():void
 		{
-			Debug_runTime += Debug_Timer.delay;
+			keypressFunctionLookup = new Dictionary();
+			var keyBindings:Object = userSettings.keyBindings;
+			keypressFunctionLookup[Keyboard.NUMBER_0] = keypressFunctionLookup[Keyboard.NUMPAD_0] = KeyPress_RandomChangeAnimation;
+			for (var i:int = 0, l:int = 9; i < l; ++i)
+			{
+				keypressFunctionLookup[Keyboard.NUMBER_1+i] = keypressFunctionLookup[Keyboard.NUMPAD_1+i] = KeyPress_ChangeAnimation;
+			}
+			keypressFunctionLookup[keyBindings.AutoCharSwitch.main] = keypressFunctionLookup[keyBindings.AutoCharSwitch.alt] = KeyPress_AutomaticCharacterSwitch;
+			keypressFunctionLookup[keyBindings.PrevAnimPage.main] = keypressFunctionLookup[keyBindings.PrevAnimPage.alt] = KeyPress_PreviousAnimationPage;
+			keypressFunctionLookup[keyBindings.NextAnimPage.main] = keypressFunctionLookup[keyBindings.NextAnimPage.alt] = KeyPress_NextAnimationPage;
+			keypressFunctionLookup[keyBindings.AnimLockMode.main] = keypressFunctionLookup[keyBindings.AnimLockMode.alt] = KeyPress_AnimationLockMode;
+			keypressFunctionLookup[keyBindings.LockChar.main] = keypressFunctionLookup[keyBindings.LockChar.alt] = KeyPress_LockCharacter;
+			keypressFunctionLookup[keyBindings.GotoChar.main] = keypressFunctionLookup[keyBindings.GotoChar.alt] = KeyPress_SwitchToCharacter;
+			keypressFunctionLookup[keyBindings.CharCursorPrev.main] = keypressFunctionLookup[keyBindings.CharCursorPrev.alt] = KeyPress_MoveCharacterCursorBack;
+			keypressFunctionLookup[keyBindings.CharCursorNext.main] = keypressFunctionLookup[keyBindings.CharCursorNext.alt] = KeyPress_MoveCharacterCursorForward;
+			keypressFunctionLookup[keyBindings.RandomChar.main] = keypressFunctionLookup[keyBindings.RandomChar.alt] = KeyPress_SelectRandomCharacter;
+			keypressFunctionLookup[keyBindings.Menu.main] = keypressFunctionLookup[keyBindings.Menu.alt] = KeyPress_Menu;
+			keypressFunctionLookup[keyBindings.Help.main] = keypressFunctionLookup[keyBindings.Help.alt] = KeyPress_Help;
+			keypressFunctionLookup[keyBindings.Backlight.main] = keypressFunctionLookup[keyBindings.Backlight.alt] = KeyPress_Backlight;
+			keypressFunctionLookup[keyBindings.Background.main] = keypressFunctionLookup[keyBindings.Background.alt] = KeyPress_Background;
+			keypressFunctionLookup[keyBindings.Music.main] = keypressFunctionLookup[keyBindings.Music.alt] = KeyPress_Music;
+			keypressFunctionLookup[keyBindings.CharPreferredMusic.main] = keypressFunctionLookup[keyBindings.CharPreferredMusic.alt] = KeyPress_CharacterPreferredMusic;
+			keypressFunctionLookup[keyBindings.NextHelpPage.main] = keypressFunctionLookup[keyBindings.NextHelpPage.alt] = KeyPress_NextHelpPage;
+			keypressFunctionLookup[keyBindings.PrevMusic.main] = keypressFunctionLookup[keyBindings.PrevMusic.alt] = KeyPress_ChangeToPrevMusic;
+			keypressFunctionLookup[keyBindings.NextMusic.main] = keypressFunctionLookup[keyBindings.NextMusic.alt] = KeyPress_ChangeToNextMusic;
+			keypressFunctionLookup[keyBindings.Activate.main] = keypressFunctionLookup[keyBindings.Activate.alt] = KeyPress_ActivateAnimationTransition;
+			
+			//Debug test key functions
+			//keypressFunctionLookup[Keyboard.END] = KeyPressDEBUG_GotoLastSectionForMusic;
+			
+		}
+		private function KeyPress_RandomChangeAnimation(keycode:int):void
+		{
+			mainMenu.SelectAnimation(null, -1);
+		}
+		
+		private function KeyPress_ChangeAnimation(keycode:int):void
+		{
+			//keypress of 1 has a keycode of 49
+			if(keycode > 96)
+			{
+				keycode = keycode - 48;
+			}
+			//AnimationIndex 
+			
+			var animationIndex:int = keycode - 49; 
+			mainMenu.SelectAnimation(null, animationIndex);
+		}
+		private function KeyPress_AutomaticCharacterSwitch(keycode:int):void
+		{
+			var charSwitchingAllowed:Boolean = characterManager.SetAllowingCharacterSwitching(!characterManager.AreCharacterSwitchesAllowed());
+			mainMenu.UpdateModeForCharacterSwitchButton(charSwitchingAllowed ? "Normal" : "Single" );
+			userSettings.UpdateCharacterSwitching(charSwitchingAllowed);
+			userSettings.UpdateRandomCharacterSelecting(characterManager.IsRandomlySelectingCharacter());
+		}
+		private function KeyPress_PreviousAnimationPage(keycode:int):void
+		{
+			//Try to go to the previous page of animations
+			mainMenu.ChangeThe9ItemsDisplayedForAnimations(false);
+		}
+		private function KeyPress_NextAnimationPage(keycode:int):void
+		{
+			//Try to go to the next page of animations
+			mainMenu.ChangeThe9ItemsDisplayedForAnimations(true);
+		}
+		private function KeyPress_AnimationLockMode(keycode:int):void
+		{
+			//toggle animation lock/goto mode
+			mainMenu.ToggleAnimationMenuKeyboardMode();
+		}
+		private function KeyPress_LockCharacter(keycode:int):void
+		{
+			//(Un)lock the character who the menu cursor is on
+			mainMenu.SetCharacterLock();
+		}
+		private function KeyPress_SwitchToCharacter(keycode:int):void
+		{
+			//Go to the character who the menu cursor is on
+			mainMenu.SelectCharacter();
+		}
+		private function KeyPress_MoveCharacterCursorBack(keycode:int):void
+		{
+			//Move menu cursor to the character above
+			mainMenu.MoveCharacterSelector(-1);
+		}
+		private function KeyPress_MoveCharacterCursorForward(keycode:int):void
+		{
+			//Move menu cursor to the character below
+			mainMenu.MoveCharacterSelector(1);
+		}
+		private function KeyPress_SelectRandomCharacter(keycode:int):void
+		{
+			//Toggles random character switching
+			var randomCharSelect:Boolean = characterManager.SetIfRandomlySelectingCharacter(!characterManager.IsRandomlySelectingCharacter());
+			mainMenu.UpdateModeForCharacterSwitchButton(randomCharSelect ? "Random" : "Normal");
+			userSettings.UpdateCharacterSwitching(characterManager.AreCharacterSwitchesAllowed());
+			userSettings.UpdateRandomCharacterSelecting(randomCharSelect);
+		}
+		private function KeyPress_Menu(keycode:int):void
+		{
+			mainMenu.visible = !mainMenu.visible;
+			userSettings.UpdateMenuVisibility(mainMenu.visible);
+		}
+		private function KeyPress_Help(keycode:int):void
+		{
+			ToggleHelpScreen();
+		}
+		private function KeyPress_Backlight(keycode:int):void
+		{
+			SetBackLight(!userSettings.backlightOn);
+		}
+		private function KeyPress_Background(keycode:int):void
+		{
+			ChangeBackgroundVisibility(!userSettings.showBackground);
+		}
+		private function KeyPress_Music(keycode:int):void
+		{
+			var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
+			mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
+			userSettings.playMusic = musicEnabled;
+			var displayText:String = musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation());
+			mainMenu.ChangeMusicMenuDisplayedInfo(displayText);
+		}
+		private function KeyPress_CharacterPreferredMusic(keycode:int):void
+		{
+			var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
+			if (musicId > -1)
+			{
+				var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, GetCompletionTimeForAnimation());
+				mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
+				userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+			}
+		}
+		private function KeyPress_NextHelpPage(keycode:int):void
+		{
+			if(helpScreenMC.currentFrame == helpScreenMC.totalFrames)
+			{
+				helpScreenMC.gotoAndStop(1);
+				UpdateKeyBindsForHelpScreen();
+			}
+			else
+			{
+				helpScreenMC.nextFrame();
+			}
+		}
+		private function KeyPress_ChangeToPrevMusic(keycode:int):void
+		{
+			mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(GetCompletionTimeForAnimation()));
+			userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+		}
+		private function KeyPress_ChangeToNextMusic(keycode:int):void
+		{
+			mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(GetCompletionTimeForAnimation()));
+			userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+		}
+		private function KeyPress_ActivateAnimationTransition(keycode:int):void
+		{
+			characterManager.ActivateAnimationChange();
+		}
+		/*private function KeyPressDEBUG_GotoLastSectionForMusic(keycode:int):void
+		{
+			musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
 		}*/
+		private function ErrorCatcher(e:Error):void
+		{
+			logger.error(e.message);
+		}
 	}
 }

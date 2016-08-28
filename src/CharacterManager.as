@@ -37,18 +37,18 @@
 		
 		public function CharacterManager() {}
 		
-		/*Adds a new character to be able to be shown. Returns true if the character was added successfully. Returns false if the
+		/*Adds a new character to be able to be shown. Returns the character's id if the character was added successfully. Returns -1 if the
 		character was missing necessary data or there was a character name conflict.*/
-		public function AddCharacter(character:AnimatedCharacter):Boolean
+		public function AddCharacter(character:AnimatedCharacter):int
 		{
-			var charAdded:Boolean = false;
+			//var charAdded:Boolean = false;
 			var charName:String = character.GetName();
 			//Make sure no character with this name already exists.
 			for (var x:int = 0, y:int = m_Characters.length; x < y; ++x)
 			{
 				if (charName == m_Characters[x].GetName())
 				{
-					return charAdded;
+					return -1;
 				}
 			}
 			
@@ -57,15 +57,18 @@
 				m_charNamesDict[charName] = m_Characters.length;
 				m_characterLocks[m_Characters.length] = false;
 				m_Characters[m_Characters.length] = character;
-				charAdded = true;
+				return m_Characters.length - 1;
+				//charAdded = true;
 			}
-			return charAdded;
+			else
+			{
+				return -1;
+			}
 		}
 		
 		public function AddAnimationsToCharacter(characterName:String, animationContainer:MovieClip):void
 		{
 			if (animationContainer == null) { return; }
-			
 			var characterId:int = GetCharacterIdByName(characterName);
 			if (characterId > -1)
 			{
@@ -79,8 +82,7 @@
 					character.AddAnimationsFromMovieClip(animationContainer);
 				}
 			}
-			animationContainer.stopAllMovieClips();
-			
+			animationContainer.stopAllMovieClips();			
 		}
 		
 		//The logic for the normal switch that happens every 120 frames
@@ -202,19 +204,58 @@
 		{
 			var animLockObject:Object = settings.animationLocked;
 			var character:AnimatedCharacter = m_Characters[charId];
-			for (var animationFrameStr:String in animLockObject)
+			var lockedAnimationCount:int = 0;
+			
+			var accessibleAnimationsCount:int = character.GetNumberOfAccessibleAnimations();
+			
+			//If character has no animations then lock them.
+			if (accessibleAnimationsCount == 0)
 			{
-				var animFrame:int = int(animationFrameStr);
-				character.SetLockOnAnimation(animFrame, animLockObject[animFrame]);
+				m_characterLocks[charId] = true;
+				settings.locked = true;
+				return;
+			}
+			
+			//var animationSettingsIsEmpty:Boolean = true;
+			/*Check to make sure that all loaded animations for the character are not locked. If they are
+			* then they all need to be unlocked*/ 
+			for (var name:String in settings.animationLocked) 
+			{
+				//animationSettingsIsEmpty = false;
+				//If animation by the given name exists and the animation is not locked
+				if(character.GetIdOfAnimationName(name) > -1 && settings.animationLocked[name] == true)
+				{
+					//Flag that all animations are not locked and break out the for loop
+					++lockedAnimationCount;
+				}
+			}
+			if (lockedAnimationCount >= accessibleAnimationsCount /*&& settings.animationLocked*/)
+			{
+				//All animations were locked, so unlock them all to be safe.
+				for (var i:int = 0; i < accessibleAnimationsCount; i++) 
+				{
+					character.SetLockOnAnimation(i, false);
+					settings.animationLocked[character.GetNameOfAnimationById(i)] = false;
+				}
+			}
+			else
+			{
+				for (var animationName:String in animLockObject)
+				{
+					var animId:int = character.GetIdOfAnimationName(animationName);
+					character.SetLockOnAnimation(animId, animLockObject[animationName]);
+				}
 			}
 			m_characterLocks[charId] = settings.locked;
 			if (settings.locked == true)
 			{
 				++m_unswitchableCharactersNum;
 			}
-			var animSelect:int = settings.animationSelect;
-			if (animSelect == 0)
+			var animSelect:int = character.GetIdOfAnimationName(settings.animationSelect);
+			
+			if (animSelect < 0 || character.GetAnimationLockedStatus(animSelect) == true)
 			{
+				//No id was found or the animation was locked, so go random instead.
 				character.SetRandomizeAnimation(true);
 			}
 			else
@@ -357,6 +398,11 @@
 			return m_nextCharacterId;
 		}
 		
+		public function IsCharacterLocked(characterId:int):Boolean
+		{
+			return m_characterLocks[characterId];
+		}
+		
 		public function ToggleLockOnCharacter(charIndex:int=-1):Boolean
 		{
 			if(charIndex == -1)	{charIndex = 0;}
@@ -404,6 +450,16 @@
 		{
 			var name:String= null;
 			return m_currentCharacter.GetName();
+		}
+		
+		public function GetIdOfAnimationNameForCharacter(charId:int, animationName:String):int
+		{
+			return m_Characters[charId].GetIdOfAnimationName(animationName);
+		}
+		
+		public function GetNameOfAnimationByIdForCharacter(charId:int, animationId:int):String
+		{
+			return m_Characters[charId].GetNameOfAnimationById(animationId);
 		}
 		
 		public function ChangeFrameOfCurrentAnimation(frame:int):void

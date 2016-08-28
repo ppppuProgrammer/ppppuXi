@@ -67,7 +67,7 @@
   </rslPaths>
   <!-- Intrinsic Libraries -->
   <intrinsics>
-    <!-- example: <element path="..." /> -->
+    <element path="Library\AS3\frameworks\Flex4" />
   </intrinsics>
   <!-- Assets to embed into the output SWF -->
   <library>

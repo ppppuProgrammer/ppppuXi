@@ -15,8 +15,8 @@ package
 			musicName = "Burning Town RR";
 			displayInfo = "Burning Town - Risky's Revenge";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(1013838+576);
-			endLoopTime = ConvertSamplesToMilliseconds(5600209);
+			startLoopTime = 24000; //24 seconds
+			//endLoopTime = -1;
 		}
 		
 	}

@@ -15,8 +15,8 @@ package
 			musicName = "Burning Town PC";
 			displayInfo = "We love Burning Town";
 			startTime = ConvertSamplesToMilliseconds(576);
-			startLoopTime = ConvertSamplesToMilliseconds(1013838+576);
-			endLoopTime = ConvertSamplesToMilliseconds(5600209);
+			startLoopTime = 16000; //16 seconds
+			//endLoopTime = -1;
 		}
 		
 	}
