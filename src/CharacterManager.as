@@ -7,6 +7,8 @@
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
+	import mx.logging.*;
+	import flash.events.UncaughtErrorEvent;
 	/**
 	 * ...
 	 * @author 
@@ -35,12 +37,23 @@
 		//"global" character and animation switch lock. Meant to be used for linked animation transitions so that they happen uninterrupted.
 		private var transitionLockout:Boolean = false;
 		
-		public function CharacterManager() {}
+		//The logging object for this class
+		private var logger:ILogger;
+		
+		public function CharacterManager() 
+		{
+			//Create the logger object that's used by this class to output messages.
+			logger = Log.getLogger("CharacterManager");
+			
+			logger.info("Initializing Character Manager");
+		}
 		
 		/*Adds a new character to be able to be shown. Returns the character's id if the character was added successfully. Returns -1 if the
 		character was missing necessary data or there was a character name conflict.*/
 		public function AddCharacter(character:AnimatedCharacter):int
 		{
+			
+			
 			//var charAdded:Boolean = false;
 			var charName:String = character.GetName();
 			//Make sure no character with this name already exists.
@@ -48,6 +61,7 @@
 			{
 				if (charName == m_Characters[x].GetName())
 				{
+					logger.warn("A character with the name \"" + charName + "\" was already added");
 					return -1;
 				}
 			}
@@ -81,6 +95,10 @@
 				{
 					character.AddAnimationsFromMovieClip(animationContainer);
 				}
+			}
+			else
+			{
+				logger.warn("Unable to add animations to " + characterName + " as the character was not found.");
 			}
 			animationContainer.stopAllMovieClips();			
 		}
@@ -231,6 +249,7 @@
 			}
 			if (lockedAnimationCount >= accessibleAnimationsCount /*&& settings.animationLocked*/)
 			{
+				logger.warn("All animations for " + character.GetName() + " were locked. Unlocking all their animations.");
 				//All animations were locked, so unlock them all to be safe.
 				for (var i:int = 0; i < accessibleAnimationsCount; i++) 
 				{
@@ -541,6 +560,7 @@
 				
 			}
 		}
+		
 		/*public function DEBUG_CharacterAnimationFrameCheck():void
 		{
 			if (m_currentCharacter)

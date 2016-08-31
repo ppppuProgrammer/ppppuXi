@@ -13,11 +13,10 @@ package
 			sourceSound = new BGM_TurnaboutSisters;
 			musicName = "Turnabout Sisters";
 			displayInfo = "Turnabout Sisters 2001";
-			startTime = ConvertSamplesToMilliseconds(576);
-			//around 10728 samples
-			startLoopTime = ConvertSamplesToMilliseconds(10728);
-			//Around 1m,3s,40796samples
-			endLoopTime= ConvertSamplesToMilliseconds((63*44100)+40796);
+			startTime = ConvertSamplesToMilliseconds(2160);
+			startLoopTime = 4000; //4 seconds
+			//1m8s
+			//endLoopTime= -1;
 		}
 		
 	}

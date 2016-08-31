@@ -13,7 +13,7 @@ package
 			sourceSound = new BGM_FE_Spa;
 			musicName = "FE Spa";
 			displayInfo = "Main Theme (Spa) - Fire Emblem 13";
-			startTime = ConvertSamplesToMilliseconds(576);
+			startTime = ConvertSamplesToMilliseconds(2016);
 			startLoopTime = 16000; //16 seconds
 			//endLoopTime = -1;
 		}

@@ -13,9 +13,9 @@ package
 			sourceSound = new BGM_GaurPlain;
 			musicName = "Gaur Plain";
 			displayInfo = "Gaur Plain - Xenoblade Chronicles";
-			startTime = ConvertSamplesToMilliseconds(576);
+			startTime = ConvertSamplesToMilliseconds(1440);
 			//Around 46s, 24116 samples
-			startLoopTime = ConvertSamplesToMilliseconds((46*44100)+24116);
+			startLoopTime = 44000; //44 seconds
 			//The end of the song is the end loop point
 			endLoopTime= -1;
 		}

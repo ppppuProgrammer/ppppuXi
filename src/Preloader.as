@@ -58,7 +58,7 @@ package
 			logger.info("ppppuXi Beta Version " + Version.VERSION + " Build " + Version.BUILDNUMBER + " Build Date: " + Version.BUILDDATE);
 			
 			//Allow any errors not caught by an event handler to be caught so they can be logged.
-			addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, ErrorCatcher, false, 0);
+			loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, PreloaderErrorCatcher, false, 0);
 			
 			if (stage) {
 				//stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -195,25 +195,32 @@ package
 			swfPreloader.unload();
 			swfPreloader = null;
 			//Preloader's job is done, so remove the error listener. 
-			removeEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, ErrorCatcher, false);
+			loaderInfo.uncaughtErrorEvents.removeEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, PreloaderErrorCatcher, false);
 			addChild(main as DisplayObject);
 		}
 		
 		private function FinishedLoadingMod(e:LoaderEvent):void
 		{
 			var mod:Mod = (e.target.content.rawContent as Mod);
-			var classType:String = getQualifiedSuperclassName(mod);
-			classType = classType.substring(classType.lastIndexOf(":")+1);
-			if (mod.GetModType() >= 0)
+			if (mod == null)
 			{
-				logger.info("Successfully loaded " + classType + ": " + getQualifiedClassName(mod));
-				addChild(mod);
-				startupMods[startupMods.length] = mod;
-				removeChild(mod);
+				logger.warn(e.target.url + " is not a ppppuXi mod. Content loaded type is " + getQualifiedClassName(e.target.content.rawContent));
 			}
 			else
 			{
-				logger.warn(getQualifiedClassName(mod) + " is not a valid mod (Super class was " + classType + ")");
+				var classType:String = getQualifiedSuperclassName(mod);
+				classType = classType.substring(classType.lastIndexOf(":")+1);
+				if (mod.GetModType() >= 0)
+				{
+					logger.info("Successfully loaded " + classType + ": " + getQualifiedClassName(mod));
+					addChild(mod);
+					startupMods[startupMods.length] = mod;
+					removeChild(mod);
+				}
+				else
+				{
+					logger.warn(getQualifiedClassName(mod) + " is not a valid mod (Super class is " + classType + ")");
+				}
 			}
 		}
 		
@@ -239,9 +246,9 @@ package
 			
 		}
 		
-		private function ErrorCatcher(e:Error):void
+		private function PreloaderErrorCatcher(e:UncaughtErrorEvent):void
 		{
-			logger.error(e.message);
+			logger.error(e.error.getStackTrace());
 		}
 	}
 	

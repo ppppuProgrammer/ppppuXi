@@ -1,0 +1,12 @@
+- ppppuXi Changelog -
+
+beta v0.3.0 RC 4 August 31, 2016
+* Included readme file to detail aspects of the program.
+* A Log file of events that occured during the last execution of ppppuXi is now created in order to help track down issues that may occur.
+* Modified all the music mods contained in the music pack and ppppuXi to have better looping that should not lead to desyncing caused by audio drifting.
+* Changed how animation lock settings are changed. It is now based on the ActionScript class name of the animation, so the program will properly set animation locks regardless of animation mod load order and animation mod load amount.
+* Improved the loading of user settings to prevent situations where changes in what mods are loaded from the last program execution would result in all animations of a character or all characters would be locked. In these cases, all animations for the character or all characters will be unlocked.
+* Character mods now must have a minimum of 1 animation in order to be accepted by the program.
+* Fixed issue in Fiora.swf and Iris.swf where end link animations would have their animations desync from the audio in the animation.
+* Removed Route 1 from the Music Pack. It will be available as a seperate mod at a later date.
+* Fixed error that would occur when the character set to be displayed first in the user settings is not found.

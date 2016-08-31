@@ -22,7 +22,7 @@ package
 			m_menuIcon = new AppleBloomIcon;
 			
 			m_characterName = "Apple Bloom"; 
-			m_preferredMusicName = "CMC GC";
+			m_preferredMusicName = "CMC Go Crusading";
         }
     }
 }

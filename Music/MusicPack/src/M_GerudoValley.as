@@ -14,7 +14,7 @@ package
 			sourceSound = new BGM_GerudoValley;
 			musicName = "Gerudo Valley";
 			displayInfo = "Gerudo Valley (Remix) - Smash 4";
-			startTime = ConvertSamplesToMilliseconds(576);
+			startTime = ConvertSamplesToMilliseconds(1440);
 			startLoopTime = 16000;
 			//endLoopTime = -1;
 			

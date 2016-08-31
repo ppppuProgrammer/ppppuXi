@@ -22,7 +22,7 @@ package
 			m_menuIcon = new SweetieBelleIcon;
 			
 			m_characterName = "Sweetie Belle"; 
-			m_preferredMusicName = "CMC GC";
+			m_preferredMusicName = "CMC Go Crusading";
         }
     }
 }

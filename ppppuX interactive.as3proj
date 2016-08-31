@@ -55,7 +55,6 @@
   <!-- SWC Libraries -->
   <libraryPaths>
     <element path="ppppuX-BaseAssets.swc" />
-    <element path="lib\sw3.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
@@ -89,7 +88,7 @@
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">cmd.exe /C python "$(ProjectDir)\MakeBuildCopy.py" "$(OutputDir)" "$(OutputName)" "$(BuildConfig)" "$(TimeStamp)"</postBuildCommand>
+  <postBuildCommand alwaysRun="False">cmd.exe /C python "$(ProjectDir)\BuildModsSwf.py" "$(CompilerPath)" "$(FDBuild)" $(BuildConfig) cmd.exe /C python "$(ProjectDir)\MakeBuildCopy.py" "$(OutputDir)" "$(OutputName)" "$(BuildConfig)" "$(TimeStamp)"</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="True" />

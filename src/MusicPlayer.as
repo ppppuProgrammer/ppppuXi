@@ -7,6 +7,8 @@
 	import flash.events.Event; 
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
+	import mx.logging.*;
+	import flash.events.UncaughtErrorEvent;
 	
 	public class MusicPlayer 
 	{
@@ -24,9 +26,16 @@
 
 		//Time in milliseconds between the character switch transition. Used for music time rounding purposes to keep it in sync with the animation.
 		private const MUSICSEGMENTTIMEMILLI:int = 4000;
+		
+		//The logging object for this class
+		private var logger:ILogger;
+		
 		//Sets up the vectors in the music manager. This should be done after all characters have been added and locked in.
 		public function MusicPlayer()
 		{
+			//Create the logger object that's used by this class to output messages.
+			logger = Log.getLogger("MusicPlayer");
+			logger.info("Initializing Music Player");
 			m_musicCollection = new Vector.<Music>();
 
 			m_musicIdLookup = new Dictionary();
@@ -38,6 +47,7 @@
 			{
 				if(soundData.bytesTotal == 0)
 				{
+					logger.warn("Music \"" + musicName + "\" was not added as it contained no data");
 					return false;//Sound did not load, do not add it to the character music vector
 				}
 				
@@ -55,6 +65,7 @@
 						//Music checking only cares that 2 songs don't have to same name.
 						if (m_musicCollection[i].GetMusicInfo().toLowerCase() == musicName.toLowerCase())
 						{
+							logger.warn("Music \"" + musicName + "\" was not added as music with the same name was already added.");
 							return false;
 						}
 					}
@@ -65,6 +76,7 @@
 				m_musicIdLookup[musicName] = musicId;
 				return true;
 			}
+			logger.warn("Music \"" + musicName + "\" was not added as it contained no data");
 			return false;
 		}
 		

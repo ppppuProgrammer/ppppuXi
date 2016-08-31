@@ -14,7 +14,7 @@ package
 			sourceSound = new BGM_MissionFinal;
 			musicName = "Mission Final";
 			displayInfo = "Mission Final - Metroid Prime";
-			startTime = ConvertSamplesToMilliseconds(576);
+			startTime = ConvertSamplesToMilliseconds(1152);
 			startLoopTime = 8000; //8 seconds
 			//endLoopTime = -1;
 		}

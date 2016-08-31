@@ -14,7 +14,7 @@ package
 			sourceSound = new BGM_2AM;
 			musicName = "2 AM";
 			displayInfo = "2:00 A.M. - Super Smash Bros. Brawl";
-			startTime = ConvertSamplesToMilliseconds(576);
+			startTime = ConvertSamplesToMilliseconds(1728);
 			startLoopTime = 8000; //8 seconds
 			//endLoopTime = -1;
 			

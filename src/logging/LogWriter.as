@@ -56,6 +56,9 @@ package logging
 					message +=  "*X* ".replace("X", event.target.category);
 				}
 				logOutputFile.data.logText += message + event.message + "\n";
+				/*Just in case logs ever need more space, flush after every logevent so the program can
+				* ask the user to increase the size shared objects if necessary.*/
+				logOutputFile.flush();
 			}
 		}
 	}

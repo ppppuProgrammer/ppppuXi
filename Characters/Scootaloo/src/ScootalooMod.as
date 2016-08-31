@@ -22,7 +22,7 @@ package
 			m_menuIcon = new ScootalooIcon;
 			
 			m_characterName = "Scootaloo"; 
-			m_preferredMusicName = "CMC GC";
+			m_preferredMusicName = "CMC Go Crusading";
         }
     }
 }

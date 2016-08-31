@@ -12,7 +12,7 @@ package
 		public function M_CMCTheme() 
 		{
 			sourceSound = new BGM_CMCGC;
-			musicName = "CMC GC"
+			musicName = "CMC Go Crusading"
 			displayInfo = "Cutie Mark Crusaders Go Crusading";
 			startTime = ConvertSamplesToMilliseconds(576);
 			startLoopTime = ConvertSamplesToMilliseconds((37*44100)+22119); //Around 37s+22119 (give or take 750 samples)

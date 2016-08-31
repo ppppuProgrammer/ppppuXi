@@ -115,9 +115,6 @@ package
 		{
 			//Create the logger object that's used by this class to output messages.
 			logger = Log.getLogger("AppCore");
-
-			//Allow any uncaught errors be caught so they can be logged.
-			addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, ErrorCatcher, false, 0);
 			
 			//Create the "main stage" that holds the character template and various other movieclips such as the transition and backlight 
 			mainStage = new MainStage();
@@ -153,6 +150,8 @@ package
 		public function Initialize(startupMods:Array = null):void
 		{	
 			logger.info("Initializing ppppuXi");
+			//Allow any uncaught errors be caught so they can be logged.
+			loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, ErrorCatcher, false, 0);
 			addEventListener(ChangeBackgroundEvent.CHANGE_BACKGROUND, ChangeBackgroundColors, true);
 			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, AnimationTransitionOccured, true);
 			mainStage.MenuLayer.mouseEnabled = true;
@@ -210,7 +209,7 @@ package
 			if ("currentCharacterName" in userSettings && userSettings.currentCharacterName.length > 0 && charactersCount > 0)
 			{
 				var characterId:int = characterManager.GetCharacterIdByName(userSettings.currentCharacterName);
-				if (characterManager.IsCharacterLocked(characterId) == true) { characterId = -1;}
+				if (characterId > -1 && characterManager.IsCharacterLocked(characterId) == true) { characterId = -1;}
 				//If the character wasn't found then iterate through the character list to find an unlocked character to pick.
 				if (characterId == -1) 
 				{ 
@@ -547,9 +546,10 @@ package
 		and the mod could not be added.*/
 		private function ProcessMod(mod:Mod/*, modType:int*/):Boolean
 		{
+			var modClassName:String = getQualifiedClassName(mod);
 			if (mod == null)
 			{
-				logger.warn(getQualifiedClassName(mod)+ " is not a ppppuXi mod!");
+				logger.warn(modClassName+ " is not a ppppuXi mod!");
 				return false;
 			}
 			
@@ -574,15 +574,24 @@ package
 						logger.warn("Failed to add character: " + character.GetName());
 					}
 				}
+				else
+				{
+					logger.error(modClassName + " was not a valid animated character mod.");
+				}
 			}
 			else if (modType == Mod.MOD_ANIMATION)
 			{
 				var animationMod:AnimationMod = mod as AnimationMod;
 				if (animationMod != null)
 				{
+					logger.info("Processing Animation Mod: " + modClassName);
 					var targetCharacter:String = animationMod.GetTargetCharacterName();
 					characterManager.AddAnimationsToCharacter(targetCharacter, 
 						animationMod.GetAnimationContainer());
+				}
+				else
+				{
+					logger.error(modClassName + " was not a valid animation mod.");
 				}
 			}
 			else if (modType == Mod.MOD_TEMPLATECHARACTER)
@@ -595,9 +604,10 @@ package
 				var music:MusicMod = mod as MusicMod;
 				if (music)
 				{
+					logger.info("Processing Music Mod: " + modClassName);
 					if (musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime()))
 					{
-						logger.info("music " + music.GetName() + " was successfully added");
+						logger.info("Music " + music.GetName() + " was successfully added");
 						if (music.GetName() == userSettings.globalSongTitle)
 						{
 							var chosenMusicId:int = musicPlayer.GetMusicIdByName(music.GetName());
@@ -617,10 +627,10 @@ package
 							}
 						}	
 					}
-					else
-					{
-						logger.error("Unable to add music: " + music.GetName());
-					}
+				}
+				else
+				{
+					logger.error(modClassName + " was not a valid archive mod.");
 				}
 			}
 			else if (modType == Mod.MOD_ASSETS)
@@ -634,7 +644,8 @@ package
 				var archive:ModArchive = mod as ModArchive;
 				if (archive)
 				{
-					logger.info("\t* Processing archive mod *");
+					
+					logger.info("\t* Processing archive mod: " + modClassName + "*");
 					var archiveModList:Vector.<Mod> = archive.GetModsList();
 					var childMod:Mod;
 					for (var i:int = 0, l:int = archiveModList.length; i < l; ++i)
@@ -642,11 +653,11 @@ package
 						childMod = archiveModList[i];
 						ProcessMod(childMod);
 					}
-					logger.info("\t* Finished processing archive mod *");
+					logger.info("\t* Finished processing archive mod " + modClassName + "*");
 				}
 				else 
 				{
-					logger.error("Mod was not a valid archive.");
+					logger.error(modClassName + " was not a valid archive mod.");
 				}
 			}
 			mod.Dispose();
@@ -729,8 +740,6 @@ package
 			{
 				TryToLoadCharacterSettings(i);
 			}
-			//Due to start up nonsense there is a possibility of all characters being locked.
-			//Check to be sure that 
 		}
 		
 		public function UpdateKeyBindsForHelpScreen():void
@@ -1141,9 +1150,10 @@ package
 		{
 			musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
 		}*/
-		private function ErrorCatcher(e:Error):void
+		//Catches all errors not caught by another handler and has the logger record the error and the call stack
+		private function ErrorCatcher(e:UncaughtErrorEvent):void
 		{
-			logger.error(e.message);
+			logger.error(e.error.getStackTrace());
 		}
 	}
 }

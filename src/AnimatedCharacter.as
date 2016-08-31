@@ -10,6 +10,8 @@
 	import flash.geom.ColorTransform;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
+	import mx.logging.*;
+	import flash.events.UncaughtErrorEvent;
 	/**
 	 * ...
 	 * @author 
@@ -67,10 +69,14 @@
 		
 		private var displayArea:Sprite = new Sprite();
 		
+		//The logging object for this class
+		private var logger:ILogger;
+		
+		private static const animationAddFailedMessage:String = "Failed to add animations:";
+		
 		public function AnimatedCharacter(characterData:Object=null) 
 		{
 			if (characterData == null) { return; }
-			
 
 			m_topLeftDiamondColor = characterData.tlColor;
 			m_centerDiamondColor = characterData.cenColor;
@@ -82,6 +88,9 @@
 			m_menuIcon = characterData.icon;
 			m_preferredMusicName = characterData.perferredMusic;
 			m_name = characterData.name;
+			
+			//Create the logger object that's used by this class to output messages.
+			logger = Log.getLogger("AnimatedCharacter_" + m_name);
 			
 			var animation:MovieClip = characterData.animation;
 			if (animation != null)
@@ -155,6 +164,7 @@
 		This is so we can get the constructor for the animation, create a new instance and save that into the animations vector.*/
 		public function AddAnimationsFromMovieClip(animationCollection:MovieClip):void
 		{
+			var failMessage:String = animationAddFailedMessage;
 			for (var i:int = 1; i <= animationCollection.totalFrames; ++i)
 			{
 				animationCollection.gotoAndStop(i);
@@ -194,12 +204,22 @@
 						m_animationLabel[animationIndex] = label; //add label
 						//No need to worry about the animation's lock since linked end animations are unaccessible by normal means anyway.
 					}
+					else
+					{
+						failMessage += " " + animationName + "(endlink missing label)";
+					}
 					//m_charAnimations[animationIndex].stop();
 				}
-				
-				
+				else
+				{
+					failMessage += " " + animationName+"(Wasn't valid movieclip or animation with same name was already added";
+				}
 				//animationCollection.removeChild(m_charAnimations[animationIndex]);
 				
+			}
+			if (failMessage != animationAddFailedMessage)
+			{
+				logger.warn(failMessage);
 			}
 			//Allow the movie clip to be garbage collected
 			animationCollection.removeChildren();
@@ -224,6 +244,10 @@
 				m_animationLabel[animationIndex] = null; //add label
 				m_lockedAnimation[m_lockedAnimation.length] = false;
 				m_animationNames[animationName] = animationIndex;
+			}
+			else
+			{
+				logger.warn("Couldn't add animation: " + animationName+"(Wasn't valid movieclip or animation with same name was already added");
 			}
 			//Allow the original movie clip to be garbage collected
 			initialAnimation = null;

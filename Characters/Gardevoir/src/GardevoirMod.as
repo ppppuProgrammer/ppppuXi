@@ -22,7 +22,7 @@ package
 			m_menuIcon = new GardevoirIcon;
 			
 			m_characterName = "Gardevoir";
-			m_preferredMusicName = "Route 1";
+			m_preferredMusicName = "Miror B";
         }
     }
 }
