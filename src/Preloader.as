@@ -33,9 +33,9 @@ package
 		private var startupMods:Array = [];
 		
 		//Loader related
-		private var modsListLoader:LoaderMax = new LoaderMax( { name:"ModsListLoader", onComplete:ReadModsList} );
+		private var modsListLoader:LoaderMax = new LoaderMax( { name:"ModsListLoader", onComplete:ReadModsList, onError:ModsListLoaderErrorHandler} );
 		private var swfPreloader:LoaderMax = new LoaderMax({name:"SWFPreloader", onChildComplete:FinishedLoadingMod, onComplete:LoadingFinished,
-			onProgress:Progress, onIOError:IOError});
+			onProgress:Progress, onError:SWFLoaderErrorHandler});
 		private const modLoadList:String = "ModsList.txt";
 		
 		//The logging object for this class
@@ -135,10 +135,30 @@ package
 			}
 		}
 		
-		private function IOError(e:LoaderEvent):void 
+		private function ModsListLoaderErrorHandler(e:LoaderEvent):void 
 		{
 			//trace(e.text);
-			logger.error(e.text);
+			if (e.data is Error)
+			{
+				logger.error("Error encountered when loading modsList: " + e.data.getStackTrace());
+			}
+			else
+			{
+				logger.error("Error encountered loading modsList: " + e.text);
+			}
+		}
+		
+		private function SWFLoaderErrorHandler(e:LoaderEvent):void 
+		{
+			//trace(e.text);
+			if (e.data is Error)
+			{
+				logger.error("Error encountered loading mods: " + e.data.getStackTrace());
+			}
+			else
+			{
+				logger.error("Error encountered loading mods: " + e.text);
+			}
 		}
 		
 		private function Progress(e:LoaderEvent):void 
@@ -245,7 +265,7 @@ package
 			swfPreloader.load();
 			
 		}
-		
+		//Catches any uncaught errors and logs them
 		private function PreloaderErrorCatcher(e:UncaughtErrorEvent):void
 		{
 			logger.error(e.error.getStackTrace());

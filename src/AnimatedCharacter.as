@@ -90,7 +90,9 @@
 			m_name = characterData.name;
 			
 			//Create the logger object that's used by this class to output messages.
-			logger = Log.getLogger("AnimatedCharacter_" + m_name);
+			//Need to remove all invalid characters from the name or the logger will throw an error
+			var nameSanitizerForLogger:RegExp = /[\s\r\n\[\]~$^&\/(){}<>+=`!#%?,:;'"@]+/gim;
+			logger = Log.getLogger("AnimatedCharacter_" + m_name.replace(nameSanitizerForLogger,''));
 			
 			var animation:MovieClip = characterData.animation;
 			if (animation != null)

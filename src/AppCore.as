@@ -199,7 +199,14 @@ package
 			{
 				for (var i:int = 0, l:int = startupMods.length; i < l; ++i)
 				{
-					ProcessMod(startupMods[i]);
+					try
+					{
+						ProcessMod(startupMods[i]);
+					}
+					catch (e:Error)
+					{
+						logger.error("Failed to load " + getQualifiedClassName(startupMods[i]) + "\nCall stack:\n" + e.getStackTrace());
+					}
 				}
 			}
 			//Load the settings for all loaded characters

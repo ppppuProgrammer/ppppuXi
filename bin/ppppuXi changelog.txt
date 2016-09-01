@@ -1,5 +1,10 @@
 - ppppuXi Changelog -
 
+beta v0.3.1 RC 5 September 1, 2016
+* Fixed issue where AnimatedCharacters mods with certain text characters in their names would cause processing to fail.
+* Made mod processing more tolerate in regards to encountering error. Now a failed processing will not prevent the later processing of valid, error free mods.
+* Improved error logging during startup loading.
+
 beta v0.3.0 RC 4 August 31, 2016
 * Included readme file to detail aspects of the program.
 * A Log file of events that occured during the last execution of ppppuXi is now created in order to help track down issues that may occur.
