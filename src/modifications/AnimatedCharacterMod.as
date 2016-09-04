@@ -4,6 +4,7 @@ package modifications
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
+	import flash.utils.getQualifiedClassName;
 	/**
 	 * Character mod intended for use in interactive versions of ppppu. A movie clip containing all the animations that will be shown
 	 * is expected. In order to add more animations for the character, the flash document for the character must be modified.
@@ -38,6 +39,10 @@ package modifications
 			if (initialAnimationContainer != null)
 			{
 				initialAnimationContainer.stop();
+				if (m_menuIcon != null)
+				{
+					m_menuIcon.name = getQualifiedClassName(m_menuIcon);
+				}
 				//A movie clip containing 1 children is one that typically has movie clips contained in each frame and that initialAnimationContainer is not an animation itself.
 				//If there are more children then it's likely that the initialAnimationContainer itself is  an animation and is the only one.
 				//if (initialAnimationContainer.numChildren == 1)	{ characterPayload.AddAnimationsFromMovieClip(initialAnimationContainer); }

@@ -260,7 +260,7 @@ package
 			}
 			
 			System.pauseForGCIfCollectionImminent(0);
-			
+
 			mainStage.play();
 		}
 		
@@ -569,10 +569,15 @@ package
 				{
 					var characterData:Object = animCharacterMod.GetCharacterData();
 					var character:AnimatedCharacter = new AnimatedCharacter(characterData);
-					var addedCharacterId:int = characterManager.AddCharacter(character);
-					if (addedCharacterId != -1)
+
+					/*To avoid a situation where character isn't added then their icon fails to be added, first a character
+					 * is verified if they can be added then the icon is added. If both these tasks are completed successfully then
+					 * the character is added.*/
+					var characterCanBeAdded:Boolean = characterManager.CheckIfCharacterCanBeAdded(character);
+					if (characterCanBeAdded == true)
 					{
 						mainMenu.AddIconToCharacterMenu(characterData.icon);
+						var addedCharacterId:int = characterManager.AddCharacter(character);
 						logger.info("Successfully added character: " +  character.GetName());
 						if(totalRunFrames > 0)	{TryToLoadCharacterSettings(addedCharacterId);}
 					}
@@ -1160,7 +1165,7 @@ package
 		//Catches all errors not caught by another handler and has the logger record the error and the call stack
 		private function ErrorCatcher(e:UncaughtErrorEvent):void
 		{
-			logger.error(e.error.getStackTrace());
+			logger.error(e.error.message + "\n" + e.error.getStackTrace());
 		}
 	}
 }

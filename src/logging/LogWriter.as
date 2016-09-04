@@ -13,7 +13,7 @@ package logging
 	{
 		//private var logOutputFileName:String = null;
 		public var logOutputFile:SharedObject = null; //= SharedObject.getLocal("ppppuXi settings");
-		//private static const 
+		public var outputTraceWhenDebugging:Boolean = true; 
 		public function LogWriter(outputFileName:String) 
 		{
 			super();
@@ -55,10 +55,12 @@ package logging
 				{
 					message +=  "*X* ".replace("X", event.target.category);
 				}
-				logOutputFile.data.logText += message + event.message + "\n";
+				var completeMessage:String = message + event.message + "\n";
+				logOutputFile.data.logText += completeMessage;
 				/*Just in case logs ever need more space, flush after every logevent so the program can
 				* ask the user to increase the size shared objects if necessary.*/
 				logOutputFile.flush();
+				if (outputTraceWhenDebugging == true)	{trace(completeMessage);}
 			}
 		}
 	}

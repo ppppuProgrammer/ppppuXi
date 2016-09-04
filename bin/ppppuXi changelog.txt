@@ -1,5 +1,10 @@
 - ppppuXi Changelog -
 
+beta v0.3.2 RC 6 September X, 2016
+* Logging now included the error message that details what the problem was.
+* Updated the minimum version of Flash needed during the start up check. Flash Player 11.8 or higher is now necessary to not get the unsupported Flash version message.
+* Changed how characters are added so a character is verified if they can be added then try to add their menu icon to the menu list then finally add the character. This prevents a case where the icon would failed to be added but the character that the icon is for was already added.   
+
 beta v0.3.1 RC 5 September 1, 2016
 * Fixed issue where AnimatedCharacters mods with certain text characters in their names would cause processing to fail.
 * Made mod processing more tolerate in regards to encountering error. Now a failed processing will not prevent the later processing of valid, error free mods.

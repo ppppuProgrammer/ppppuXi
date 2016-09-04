@@ -86,12 +86,15 @@ package menu
 			//dispatchEvent(new Event(Event.SELECT));
 		}
 		
-		public function ChangeAnimationItemsShown(next9Items:Boolean):void
+		public function ChangeAnimationItemsShown(nextPage:Boolean):void
 		{
-			if (next9Items == true)
-			{_scrollbar.value += 9;}
+			var maxItemsDisplayed:int = Math.ceil(_height / _listItemHeight);
+			maxItemsDisplayed = Math.min(maxItemsDisplayed, _items.length);
+			
+			if (nextPage == true)
+			{_scrollbar.value += maxItemsDisplayed;}
 			else
-			{_scrollbar.value -= 9; }
+			{_scrollbar.value -= maxItemsDisplayed; }
 			
 			invalidate();
 		}

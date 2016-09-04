@@ -48,13 +48,8 @@
 			logger.info("Initializing Character Manager");
 		}
 		
-		/*Adds a new character to be able to be shown. Returns the character's id if the character was added successfully. Returns -1 if the
-		character was missing necessary data or there was a character name conflict.*/
-		public function AddCharacter(character:AnimatedCharacter):int
+		public function CheckIfCharacterCanBeAdded(character:AnimatedCharacter):Boolean
 		{
-			
-			
-			//var charAdded:Boolean = false;
 			var charName:String = character.GetName();
 			//Make sure no character with this name already exists.
 			for (var x:int = 0, y:int = m_Characters.length; x < y; ++x)
@@ -62,22 +57,46 @@
 				if (charName == m_Characters[x].GetName())
 				{
 					logger.warn("A character with the name \"" + charName + "\" was already added");
-					return -1;
+					return false;
 				}
 			}
-			
-			if (character.IsValidCharacter())
+			if (character.IsValidCharacter() == false)
 			{
+				return false;
+			}
+			return true;
+		}
+		
+		/*Adds a new character to be able to be shown. Returns the character's id if the character was added successfully. Should be called only after CheckIfCharacterCanBeAdded
+		has been used to verify that the character can be added.*/
+		public function AddCharacter(character:AnimatedCharacter):int
+		{
+			
+			
+			//var charAdded:Boolean = false;
+			var charName:String = character.GetName();
+			/*Make sure no character with this name already exists.
+			for (var x:int = 0, y:int = m_Characters.length; x < y; ++x)
+			{
+				if (charName == m_Characters[x].GetName())
+				{
+					logger.warn("A character with the name \"" + charName + "\" was already added");
+					return -1;
+				}
+			}*/
+			
+			//if (character.IsValidCharacter())
+			//{
 				m_charNamesDict[charName] = m_Characters.length;
 				m_characterLocks[m_Characters.length] = false;
 				m_Characters[m_Characters.length] = character;
 				return m_Characters.length - 1;
 				//charAdded = true;
-			}
+			/*}
 			else
 			{
 				return -1;
-			}
+			}*/
 		}
 		
 		public function AddAnimationsToCharacter(characterName:String, animationContainer:MovieClip):void

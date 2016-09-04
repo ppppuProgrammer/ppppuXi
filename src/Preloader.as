@@ -22,13 +22,14 @@ package
 	import com.greensock.events.LoaderEvent;
 	import mx.logging.*;
 	/**
-	 * ...
+	 * The entry way into the program. First checks that the Flash Player version can support
+	 * the program then it reads the ModsList text file to know what mods to load.
 	 * @author 
 	 */
 	public class Preloader extends MovieClip 
 	{
 		public const MIN_SUPPORTED_FLASH_MAJOR_VER:int = 11;
-		public const MIN_SUPPORTED_FLASH_MINOR_VER:int = 2;
+		public const MIN_SUPPORTED_FLASH_MINOR_VER:int = 8;
 		
 		private var startupMods:Array = [];
 		
@@ -45,11 +46,21 @@ package
 		{
 			//Initialize the logger for the program.
 			var logWriter:LogWriter = new LogWriter("ppppuXi_Log");
-			logWriter.level = LogEventLevel.INFO;
+			if (Capabilities.isDebugger)
+			{
+				//Have the logger record up to debug level messages (essentially all messages).
+				logWriter.level = LogEventLevel.DEBUG;
+			}
+			else
+			{
+				//Have the logger only record up to Info level messages.
+				logWriter.level = LogEventLevel.INFO;
+			}
 			logWriter.includeDate = true;
 			logWriter.includeTime = true;
 			logWriter.includeCategory = true;
 			logWriter.includeLevel = true;
+			logWriter.outputTraceWhenDebugging = false;
 			Log.addTarget(logWriter);
 			
 			//Create the logger object that's used by this class to output messages.
@@ -140,7 +151,7 @@ package
 			//trace(e.text);
 			if (e.data is Error)
 			{
-				logger.error("Error encountered when loading modsList: " + e.data.getStackTrace());
+				logger.error("Error encountered when loading modsList: " + e.data.message + "\n" + e.data.getStackTrace());
 			}
 			else
 			{
@@ -153,7 +164,7 @@ package
 			//trace(e.text);
 			if (e.data is Error)
 			{
-				logger.error("Error encountered loading mods: " + e.data.getStackTrace());
+				logger.error("Error encountered loading mods: " + e.data.message + "\n" + e.data.getStackTrace());
 			}
 			else
 			{
@@ -268,7 +279,7 @@ package
 		//Catches any uncaught errors and logs them
 		private function PreloaderErrorCatcher(e:UncaughtErrorEvent):void
 		{
-			logger.error(e.error.getStackTrace());
+			logger.error(e.error.message + "\n" + e.error.getStackTrace());
 		}
 	}
 	

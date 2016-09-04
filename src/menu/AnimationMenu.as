@@ -13,7 +13,7 @@ package menu
 	public class AnimationMenu extends Panel
 	{
 		public const AnimationButtonSize:Number = 35;
-		private const MAX_ITEMS_DISPLAYED:int = 9;
+		private const MAX_ITEMS_DISPLAYED:int = 10;
 		
 		//Text
 		private var modeLabel:Label;
@@ -113,9 +113,9 @@ package menu
 			animationList.ResetList(locks);
 		}
 		
-		public function Change9ItemsDisplayedOnList(next9Items:Boolean = true):void
+		public function ChangePageForItemsDisplayedOnList(nextPage:Boolean = true):void
 		{
-			animationList.ChangeAnimationItemsShown(next9Items);
+			animationList.ChangeAnimationItemsShown(nextPage);
 		}
 		
 		public function ChangeSelectedItem(index:int, moveScrollBar:Boolean=true):void

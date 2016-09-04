@@ -121,7 +121,7 @@ package menu
 				{
 					item.data.width = item.data.height = _listItemHeight;
 				}*/
-				item.setSize(width-10, _listItemHeight);
+				item.setSize(width/*-10*/, _listItemHeight);
 				item.defaultColor = _defaultColor;
 
 				item.selectedColor = _selectedColor;

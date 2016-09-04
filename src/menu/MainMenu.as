@@ -378,7 +378,7 @@ package menu
 		
 		public function ChangeThe9ItemsDisplayedForAnimations(showNext9Items:Boolean):void
 		{
-			animationMenu.Change9ItemsDisplayedOnList(showNext9Items);
+			animationMenu.ChangePageForItemsDisplayedOnList(showNext9Items);
 		}
 		//}
 		

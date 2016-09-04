@@ -35,7 +35,11 @@ If you are interested in creating a mod of your own, you can find the guide on c
 Currently there is no site dedicated for the hosting of mods. swfchan and the 7chan /fl/ thread are the likely places to find a mod.
 
 -- Where are the settings saved? --
-ppppuXi makes use of Flash's Shared Objects to save user settings (ppppuXi_Settings.sol) and a log (ppppuXi_Log.sol) containing message pertaining to events that happened during the latest execution of the program. WARNING: Do note that Shared Objects ARE NOT SAVED when playing the flash FROM A BROWSER IN INCOGNITO OR OTHER PRIVATE MODES. If for some reason you need to clear the user settings or need to send the log file to help track down an issue,  here are the directories that the Flash Player stores Shared Objects in:
+ppppuXi makes use of Flash's Shared Objects to save user settings (ppppuXi_Settings.sol) and a log (ppppuXi_Log.sol) containing message pertaining to events that happened during the latest execution of the program. 
+
+!WARNING! Do note that Shared Objects ARE NOT SAVED when playing the flash FROM A BROWSER IN INCOGNITO OR OTHER PRIVATE MODES.
+
+If for some reason you need to clear the user settings or need to send the log file to help track down an issue, here are the directories that the Flash Player stores Shared Objects in:
 
 Operating System				Location
 
