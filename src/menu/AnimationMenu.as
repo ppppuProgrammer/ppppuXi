@@ -13,7 +13,7 @@ package menu
 	public class AnimationMenu extends Panel
 	{
 		public const AnimationButtonSize:Number = 35;
-		private const MAX_ITEMS_DISPLAYED:int = 10;
+		private const MAX_ITEMS_DISPLAYED:int = 9;
 		
 		//Text
 		private var modeLabel:Label;

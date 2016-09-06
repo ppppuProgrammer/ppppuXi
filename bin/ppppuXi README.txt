@@ -3,6 +3,9 @@
 -- Preface --
 ppppuXi is a modified version of minus 8's ppppu flash animation designed to facilitate adding new assets, such as characters and music, which are added through the use of "mod" swf files. The mod system is intended to allow greater customization of ppppu, encourage new content creation, and decouple content from the main program which was causing issues as more and mroe characters were being added. Included in this zip is ppppuXi.swf, the main flash program that should be run by the flash player, and various mods, the majority of which are character mods that were created by GeneralScot, and MusicPack.swf, an archive containing various music that have been included in ppppu edits made by GeneralScot.
 
+-- Starting up --
+Once you've downloaded the zip containing ppppuXi.swf and at least 1 animated character mod, extract the contents of the zips and any other related files into a folder of your choice. Open the modsList.txt to make set any mod content you want enable or disable (more on this in the "How to load mods" section). Now play ppppuXi.swf in a flash player of your choice (such as a web browser or standalone like Adobe's or baka loader).
+
 -- Help --
 If there is a feature you don't understand, forgot what keys do what, or perhaps wondering what version of ppppuXi you currently have, hit the help button (default: H) to bring up the help screen and use the next help page button (Default: Z) to see more helpful information.
 
@@ -32,7 +35,7 @@ Mods are loaded and processed in order from top to bottom and load order does ma
 If you are interested in creating a mod of your own, you can find the guide on creating them at ppppuProgrammer.tumblr.com/modsGuide. There you can find information on creating them, mod requirements and specifications, tips for the various mod types, and the source files necessary for mod creation.
 
 -- Where to find mods --
-Currently there is no site dedicated for the hosting of mods. swfchan and the 7chan /fl/ thread are the likely places to find a mod.
+You can find mods at the ppppuXi discord group, located at https://discord.gg/zmQx6am. swfchan and the 7chan /fl/ thread are also likely places to find mods by chance.
 
 -- Where are the settings saved? --
 ppppuXi makes use of Flash's Shared Objects to save user settings (ppppuXi_Settings.sol) and a log (ppppuXi_Log.sol) containing message pertaining to events that happened during the latest execution of the program. 
