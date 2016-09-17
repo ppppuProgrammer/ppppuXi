@@ -1,7 +1,7 @@
-- ppppuX interactive (ppppuXi) Version 0.3.0 RC4 Read Me -
+- ppppuX interactive (ppppuXi) Version 0.3.3 RC7 Read Me -
 
 -- Preface --
-ppppuXi is a modified version of minus 8's ppppu flash animation designed to facilitate adding new assets, such as characters and music, which are added through the use of "mod" swf files. The mod system is intended to allow greater customization of ppppu, encourage new content creation, and decouple content from the main program which was causing issues as more and mroe characters were being added. Included in this zip is ppppuXi.swf, the main flash program that should be run by the flash player, and various mods, the majority of which are character mods that were created by GeneralScot, and MusicPack.swf, an archive containing various music that have been included in ppppu edits made by GeneralScot.
+ppppuXi is a modified version of minus 8's ppppu flash animation designed to facilitate adding new assets, such as characters and music, which are added through the use of "mod" swf files. The mod system is intended to allow greater customization of ppppu, encourage new content creation, and decouple content from the main program which was causing issues as more and mroe characters were being added. Included in this zip is ppppuXi.swf, the main flash program that should be run by the flash player, and various mods, the 2 original characters done by minus8 and a majority of the others being character mods that were created by GeneralScot, and MusicPack.swf, an archive containing various music that have been included in ppppu edits made by GeneralScot. Also included is a helper program, Xi Log Reader.swf, which will load the log file for ppppuXi and output it onto your screen.
 
 -- Starting up --
 Once you've downloaded the zip containing ppppuXi.swf and at least 1 animated character mod, extract the contents of the zips and any other related files into a folder of your choice. Open the modsList.txt to make set any mod content you want enable or disable (more on this in the "How to load mods" section). Now play ppppuXi.swf in a flash player of your choice (such as a web browser or standalone like Adobe's or baka loader).
@@ -18,7 +18,7 @@ Music					M			Adds a new song to be played by the music player.
 AnimatedCharacter		ACHAR		Adds a new character for with one or more animations.
 Archive					ARCH		Contains various mods of any of the above types.
 
-The typically naming format for a mod is (prefix)_(mod name).swf
+The typically naming format for a mod is (prefix)_(mod name).swf and you can load the mod on its own to get information on its contents (mods created with certain older modding kit versions won't have this information available).
 
 Make sure that you trust the source of a mod before you have it loaded by ppppuXi.	
 
@@ -57,11 +57,14 @@ Linux/Unix						~/.macromedia/Flash_Player/#SharedObjects/
 
 Note: For the Chrome using paths, "Default" refers to the profile name. If the profile you use is not named Default, edit the path to refer to your profile name.
 
-
-After navigating to the proper directory, enter one of the randomly named folders Flash generates then go into the localhost folder. Enter the ppppuX interactive and enter any folders encountered until you are in the folder with "ppppuXi_Settings.sol" and "ppppuXi_Log.sol".
+After navigating to the proper directory, enter one of the randomly named folders Flash generates then go into the localhost folder. In this folder you should find "ppppuXi_Settings.sol" and "ppppuXi_Log.sol". If they aren't there something is not allowing the Flash Player to create shared objects. Make sure your Flash player is allowed to save shared objects locally with sufficient file size privilege and that if you play ppppuXi in a browser that it is not in private mode/incognito.
 
 -- Bug Reporting --
-There is a log created that records various events and errors that happened for the last time the program was ran. If you feel that there was a bug or some other problem, close the flash and DO NOT reopen it. Navigate to the folder where the Flash Player saves Shared Objects (The flash Player's "cookie") for ppppuXi and look for "ppppuXi_Log.sol". I'd make a copy of it just to make sure that it won't get overwritten by accident. Upload the Log file somewhere and when you go to report the issue you encountered, include a link to the log to help diagnose the problem. Alternatively, you can use a Shared Object reader with AMF3 capabilities such as those listed here (https://en.wikipedia.org/wiki/Local_shared_object#Editors_and_toolkits) to read the log yourself and include the text from it in your report or a link to a pastebin with the log's contents.
+There is a log created that records various events and errors that happened for the last time the program was ran. If you feel that there was a bug or some other problem, close the flash and DO NOT reopen it. 
+
+For easy access to the log you can run "Xi Log Reader.swf", which will read the contents of the log shared object and output it on the flash player's display. Press space bar to copy the log to your clipboard. From that point you have many options of sending the log to me but I'd prefer if you paste the log contents into a pastebin and link me to the pastebin on the Discord group or my tumblr.
+
+The older method is no longer necessary for logs but still necessary for reporting the settings. Navigate to the folder where the Flash Player saves Shared Objects (The flash Player's "cookie") for ppppuXi and look for "ppppuXi_Log.sol". I'd make a copy of it just to make sure that it won't get overwritten by accident. Upload the Log file somewhere and when you go to report the issue you encountered, include a link to the log to help diagnose the problem. Alternatively, you can use a Shared Object reader with AMF3 capabilities such as those listed here (https://en.wikipedia.org/wiki/Local_shared_object#Editors_and_toolkits) to read the log yourself and include the text from it in your report or a link to a pastebin with the log's contents.
 
 -- Contact --
 If you need to contact me to report an issue or send a suggestion (don't ask me to create a character though, I'm not capable of doing this), then you can message me or send me an ask on my tumblr (ppppuProgrammer.tumblr.com), ask on the discord group (https://discord.gg/zmQx6am) or post on the 7chan /fl/ thread (http://7chan.org/fl/res/18154.html at the time of writing)

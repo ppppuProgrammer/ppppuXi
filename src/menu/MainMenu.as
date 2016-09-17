@@ -259,13 +259,25 @@ package menu
 				//Random select
 				if (relativeListIndex == -1)
 				{
-					index = characterManager.RandomizeCurrentCharacterAnimation(currentFrameForAnimation);
+					var exitedLinkAnimation:Boolean = characterManager.AllowChangeOutOfLinkedAnimation();
+					if (exitedLinkAnimation == true)
+					{
+						index = characterManager.GetIdTargetsOfCurrentCharacter().indexOf(characterManager.GetCurrentAnimationIdOfCharacter());
+					}
+					else
+					{
+						index = characterManager.GetIdTargetsOfCurrentCharacter().indexOf(characterManager.RandomizeCurrentCharacterAnimation(currentFrameForAnimation));
+					}
+					
 					//var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
 					//var target:int = currentCharacterIdTargets.indexOf(index); 
+					characterManager.ChangeAnimationForCurrentCharacter(characterManager.GetCurrentAnimationIdOfCharacter(), true)
 					UpdateAnimationIndexSelected(index);
 					//Update the random animation button to be selected.
 					animationMenu.SetSelectOnRandomAnimationButton(true);
+					characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
 					userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), "RANDOM");
+					
 					return;
 				}
 				else if (relativeListIndex > -1)
@@ -286,9 +298,9 @@ package menu
 				var currentCharacterIdTargets:Vector.<int> = characterManager.GetIdTargetsOfCurrentCharacter();
 				characterManager.AllowChangeOutOfLinkedAnimation();
 				//Need to get the index that targets the given animation id.
-				var target:int = currentCharacterIdTargets.indexOf(index);
+				var target:int = currentCharacterIdTargets[index];
 				
-				var switchSuccessful:Boolean = characterManager.ChangeAnimationForCurrentCharacter(target);
+				var switchSuccessful:Boolean = characterManager.ChangeAnimationForCurrentCharacter(target, false);
 				if (switchSuccessful == true)	
 				{ 
 					characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation); 

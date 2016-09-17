@@ -225,6 +225,7 @@
 				m_currentCharacter = currentCharacter;
 				charSwitchOccured = true;
 			}
+			//currentCharacter.OnAccessibleAnimationCheck();
 			currentCharacter.RandomizePlayAnim();
 			currentCharacter.PlayingLockedAnimCheck();
 			currentCharacter.ChangeAnimationIndexToPlay();
@@ -365,8 +366,10 @@
 			return currChar.GetCurrentAnimationId();
 		}
 		
+		/*Changes the animation for the character based off the index. Also sets whether
+		 * the character randomly selects a character every 4 seconds or not.*/
 		//Returns true if the animation could be switched. false if the switch failed.
-		public function ChangeAnimationForCurrentCharacter(characterAnimIndex:int):Boolean
+		public function ChangeAnimationForCurrentCharacter(characterAnimIndex:int, randomizeAnimations:Boolean):Boolean
 		{
 			var currChar:AnimatedCharacter = m_currentCharacter;
 			if (CheckIfTransitionLockIsActive() || currChar.GetTotalNumberOfAnimations() < characterAnimIndex || 
@@ -374,7 +377,7 @@
 			{
 				return false;
 			}
-			currChar.SetRandomizeAnimation(false);
+			currChar.SetRandomizeAnimation(randomizeAnimations);
 			currChar.ChangeAnimationIndexToPlay(characterAnimIndex);
 			return true;
 			//userSettings.characterSettings[currChar.GetName()].animationSelect = characterAnimFrame;
@@ -512,10 +515,11 @@
 			return transitionLockout == true || m_currentCharacter.IsStillInLinkedAnimation();
 		}
 		
-		public function AllowChangeOutOfLinkedAnimation():void
+		//Returns true if the function dispatched the exit linked animation event. Other false is returned
+		public function AllowChangeOutOfLinkedAnimation():Boolean
 		{
 			var currentCharacter:AnimatedCharacter = m_currentCharacter;
-			if (currentCharacter == null)	{ return; }
+			if (currentCharacter == null)	{ return false; }
 			
 			if (transitionLockout == false && currentCharacter.IsStillInLinkedAnimation())
 			{
@@ -523,14 +527,20 @@
 				var idToRandomlySelect:int = -1; 
 				var idTargets:Vector.<int> = currentCharacter.GetAnimationIdTargets();
 				
+				currentCharacter.SetRandomizeAnimation(true);
+				currentCharacter.RandomizePlayAnim();
+				currentCharacter.ChangeAnimationIndexToPlay(currentCharacter.GetCurrentAnimationId());
+				/*currentCharacter.SetRandomizeAnimation(true);
 				while (idToRandomlySelect < 0 && currentCharacter.GetAnimationLockedStatus(idToRandomlySelect) == false)
 				{
 					var index:int = Math.floor(Math.random() * idTargets.length)
 					idToRandomlySelect = idTargets[index];
-				}
+				}*/
 				dispatchEvent(new Event(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION));
-				currentCharacter.ChangeAnimationIndexToPlay(idToRandomlySelect);
+				return true;
+				//currentCharacter.ChangeAnimationIndexToPlay(idToRandomlySelect);
 			}
+			return false;
 		}
 		
 		public function GetCurrentAnimationIdOfCharacter():int

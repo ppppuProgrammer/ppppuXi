@@ -6,11 +6,11 @@ package modifications
 	 * ...
 	 * @author 
 	 */
-	public class MusicMod extends Mod
+	public class MusicMod extends Mod implements IModdable
 	{
 		//Contains the audio data that will be played.
 		protected var sourceSound:Sound=null;
-		//Where to start playing the music from on the inital playback.
+		//Time in milliseconds to start playing the music from on the inital playback.
 		protected var startTime:Number=0;
 		//Time in milliseconds of where to set the playhead when the endLoopTime is reached.
 		protected var startLoopTime:Number = 0;
@@ -34,6 +34,11 @@ package modifications
 			{
 				displayInfo = musicName;
 			}
+		}
+		
+		public function OutputModDetails():String
+		{
+			return "Music Name: " + musicName + ", Display Title: " + displayInfo;
 		}
 		
 		public override function Dispose():void

@@ -1,11 +1,12 @@
 package modifications 
 {
+	import flash.utils.getQualifiedClassName;
 	/**
 	 * A ppppuMod subclass that is used as an archive that contains various ppppuMods that actually contain data to be added 
 	 * to the ppppu program
 	 * @author 
 	 */
-	public class ModArchive extends Mod
+	public class ModArchive extends Mod  implements IModdable
 	{
 		
 		protected var modsList:Vector.<Mod> = new Vector.<Mod>();
@@ -14,8 +15,20 @@ package modifications
 		{
 			modType = MOD_ARCHIVE;
 		}
-		
+
 		public function GetModsList():Vector.<Mod> { return modsList; }
+		public function OutputModDetails():String
+		{
+			var output:String = "\tArchive contents: ";
+			var mod:Mod;
+			for (var i:int = 0, l:int = modsList.length; i < l; ++i)
+			{
+				mod = modsList[i];
+				output += "\n\tMod Name: " +  getQualifiedClassName(mod) + ", Type: " + mod.GetStringOfModType() + (("OutputModDetails" in mod) ? ", " +  (mod["OutputModDetails"]()) : "");
+			}
+			return output;
+		}
+
 		public override function Dispose():void
 		{
 			//Call the dispose function of all the mods in the list

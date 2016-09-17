@@ -5,7 +5,7 @@ package modifications
 	 * ...
 	 * @author 
 	 */
-	public class AnimationMod extends Mod
+	public class AnimationMod extends Mod  implements IModdable
 	{
 		//The movie clip for an single animation or for multiple animations, each in a frame of the container.
 		protected var animationContainer:MovieClip=null;
@@ -25,6 +25,12 @@ package modifications
 		public function GetTargetCharacterName():String
 		{
 			return targetCharacterName;
+		}
+		
+		public function OutputModDetails():String
+		{
+			var output:String = "Target character: " + (targetCharacterName != null && targetCharacterName.length > 0 ? targetCharacterName : "None targetted");
+			return output;
 		}
 		
 		override public function Dispose():void 

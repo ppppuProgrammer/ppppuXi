@@ -14,6 +14,9 @@ package logging
 		//private var logOutputFileName:String = null;
 		public var logOutputFile:SharedObject = null; //= SharedObject.getLocal("ppppuXi settings");
 		public var outputTraceWhenDebugging:Boolean = true; 
+		private var dateFormatter:DateFormatter = new DateFormatter();
+		private const DATE_FORMAT_STRING:String = "DD/MM/YYYY";
+		private const TIME_FORMAT_STRING:String = "HH:NN:SS.QQQ";
 		public function LogWriter(outputFileName:String) 
 		{
 			super();
@@ -21,7 +24,7 @@ package logging
 			{
 				//logOutputFileName = outputFileName;
 				//Create or load the log file
-				logOutputFile = SharedObject.getLocal(outputFileName);
+				logOutputFile = SharedObject.getLocal(outputFileName, "/");
 				//Clear the log file
 				logOutputFile.clear();
 				logOutputFile.flush();
@@ -36,15 +39,15 @@ package logging
 			{
 				var message:String="";
 				var currentDateTime:Date = new Date();
-				var dateFormatter:DateFormatter = new DateFormatter();
+				
 				if (includeDate)
 				{
-					dateFormatter.formatString = "DD/MM/YYYY";
+					dateFormatter.formatString = DATE_FORMAT_STRING;
 					message += dateFormatter.format(currentDateTime) + " ";
 				}
 				if (includeTime)
 				{
-					dateFormatter.formatString = "HH:NN:SS.QQQ";
+					dateFormatter.formatString = TIME_FORMAT_STRING;
 					message += dateFormatter.format(currentDateTime) + " ";
 				}
 				if (includeLevel)

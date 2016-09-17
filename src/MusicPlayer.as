@@ -114,7 +114,7 @@
 				//stop music
 				if (m_currentlyPlayingMusicId > -1)
 				{
-					StopMusic(currentTimeIntoAnimation);
+					StopMusic();
 
 					m_currentlyPlayingMusicId = -1;
 				}
@@ -228,7 +228,7 @@
 		}
 		
 		//public function StopMusic(currentFrame:uint):void
-		public function StopMusic(currentTime:Number):void
+		public function StopMusic():void
 		{
 			if (m_currentlyPlayingMusicId > -1)
 			{

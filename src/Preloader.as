@@ -168,7 +168,7 @@ package
 			}
 			else
 			{
-				logger.error("Error encountered loading mods: " + e.text);
+				logger.error("Error encountered loading mods" + (e.data.errorID == 2032 ? ", a file was not found. Full error message: " : ": ") + e.text);
 			}
 		}
 		
@@ -240,17 +240,19 @@ package
 			else
 			{
 				var classType:String = getQualifiedSuperclassName(mod);
-				classType = classType.substring(classType.lastIndexOf(":")+1);
+				classType = classType.substring(classType.lastIndexOf(":") + 1);
+				mod.UrlLoadedFrom = e.target.url;
 				if (mod.GetModType() >= 0)
 				{
-					logger.info("Successfully loaded " + classType + ": " + getQualifiedClassName(mod));
+					var modVersion:String = mod.GetModVersion();
+					logger.info("Successfully loaded " + classType + ": " + getQualifiedClassName(mod) + " (" + e.target.url +" ver" + (modVersion != "0.0" ? modVersion : "Not Available") + ")");
 					addChild(mod);
 					startupMods[startupMods.length] = mod;
 					removeChild(mod);
 				}
 				else
 				{
-					logger.warn(getQualifiedClassName(mod) + " is not a valid mod (Super class is " + classType + ")");
+					logger.warn(getQualifiedClassName(mod) +"(" + e.target.url +")" + " is not a valid mod (Super class is " + classType + ")");
 				}
 			}
 		}

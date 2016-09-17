@@ -8,6 +8,7 @@ package
 	import com.greensock.loading.SWFLoader;
 	import events.AnimationTransitionEvent;
 	import events.ExitLinkedAnimationEvent;
+	import events.FadeToBlackTransitionEvent;
 	import flash.events.UncaughtErrorEvent;
 	import flash.system.System;
 	import flash.utils.Dictionary;
@@ -52,6 +53,7 @@ package
 		private var characterManager:CharacterManager;
 		
 		private const flashStartFrame:int = 2;
+		private static var FadeToBlackDuration:int = 0; 
 		//Main menu for the program.
 		//private var charVoiceSystem:SoundEffectSystem;
 		
@@ -64,7 +66,7 @@ package
 		private var mainStageLoopStartFrame:int;
 		
 		//Settings related
-		public var settingsSaveFile:SharedObject = SharedObject.getLocal("ppppuXi_Settings");
+		public var settingsSaveFile:SharedObject = SharedObject.getLocal("ppppuXi_Settings", "/");
 		
 		public var userSettings:UserSettings = new UserSettings();
 		
@@ -169,11 +171,14 @@ package
 			mainStage.OuterDiamondBG.mouseEnabled = false;
 			mainStage.TransitionDiamondBG.mouseChildren = false;
 			mainStage.TransitionDiamondBG.mouseEnabled = false;
-			
+			mainStage.FadeBlackScreen.mouseChildren = false;
+			mainStage.FadeBlackScreen.mouseEnabled = false;
+			mainStage.FadeBlackScreen.stop();
+			FadeToBlackDuration = mainStage.FadeBlackScreen.totalFrames;
 			characterManager = new CharacterManager(/*mainStage, userSettings*/);
 			mainStage.x = (stage.stageWidth - mainStage.CharacterLayer.width /*- characterManager.MENUBUTTONSIZE/2*/) / 2;
 			mainStage.CharacterLayer.addChild(characterManager);
-			
+			mainStage.FadeBlackScreen.addFrameScript(mainStage.FadeBlackScreen.totalFrames-1, FadeToBlackTransitionEnded);
 			LoadUserSettings();
 			
 			
@@ -201,7 +206,11 @@ package
 				{
 					try
 					{
-						ProcessMod(startupMods[i]);
+						var successfulModAdd:Boolean = ProcessMod(startupMods[i]);
+						if (successfulModAdd == false)
+						{
+							logger.warn("Mod that could not be added: " + " ("+startupMods[i].UrlLoadedFrom+")");
+						}
 					}
 					catch (e:Error)
 					{
@@ -554,10 +563,11 @@ package
 		private function ProcessMod(mod:Mod/*, modType:int*/):Boolean
 		{
 			var modClassName:String = getQualifiedClassName(mod);
+			var addedMod:Boolean = false;
 			if (mod == null)
 			{
 				logger.warn(modClassName+ " is not a ppppuXi mod!");
-				return false;
+				return addedMod;
 			}
 			
 			var modType:int = mod.GetModType();
@@ -578,6 +588,7 @@ package
 					{
 						mainMenu.AddIconToCharacterMenu(characterData.icon);
 						var addedCharacterId:int = characterManager.AddCharacter(character);
+						addedMod = true;
 						logger.info("Successfully added character: " +  character.GetName());
 						if(totalRunFrames > 0)	{TryToLoadCharacterSettings(addedCharacterId);}
 					}
@@ -600,6 +611,7 @@ package
 					var targetCharacter:String = animationMod.GetTargetCharacterName();
 					characterManager.AddAnimationsToCharacter(targetCharacter, 
 						animationMod.GetAnimationContainer());
+					addedMod = true;
 				}
 				else
 				{
@@ -619,6 +631,7 @@ package
 					logger.info("Processing Music Mod: " + modClassName);
 					if (musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime()))
 					{
+						addedMod = true;
 						logger.info("Music " + music.GetName() + " was successfully added");
 						if (music.GetName() == userSettings.globalSongTitle)
 						{
@@ -665,6 +678,7 @@ package
 						childMod = archiveModList[i];
 						ProcessMod(childMod);
 					}
+					addedMod = true;
 					logger.info("\t* Finished processing archive mod " + modClassName + "*");
 				}
 				else 
@@ -672,9 +686,13 @@ package
 					logger.error(modClassName + " was not a valid archive mod.");
 				}
 			}
+			else
+			{
+				logger.error(modClassName + " was an unrecognized ppppuXi mod.");
+			}
 			mod.Dispose();
 			mod = null;
-			return false;
+			return addedMod;
 		}
 		
 		/*SETTINGS RELATED FUNCTIONS*/
@@ -918,16 +936,18 @@ package
 		
 		private function AnimationTransitionOccured(e:Event):void
 		{
-			
 			StopBackgroundAnimations();
 			addEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
-			musicPlayer.StopMusic(intendedRunFrame);
+			addEventListener(FadeToBlackTransitionEvent.FADETOBLACK_TRANSITION, StartFadeToBlackTransition, true);
+			
+			musicPlayer.StopMusic();
 		}
 		
 		private function ExitingLinkedAnimation(e:Event):void
 		{
 			removeEventListener(ExitLinkedAnimationEvent.EXIT_LINKED_ANIMATION, ExitingLinkedAnimation, true);
 			PlayBackgroundAnimations(GetFrameNumberToSetForAnimation());
+			mainStage.FadeBlackScreen.gotoAndStop(1);
 			musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation());
 		}
 		[inline]
@@ -972,6 +992,34 @@ package
 			mainStage.BacklightBG.Backlight.BacklightGfx.transform.colorTransform = colors.light;
 		}
 		
+		//Catches all errors not caught by another handler and has the logger record the error and the call stack
+		private function ErrorCatcher(e:UncaughtErrorEvent):void
+		{
+			logger.error(e.error.message + "\n" + e.error.getStackTrace());
+		}
+		
+		/**/
+		private function StartFadeToBlackTransition(e:Event):void
+		{
+			removeEventListener(FadeToBlackTransitionEvent.FADETOBLACK_TRANSITION, StartFadeToBlackTransition, true);
+			mainStage.FadeBlackScreen.play();
+		}
+		
+		private function FadeToBlackTransitionEnded():void
+		{
+			//After an animation transition, a random animation of the character is selected.
+			mainMenu.SelectAnimation(null, -1);
+			//Actually allow 
+			//characterManager.AllowChangeOutOfLinkedAnimation();
+			
+			
+			//mainStage.FadeBlackScreen.gotoAndStop(1);
+		}
+		
+		public static function GetFadeToBlackTransitionDuration():int
+		{
+			return FadeToBlackDuration;
+		}
 		[inline]
 		private function ShowMenu(visible:Boolean):void
 		{
@@ -1162,10 +1210,6 @@ package
 		{
 			musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
 		}*/
-		//Catches all errors not caught by another handler and has the logger record the error and the call stack
-		private function ErrorCatcher(e:UncaughtErrorEvent):void
-		{
-			logger.error(e.error.message + "\n" + e.error.getStackTrace());
-		}
+		
 	}
 }

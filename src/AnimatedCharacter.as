@@ -1,6 +1,7 @@
 ﻿package 
 {
 	import events.AnimationTransitionEvent;
+	import events.FadeToBlackTransitionEvent;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
@@ -21,14 +22,15 @@
 		//The name of the character
 		protected var m_name:String = null;
 		
-		/*The vector that contains all animation movieclips for the character.*/
+		/*The vector that contains all animation movieclips for the character. Also referred to as the animation collection*/
 		protected var m_charAnimations:Vector.<MovieClip> = new Vector.<MovieClip>();
 		//animation labels are used to tell which animations are linked.
 		protected var m_animationLabel:Vector.<String> = new Vector.<String>();
 		
 		private var m_currentlyPlayingAnimation:MovieClip = null;
-		//The id of the characters animation collection that is slated to play or is playing currently. -1 indicates nothing is playing.
-		private var m_currentAnimationId:int = -1;
+		/*The id of the characters animation collection that is slated to play or is playing currently. -1 indicates nothing is playing.
+		 * Value corresponds to the index of the character animations vector*/
+		private var m_currentAnimationIndex:int = -1;
 		
 		private var m_animationNames:Dictionary = new Dictionary();
 		
@@ -71,6 +73,9 @@
 		
 		//The logging object for this class
 		private var logger:ILogger;
+		
+		//The frame that the fade to black transition should be started on.
+		protected var fadeToBlackFrame:int = -1;
 		
 		private static const animationAddFailedMessage:String = "Failed to add animations:";
 		
@@ -172,52 +177,54 @@
 				animationCollection.gotoAndStop(i);
 				//Stop the movie clip in the collection from playing, which can cause sounds embed into them
 				//to play for a few milliseconds during this.
-				(animationCollection.getChildAt(0) as MovieClip).stop();
-				var animationIndex:int = m_charAnimations.length;
-				
-				var label:String = animationCollection.currentFrameLabel;
-				var isLinkedEndAnimation:Boolean = false;
-				if (label && label.indexOf("Into_") != 0)
+				if (animationCollection.numChildren > 0 && animationCollection.getChildAt(0) as MovieClip != null)
 				{
-					isLinkedEndAnimation = true;
-				}
-				//Animation labels are not allowed to overwrite each other
-				if (label && m_animationLabel.indexOf(label) != -1)
-				{
-					label = null;
-				}
-				var animationClass:Class = Object(animationCollection.getChildAt(0)).constructor;
-				var animationName:String = getQualifiedClassName(animationClass);
-				var animation:DisplayObject = new animationClass();
-				if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames))
-				{
-					(animation as MovieClip).stop();
-					if (isLinkedEndAnimation == false)
+					(animationCollection.getChildAt(0) as MovieClip).stop();
+					var animationIndex:int = m_charAnimations.length;
+					
+					var label:String = animationCollection.currentFrameLabel;
+					var isLinkedEndAnimation:Boolean = false;
+					if (label && label.indexOf("Into_") != 0)
 					{
-						//add animation
-						m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
-						m_animationLabel[animationIndex] = label; //add label
-						m_lockedAnimation[m_lockedAnimation.length] = false;
-						m_animationNames[animationName] = animationIndex;
+						isLinkedEndAnimation = true;
 					}
-					else if (isLinkedEndAnimation == true && label != null)
+					//Animation labels are not allowed to overwrite each other
+					if (label && m_animationLabel.indexOf(label) != -1)
 					{
-						m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
-						m_animationLabel[animationIndex] = label; //add label
-						//No need to worry about the animation's lock since linked end animations are unaccessible by normal means anyway.
+						label = null;
+					}
+					var animationClass:Class = Object(animationCollection.getChildAt(0)).constructor;
+					var animationName:String = getQualifiedClassName(animationClass);
+					var animation:DisplayObject = new animationClass();
+					if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames))
+					{
+						(animation as MovieClip).stop();
+						if (isLinkedEndAnimation == false)
+						{
+							//add animation
+							m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
+							m_animationLabel[animationIndex] = label; //add label
+							m_lockedAnimation[m_lockedAnimation.length] = false;
+							m_animationNames[animationName] = animationIndex;
+						}
+						else if (isLinkedEndAnimation == true && label != null)
+						{
+							m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
+							m_animationLabel[animationIndex] = label; //add label
+							//No need to worry about the animation's lock since linked end animations are unaccessible by normal means anyway.
+						}
+						else
+						{
+							failMessage += " " + animationName + "(endlink missing label)";
+						}
+						//m_charAnimations[animationIndex].stop();
 					}
 					else
 					{
-						failMessage += " " + animationName + "(endlink missing label)";
+						failMessage += " " + animationName+"(Wasn't valid movieclip or animation with same name was already added";
 					}
-					//m_charAnimations[animationIndex].stop();
+					//animationCollection.removeChild(m_charAnimations[animationIndex]);
 				}
-				else
-				{
-					failMessage += " " + animationName+"(Wasn't valid movieclip or animation with same name was already added";
-				}
-				//animationCollection.removeChild(m_charAnimations[animationIndex]);
-				
 			}
 			if (failMessage != animationAddFailedMessage)
 			{
@@ -270,7 +277,7 @@
 		
 		public function GetCurrentAnimationId():int
 		{
-			return m_currentAnimationId;
+			return m_currentAnimationIndex;
 		}
 		
 		public function SetRandomizeAnimation(randomStatus:Boolean):void
@@ -281,6 +288,16 @@
 		{
 			return m_randomizePlayAnim;
 		}
+		
+		/*public function OnAccessibleAnimationCheck():void
+		{
+			//Check that animation index has an accessible animation id associated with it.
+			if (GetIdTargetForIndex(m_currentAnimationIndex) == -1)
+			{
+				//Animation index didn't have an associated accessible id.
+				m_currentAnimationIndex = -1;
+			}
+		}*/
 		
 		//Returns the animation id that was selected
 		public function RandomizePlayAnim(forceRandomization:Boolean=false):void
@@ -293,7 +310,7 @@
 				
 				if((accessibleAnimationCount - GetNumberOfLockedAnimations()) > 2)
 				{
-					while(randomAnimIndex == m_currentAnimationId || GetAnimationLockedStatus(randomAnimIndex))
+					while(randomAnimIndex == m_currentAnimationIndex || GetAnimationLockedStatus(randomAnimIndex))
 					{
 						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
 					}
@@ -305,7 +322,7 @@
 						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
 					}
 				}
-				m_currentAnimationId = randomAnimIndex;
+				m_currentAnimationIndex = m_idTargets[randomAnimIndex];
 				
 				//ChangeAnimationIndexToPlay(randomAnimIndex);
 			}
@@ -353,9 +370,11 @@
 		
 		public function PlayingLockedAnimCheck():void
 		{
-			//Only 1 animation is available, so search for it and use it.
-			var accessibleId:int = GetIdTargetForIndex(m_currentAnimationId);
-			if (accessibleId == -1) { return;}
+			//Make sure the currently playing animation can be locked.
+			//animation id are already the accessible animations.
+			var accessibleId:int = GetIdTargetForIndex(m_currentAnimationIndex);
+			//id returned was -1, meaning the animation at the index was not accessible.
+			//if (accessibleId == -1) { return;}
 			if(GetAnimationLockedStatus(accessibleId) && (GetNumberOfAccessibleAnimations() - GetNumberOfLockedAnimations() == 1))
 			{
 				var unlockedAnimNum:int = 0;
@@ -367,7 +386,7 @@
 					}
 					++unlockedAnimNum;
 				}
-				m_currentAnimationId = unlockedAnimNum;
+				m_currentAnimationIndex = m_idTargets[unlockedAnimNum];
 				//ChangeAnimationIndexToPlay(unlockedAnimNum);
 			}
 		}
@@ -375,7 +394,7 @@
 		public function CheckAndSetupLinkedTransition():Boolean
 		{
 			var linkedAnimationIndex:int = -1;
-			var currLabel:String = m_animationLabel[m_currentAnimationId];// m_charAnimations.currentFrameLabel;
+			var currLabel:String = m_animationLabel[m_currentAnimationIndex];// m_charAnimations.currentFrameLabel;
 			if (currLabel == null || currLabel.indexOf("Into_") == -1) 
 			{ 
 				return false;
@@ -448,6 +467,26 @@
 			{
 				this.ChangeAnimationIndexToPlay(queuedLinkedAnimationIndex);
 				this.GotoFrameAndPlayForCurrentAnimation(1);
+				//animation has changed, so now to attach a frame script to it to activate the fade to black transition.
+				//First check if the animation has a "FadeToBlack" label. End link animations can use this to specify a frame to start the fade to black transition
+				if (this.m_currentlyPlayingAnimation.currentLabels.length > 0)
+				{
+					fadeToBlackFrame = this.m_currentlyPlayingAnimation.currentLabels.indexOf("FadeToBlack");
+				}
+				//if the label wasn't found then the amount of frames that the transition lasts is subtracted from the total frame count of the animation. The result of that subtraction is the fadeToBlackFrame.
+				if (fadeToBlackFrame == -1)
+				{
+					fadeToBlackFrame = this.m_currentlyPlayingAnimation.totalFrames - AppCore.GetFadeToBlackTransitionDuration();
+				}
+				//Last check, make sure that fadeToBlackFrame is not less than 1, which could happen if an animation duration is shorter than the transition.
+				if (fadeToBlackFrame < 1)
+				{
+					fadeToBlackFrame = 1;
+				}
+				
+				//With the FtBFrame found, attach the frame script
+				this.m_currentlyPlayingAnimation.addFrameScript(fadeToBlackFrame-1, RequestFadeToBlackTransition);
+				
 				frameToTransitionToLinkedAnimation = -1;
 				queuedLinkedAnimationIndex = -1;
 				e.target.removeEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
@@ -469,10 +508,10 @@
 		
 		public function GotoFrameAndPlayForCurrentAnimation(animationFrame:int):void
 		{
-			if (m_currentAnimationId < 0 || m_charAnimations.length == 0)	{ return; }
+			if (m_currentAnimationIndex < 0 || m_charAnimations.length == 0)	{ return; }
 			
 			//and set this animation's frame number to reflect where it would be if animations weren't changed on a whim
-			var animation:MovieClip = m_charAnimations[m_currentAnimationId];
+			var animation:MovieClip = m_charAnimations[m_currentAnimationIndex];
 			if(animation)
 			{
 				//displayArea.addChild(animation);
@@ -503,6 +542,7 @@
 		private function GetIdTargetForIndex(index:int):int
 		{
 			return m_idTargets.indexOf(index);
+			
 		}
 		
 		public function GetAnimationLockedStatus(animIndex:int):Boolean
@@ -525,12 +565,12 @@
 		public function ChangeAnimationIndexToPlay(animIndex:int=-1):void
 		{
 			
-			if (animIndex > -1)	{ m_currentAnimationId = animIndex /*+ 1*/; }
+			if (animIndex > -1)	{ m_currentAnimationIndex = animIndex /*+ 1*/; }
 			
 			/*If the animation index does not correspond to an actual animation, in a case such as 
 			 * adding an extra animation for one playthrough then locking that extra animation then 
 			 * removing it for the next playthrough, then it needs to be randomly selected*/
-			if (m_currentAnimationId >= GetTotalNumberOfAnimations())
+			if (m_currentAnimationIndex >= GetTotalNumberOfAnimations())
 			{
 				RandomizePlayAnim(true);
 			}
@@ -542,10 +582,10 @@
 				m_currentlyPlayingAnimation = null;
 			}
 			
-			if (m_currentAnimationId > -1 && m_currentAnimationId < m_charAnimations.length && displayArea.numChildren == 0)
+			if (m_currentAnimationIndex > -1 && m_currentAnimationIndex < m_charAnimations.length && displayArea.numChildren == 0)
 			{
-				m_currentlyPlayingAnimation = m_charAnimations[m_currentAnimationId];
-				displayArea.addChild(m_charAnimations[m_currentAnimationId]);
+				m_currentlyPlayingAnimation = m_charAnimations[m_currentAnimationIndex];
+				displayArea.addChild(m_charAnimations[m_currentAnimationIndex]);
 			}
 		}
 		
@@ -578,6 +618,16 @@
 			}
 			return null;
 		}
+		
+		private function RequestFadeToBlackTransition():void
+		{
+			displayArea.dispatchEvent(new Event(FadeToBlackTransitionEvent.FADETOBLACK_TRANSITION));
+			//Remove the frame script that was responsible for having this function called.
+			this.m_currentlyPlayingAnimation.addFrameScript(fadeToBlackFrame-1, null);
+			//Reset the fade to black frame. 
+			fadeToBlackFrame = -1;
+		}
+		
 		/*protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform
 		{
 			var ct:ColorTransform = new ColorTransform();

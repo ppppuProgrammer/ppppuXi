@@ -10,7 +10,7 @@ package modifications
 	 * is expected. In order to add more animations for the character, the flash document for the character must be modified.
 	 * @author 
 	 */
-	public class AnimatedCharacterMod extends Mod
+	public class AnimatedCharacterMod extends Mod  implements IModdable
 	{
 		//The character instance that will be extracted from the mod and added into the character manager.
 		//protected var characterPayload:AnimatedCharacter;
@@ -65,6 +65,12 @@ package modifications
 			name: m_characterName,
 			animation: initialAnimationContainer};
 			return data;
+		}
+		
+		public function OutputModDetails():String
+		{
+			var output:String = "Character Name: " + m_characterName + ", Preferred Music: " + m_preferredMusicName;
+			return output;
 		}
 		
 		public override function Dispose():void

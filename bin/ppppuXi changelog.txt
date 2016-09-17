@@ -1,5 +1,14 @@
 - ppppuXi Changelog -
 
+beta v0.3.3 RC 7 September 16, 2016
+* Included a log reading program to ease user log reporting by allowing them direct access to the log contents.
+* Moved where the log and setting save files are stored. They are now stored in the localhost subdirectory of the Flash player's shared object folder. Move your old settings to the localhost folder if you want to keep your old settings.
+* End link animations now end on their own. At a certain point, the screen will fade to black before switching to another animation for the character.
+* Modified how Animated Characters change their animations so that end link animation be placed anywhere in the animation collection movie clip without causing issues such as the end link animation being selectable on the animation menu.
+* Mods can be designated a version to help track differences in releases. Creators can change the version of the mod in it's constructor. Version is set to 0.0/Not Available by default.
+* Mods now give information about their contents (type, version, all mods in it if an archive) when loaded standalone.
+* Improved logging to mention the file url and version of a mod when successfully loaded. Also when a mod fails to have its contents added the url of the mod is logged.
+
 beta v0.3.2 RC 6 September 6, 2016
 * Logging now included the error message that details what the problem was.
 * Updated the minimum version of Flash needed during the start up check. Flash Player 11.8 or higher is now necessary to not get the unsupported Flash version message.
