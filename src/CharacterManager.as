@@ -314,7 +314,7 @@
 			//Already doing a transition or already is in the end part of a linked animation.
 			if (transitionLockout == true || m_currentCharacter.IsStillInLinkedAnimation() == true) { return; } 
 			
-			var animationQueued:Boolean = m_currentCharacter.CheckAndSetupLinkedTransition();
+			var animationQueued:Boolean = m_currentCharacter.SetupLinkedTransition();
 			if (animationQueued == true)
 			{
 				transitionLockout = true;
@@ -450,6 +450,7 @@
 			//Test if setting this character to be unselectable will result in all characters being unselectable
 			if (m_characterLocks[charIndex] == false && m_unswitchableCharactersNum + 1 >= m_Characters.length)
 			{
+				logger.debug("Could not lock character {0}", GetCharacterNameById(charIndex));
 				return false; //Need to exit the function immediantly, 1 character must always be selectable.
 			}
 			m_characterLocks[charIndex] = !m_characterLocks[charIndex];
@@ -462,6 +463,7 @@
 			{
 				--m_unswitchableCharactersNum;
 			}
+			logger.debug("Character {0} is {1}", GetCharacterNameById(charIndex), m_characterLocks[charIndex] ? "Locked" : "Unlocked");
 			return m_characterLocks[charIndex];
 		}
 		
@@ -588,6 +590,11 @@
 				}
 				
 			}
+		}
+		
+		public function GetTransitionPointsForCurrentAnimation():Vector.<int>
+		{
+			return m_currentCharacter.GetTransitionActivationPoints();
 		}
 		
 		/*public function DEBUG_CharacterAnimationFrameCheck():void

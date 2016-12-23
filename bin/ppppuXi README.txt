@@ -1,4 +1,4 @@
-- ppppuX interactive (ppppuXi) Version 0.3.3 RC7 Read Me -
+- ppppuX interactive (ppppuXi) Version 0.3.4 RC8 Read Me -
 
 -- Preface --
 ppppuXi is a modified version of minus 8's ppppu flash animation designed to facilitate adding new assets, such as characters and music, which are added through the use of "mod" swf files. The mod system is intended to allow greater customization of ppppu, encourage new content creation, and decouple content from the main program which was causing issues as more and mroe characters were being added. Included in this zip is ppppuXi.swf, the main flash program that should be run by the flash player, and various mods, the 2 original characters done by minus8 and a majority of the others being character mods that were created by GeneralScot, and MusicPack.swf, an archive containing various music that have been included in ppppu edits made by GeneralScot. Also included is a helper program, Xi Log Reader.swf, which will load the log file for ppppuXi and output it onto your screen.
@@ -58,6 +58,26 @@ Linux/Unix						~/.macromedia/Flash_Player/#SharedObjects/
 Note: For the Chrome using paths, "Default" refers to the profile name. If the profile you use is not named Default, edit the path to refer to your profile name.
 
 After navigating to the proper directory, enter one of the randomly named folders Flash generates then go into the localhost folder. In this folder you should find "ppppuXi_Settings.sol" and "ppppuXi_Log.sol". If they aren't there something is not allowing the Flash Player to create shared objects. Make sure your Flash player is allowed to save shared objects locally with sufficient file size privilege and that if you play ppppuXi in a browser that it is not in private mode/incognito.
+
+-- Flash Player 23+ Warning --
+Due to changes made by Adobe, Flash Player version 23 and higher will no longer allows browsers to have a swf load other local swf files. In order to force local files to be loaded, you must tell Flash Player to trust the folder/files that you wish to be loaded.
+
+For Internet Explorer, Edge, Firefox, Opera and Safari:
+On the affected system, go to the Flash Player Settings Manager:
+• Mac: System Preferences > Flash Player
+• Windows: Control Panel > Flash Player
+* Linux (Ubuntu tested solution): Open terminal > enter in the following (without quotes): "flash-player-properties" 
+Select the Advanced tab
+In the Developer Tools section, click the Trusted Location Settings button
+Click the "Add..." button and add relevant files and folders to the list
+ 
+For Google Chrome (and similar PPAPI browsers):
+Navigate to the Settings Manager page (http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager02.html)
+Choose Edit Locations > Add Locations from the popup list
+In the text field that appears, type or paste the file/folder path that you'd like to trust
+Click the "Confirm" button
+
+The alternative is to use a stand alone flash projector, here are ones provided by Adobe at https://www.adobe.com/support/flashplayer/debug_downloads.html
 
 -- Bug Reporting --
 There is a log created that records various events and errors that happened for the last time the program was ran. If you feel that there was a bug or some other problem, close the flash and DO NOT reopen it. 

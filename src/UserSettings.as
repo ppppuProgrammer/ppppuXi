@@ -1,6 +1,7 @@
 package  
 {
 	import flash.ui.Keyboard;
+	import mx.logging.*;
 	/**
 	 * ...
 	 * @author 
@@ -24,8 +25,13 @@ package
 		public const SAVE_VERSION:int = 7;
 		//The version of the settings that this settings object was created for.
 		public var version:int = SAVE_VERSION;
+		
+		//The logging object for this class
+		private var logger:ILogger;
+		
 		public function UserSettings() 
 		{
+			logger = Log.getLogger("UserSettings");
 			keyBindings.LockChar = new Object();
 			keyBindings.GotoChar = new Object();
 			keyBindings.CharCursorPrev = new Object();
@@ -75,36 +81,43 @@ package
 		public function UpdateShowingBacklight(value:Boolean):void
 		{
 			backlightOn = value;
+			logger.debug("Backlight is being {0}", value ? "Shown" : "Hidden");
 		}
 		
 		public function UpdateShowBackground(value:Boolean):void
 		{
 			showBackground = value;
+			logger.debug("Background is being {0}", value ? "Shown" : "Hidden");
 		}
 		
 		public function UpdateMenuVisibility(value:Boolean):void
 		{
 			showMenu = value;
+			logger.debug("Menu is being {0}", value ? "Shown" : "Hidden");
 		}
 		
 		public function UpdateCharacterSwitching(value:Boolean):void
 		{
 			allowCharacterSwitches = value;
+			logger.debug("Character switches are {0}", value ? "Allowed" : "Forbidden");
 		}
 		
 		public function UpdateRandomCharacterSelecting(value:Boolean):void
 		{
 			randomlySelectCharacter = value;
+			logger.debug("Randomly selecting a character: {0}", value);
 		}
 		
 		public function UpdateCurrentCharacterName(characterName:String):void
 		{
 			currentCharacterName = characterName;
+			logger.debug("Current character is set to {0}", characterName);
 		}
 		
 		public function CreateSettingsForNewCharacter(charName:String):void
 		{
 			characterSettings[charName] = new Object();
+			logger.debug("Created settings for new character {0}", charName);
 			characterSettings[charName].locked = false;
 			characterSettings[charName].animationLocked = new Object();
 			//characterSettings[charName].playMusicTitle = globalSongTitle;
@@ -114,11 +127,13 @@ package
 		public function UpdateSettingForCharacter_Lock(characterName:String, value:Boolean):void
 		{
 			characterSettings[characterName].locked = value;
+			logger.debug("Character {0} is {1}", characterName, value ? "Locked" : "Unlocked");
 		}
 		
 		public function UpdateSettingForCharacter_AnimationLock(characterName:String, animationName:String, value:Boolean):void
 		{
 			characterSettings[characterName].animationLocked[animationName] = value;
+			logger.debug("Animation {0} for {1} is {2}", animationName, characterName, value ? "Locked" : "Unlocked");
 		}
 		
 		/*public function UpdateSettingForCharacter_Music(characterName:String, value:String):void
@@ -129,6 +144,7 @@ package
 		public function UpdateSettingForCharacter_SelectedAnimation(characterName:String, value:String):void
 		{
 			characterSettings[characterName].animationSelect = value;
+			logger.debug("Selected animation for {0} has been set to {1}", characterName, value);
 		}
 		
 		public function GetSettingsForCharacter(characterName:String):Object

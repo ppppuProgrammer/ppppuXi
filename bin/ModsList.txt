@@ -25,14 +25,14 @@ ACHAR_Iris.swf
 ACHAR_Shygirls.swf
 ACHAR_Koopagirls.swf
 ACHAR_Piranhagirls.swf
-ACHAR_Toadette.swf
+#ACHAR_Toadette.swf
 #ACHAR_AppleBloom.swf
 #ACHAR_SweetieBelle.swf
 #ACHAR_Scootaloo.swf
 
 #Archive mods
 ARCH_StarterMusicPack.swf
-ARCH_MusicGalRemixesMod.swf
+
 #Music mods
 #M_CMCTheme.swf
 

@@ -36,12 +36,17 @@ package
 		//Loader related
 		private var modsListLoader:LoaderMax = new LoaderMax( { name:"ModsListLoader", onComplete:ReadModsList, onError:ModsListLoaderErrorHandler} );
 		private var swfPreloader:LoaderMax = new LoaderMax({name:"SWFPreloader", onChildComplete:FinishedLoadingMod, onComplete:LoadingFinished,
-			onProgress:Progress, onError:SWFLoaderErrorHandler});
-		private const modLoadList:String = "ModsList.txt";
+			onProgress:Progress, onError:SWFLoaderErrorHandler } );
+			
+		CONFIG::release
+		private const modLoadList:String = "ModsList.txt" ;
+		
+		CONFIG::debug
+		private const modLoadList:String = "DebugModsList.txt" ;
 		
 		//The logging object for this class
 		private var logger:ILogger;
-		
+
 		public function Preloader() 
 		{
 			//Initialize the logger for the program.
@@ -81,6 +86,7 @@ package
 			var majorVer:int = int(playerVersion.substring(playerVersion.indexOf(" ") + 1, majorVerCommaIndex));
 			var minorVer:int = int(playerVersion.substring(majorVerCommaIndex + 1, minorVerCommaIndex));
 			var osUsed:String = playerVersion.substring(0, 3);
+			//if (osUsed != "WIN") { txtFilelineEnding = "\n";}
 			var mobileDevice:Boolean = (osUsed == "IOS" || osUsed == "AND")?true:false;
 			var flashPlayerIsSupported:Boolean = false;
 			logger.info("Flash Player Info: Version " + majorVer + "." + minorVer + ", Operating System: " + osUsed);
@@ -261,8 +267,12 @@ package
 		{
 			var listText:String = e.target.content[0] as String;
 			//var modsToLoad:Array = [];
-			
-			var rawSplitStrings:Array = listText.split("\r\n");
+			//By default, assume the line ending used is CR LF (Windows)
+			var txtFilelineEnding:String="\r\n";
+			//Check for the line ending used in the mods list file and then split the contents of it based on the ending.
+			if (listText.indexOf("\r") != -1 && listText.indexOf("\n") == -1) { txtFilelineEnding = "\r"; } //CR
+		else if	(listText.indexOf("\r") == -1 && listText.indexOf("\n") != -1){txtFilelineEnding = "\n";} //LF
+			var rawSplitStrings:Array = listText.split(txtFilelineEnding);
 			//Feed the mods to load array into the modLoader
 			for (var i:int = 0, l:int = rawSplitStrings.length; i < l; ++i)
 			{

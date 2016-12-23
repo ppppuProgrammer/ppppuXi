@@ -125,9 +125,6 @@ package
 			
 			contentLoader.autoLoad = true;
 			
-			mainStage.mouseChildren = false;
-			mainStage.mouseEnabled = false;
-			
 			var frameLabels:Array = mainStage.currentLabels;
 			for (var i:int = 0, l:int = frameLabels.length; i < l;++i)
 			{
@@ -156,7 +153,9 @@ package
 			loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, ErrorCatcher, false, 0);
 			addEventListener(ChangeBackgroundEvent.CHANGE_BACKGROUND, ChangeBackgroundColors, true);
 			addEventListener(AnimationTransitionEvent.ANIMATION_TRANSITIONED, AnimationTransitionOccured, true);
-			mainStage.MenuLayer.mouseEnabled = true;
+			mainStage.mouseChildren = true;
+			mainStage.MenuLayer.mouseEnabled = false;
+			mainStage.MenuLayer.mouseChildren = true;
 			//Disable mouse interaction for various objects
 			mainStage.mouseEnabled = false;
 			mainStage.CharacterLayer.mouseEnabled = false;
@@ -186,9 +185,9 @@ package
 			
 			mainMenu = new MainMenu(characterManager, musicPlayer, userSettings);
 			mainMenu.visible = false;
-			addChild(mainMenu);
+			mainStage.MenuLayer.addChild(mainMenu);
 			mainMenu.Initialize();
-			
+			mainMenu.x = -(mainStage.MenuLayer.localToGlobal(new Point).x);
 			mainStage.CharacterLayer.visible = false;
 			//Movie clip initialization.
 			helpScreenMC = new HelpScreen();
@@ -209,7 +208,7 @@ package
 						var successfulModAdd:Boolean = ProcessMod(startupMods[i]);
 						if (successfulModAdd == false)
 						{
-							logger.warn("Mod that could not be added: " + " ("+startupMods[i].UrlLoadedFrom+")");
+							logger.warn("Mod that could not be added: " + +startupMods[i].UrlLoadedFrom);
 						}
 					}
 					catch (e:Error)
@@ -219,7 +218,9 @@ package
 				}
 			}
 			//Load the settings for all loaded characters
+			logger.info("Applying settings to added characters");
 			InitializeSettingsForCharactersLoadedAtStartup();
+			logger.info("Finish applying character settings");
 			//Set the first character that is to be picked according to the settings save file
 			var charactersCount:int = characterManager.GetTotalNumOfCharacters();
 			if ("currentCharacterName" in userSettings && userSettings.currentCharacterName.length > 0 && charactersCount > 0)
@@ -267,7 +268,7 @@ package
 				}
 				characterManager.SwitchToCharacter(characterId);
 			}
-			
+			logger.info("Finished initialization.");
 			System.pauseForGCIfCollectionImminent(0);
 
 			mainStage.play();
@@ -451,7 +452,7 @@ package
 					if (charsWereSwitched == true)
 					{
 						
-						userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
+						//userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
 						//Make sure that there is no way for all accessible animations to be locked.
 						characterManager.CheckLocksForCurrentCharacter();
 						mainMenu.SetCharacterSelectorAndUpdate(characterManager.GetIdOfCurrentCharacter());

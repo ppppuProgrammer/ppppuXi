@@ -29,9 +29,12 @@ package menu
 		 * transition to be accessed.*/
 		private var currentFrameForAnimation:uint = 0;
 		private var currentTimeForAnimation:Number=0.0;
-		
+		private var currentAnimationTransitionFrames:Vector.<int> = new Vector.<int>(2);
 		
 		private var settingsButton:PushButton;
+		//Button that shows up when an animation transition is possible.
+		private var animationTransitionButton:/*Icon*/PushButton;
+		//Menu for key inputs
 		private var keyConfig:Config;
 		
 		
@@ -79,8 +82,30 @@ package menu
 			
 			animationMenu = new AnimationMenu(this, 550);
 			animationMenu.x = stage.stageWidth - animationMenu.width;
+			
+			animationTransitionButton = new /*Icon*/PushButton(this, 0, 0, "", ClickHandler);
+			animationTransitionButton.toggle = false;
+			animationTransitionButton.name = "Animation Transition Button";
+			animationTransitionButton.setSize(40.5, 48);
+			animationTransitionButton.x = animationMenu.x - animationTransitionButton.width - 8;
+			animationTransitionButton.y = animationMenu.y + 8;
+			//Add the graphic that will be used for the animation transition button.
+			var animTransitionIcon:TransitionIndicator = new TransitionIndicator();
+			//animTransitionIcon.mouseEnabled = false;
+			animTransitionIcon.width = animationTransitionButton.width;
+			animTransitionIcon.height = animationTransitionButton.height;
+			animationTransitionButton.addChild(animTransitionIcon);
+			//Disable 
+			animationTransitionButton.getChildAt(0).visible = animationTransitionButton.getChildAt(1).visible = false;
+			
+			//animationTransitionButton.unselectedIcon = new TransitionIndicator;
+			
+			
+			
 			//animationMenu.AddEventListenerToAnimList(Event.SELECT, AnimationSelected);
 			//characterMenu
+			
+			
 			musicMenu = new MusicMenu(this, 0, 690, ClickHandler);
 			musicMenu.UpdateMusicEnabledButton(userSettings.playMusic);
 			
@@ -162,7 +187,7 @@ package menu
 		private function ClickHandler(e:Event):void
 		{
 			var displayText:String;
-			switch(e.target.name)
+			switch(e.currentTarget.name)
 			{
 				case "Preferred Music Button":
 					var preferredMusicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
@@ -189,6 +214,9 @@ package menu
 				case "Previous Music Button":
 					displayText = musicPlayer.ChangeToPrevMusic(currentTimeForAnimation);
 					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					break;
+				case "Animation Transition Button":
+					characterManager.ActivateAnimationChange();
 					break;
 			}
 			//Unlike the other event handlers DO NOT STOP PROPAGATION. This will cause select events to not
@@ -228,7 +256,9 @@ package menu
 				var animationsPickRandomly:Boolean = characterManager.AreAnimationsRandomlyPickedForCurrentCharacter();
 				animationMenu.SetSelectOnRandomAnimationButton(animationsPickRandomly);
 				characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
+				currentAnimationTransitionFrames = characterManager.GetTransitionPointsForCurrentAnimation();
 				userSettings.UpdateCurrentCharacterName(characterManager.GetCurrentCharacterName());
+				
 			}
 			else
 			{
@@ -277,7 +307,7 @@ package menu
 					animationMenu.SetSelectOnRandomAnimationButton(true);
 					characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
 					userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), "RANDOM");
-					
+					currentAnimationTransitionFrames = characterManager.GetTransitionPointsForCurrentAnimation();
 					return;
 				}
 				else if (relativeListIndex > -1)
@@ -303,7 +333,8 @@ package menu
 				var switchSuccessful:Boolean = characterManager.ChangeAnimationForCurrentCharacter(target, false);
 				if (switchSuccessful == true)	
 				{ 
-					characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation); 
+					characterManager.ChangeFrameOfCurrentAnimation(currentFrameForAnimation);
+					currentAnimationTransitionFrames = characterManager.GetTransitionPointsForCurrentAnimation();
 					//For keyboard input the animation items need to be manually updated to reflect any changes.
 					if (e == null)
 					{
@@ -465,6 +496,14 @@ package menu
 		{
 			currentFrameForAnimation = frame;
 			currentTimeForAnimation = time;
+			if (currentFrameForAnimation >= currentAnimationTransitionFrames[0] && currentFrameForAnimation <= currentAnimationTransitionFrames[1] && !characterManager.CheckIfTransitionLockIsActive())
+			{
+				animationTransitionButton.enabled = animationTransitionButton.visible = true;
+			}
+			else
+			{
+				animationTransitionButton.enabled = animationTransitionButton.visible = false;
+			}
 		}
 		
 		public function OpenSettingsWindow(e:MouseEvent):void

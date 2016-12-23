@@ -60,6 +60,8 @@
 		 * by normal means.*/
 		private var m_idTargets:Vector.<int> = new Vector.<int>();
 		
+		private var m_transitionActivationPoints:Vector.<int> = new Vector.<int>(2);
+		
 		//The frame in the current animation to switch to the linked animation. 
 		private var frameToTransitionToLinkedAnimation:int = -1;
 		/*The index of the animation in the character animations vector that will be switched to when the current animation reaches
@@ -76,6 +78,8 @@
 		
 		//The frame that the fade to black transition should be started on.
 		protected var fadeToBlackFrame:int = -1;
+		
+		
 		
 		private static const animationAddFailedMessage:String = "Failed to add animations:";
 		
@@ -331,11 +335,13 @@
 		public function SetLockOnAnimation(animId:int, lockValue:Boolean):void
 		{
 			var indexForId:int = m_idTargets.indexOf(animId);
+			logger.debug("Trying to set lock on animation {0} (id {1}) to {2}",GetNameOfAnimationById(animId),  animId, lockValue);
 			/*Conditions that will not have a set locked:
 			 * 1) index for id [id target] is -1 (animation id did not belong to an accessible animation). 
 			 * 2) if lockValue is true: setting the lock on the given animation will lead to all animations being locked.*/
 			if( indexForId == -1 || (lockValue == true && GetNumberOfLockedAnimations() + 1 >= GetNumberOfAccessibleAnimations()) )
 			{
+				logger.debug("Could not change lock on animation {0} (id {1})", GetNameOfAnimationById(animId),  animId);
 				return;
 			}
 			m_lockedAnimation[indexForId] = lockValue;
@@ -391,7 +397,43 @@
 			}
 		}
 		
-		public function CheckAndSetupLinkedTransition():Boolean
+		//Checks if there are any transition points for the current animation and sets the transition points vector which is used to let any classes that need that information.
+		public function CheckCurrentAnimationForTransitionLinks():void
+		{
+			
+		
+			//Now to check the linked animation to do things
+			var currentAnimation:MovieClip = m_currentlyPlayingAnimation;
+			var frameLabels:Array = currentAnimation.currentLabels;
+			var startFrame:int = -1, endFrame:int = -1;
+			for (var i:int = 0, l:int = frameLabels.length; i < l; ++i )
+			{
+				var animationLabel:FrameLabel = frameLabels[i] as FrameLabel;
+				if (animationLabel.name == "ActivateStart")
+				{
+					startFrame = animationLabel.frame;
+				}
+				else if (animationLabel.name == "ActivateEnd")
+				{
+					endFrame = animationLabel.frame;
+				}
+			}
+			if (startFrame == -1 && endFrame > 0)
+			{
+				startFrame = 1;
+			}
+			if (endFrame > currentAnimation.totalFrames)
+			{
+				endFrame = currentAnimation.totalFrames;
+			}
+			m_transitionActivationPoints[1] = endFrame;
+			m_transitionActivationPoints[0] = startFrame;
+		}
+		public function GetTransitionActivationPoints():Vector.<int>
+		{
+			return m_transitionActivationPoints;
+		}
+		public function SetupLinkedTransition():Boolean
 		{
 			var linkedAnimationIndex:int = -1;
 			var currLabel:String = m_animationLabel[m_currentAnimationIndex];// m_charAnimations.currentFrameLabel;
@@ -412,42 +454,27 @@
 				}
 			}
 			if (linkedAnimationIndex == -1) { return false; }
-		
-			//Now to check the linked animation to do things
-			var currentAnimation:MovieClip = m_currentlyPlayingAnimation;
-			var frameLabels:Array = currentAnimation.currentLabels;
-			var startFrame:int = -1, endFrame:int = -1;
-			for (var i:int = 0, l:int = frameLabels.length; i < l; ++i )
+			
+			var currentAnimationFrame:int = m_currentlyPlayingAnimation.currentFrame;
+			if(m_transitionActivationPoints[1] > 0)
 			{
-				var animationLabel:FrameLabel = frameLabels[i] as FrameLabel;
-				if (animationLabel.name == "ActivateStart")
+				if (m_transitionActivationPoints[0] > 0)
 				{
-					startFrame = animationLabel.frame;
-				}
-				else if (animationLabel.name == "ActivateEnd")
-				{
-					endFrame = animationLabel.frame;
-				}
-			}
-			if (endFrame > -1)
-			{
-				if (startFrame > -1)
-				{
-					if (currentAnimation.currentFrame >= startFrame && currentAnimation.currentFrame <= endFrame)
+					if (currentAnimationFrame >= m_transitionActivationPoints[0] && currentAnimationFrame <= m_transitionActivationPoints[1])
 					{
-						frameToTransitionToLinkedAnimation = endFrame;
+						frameToTransitionToLinkedAnimation = m_transitionActivationPoints[1];
 						queuedLinkedAnimationIndex = linkedAnimationIndex;
-						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
+						m_currentlyPlayingAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
 				}
 				else
 				{
-					if (currentAnimation.currentFrame <= endFrame)
+					if (currentAnimationFrame <= m_transitionActivationPoints[1])
 					{
-						frameToTransitionToLinkedAnimation = endFrame;
+						frameToTransitionToLinkedAnimation = m_transitionActivationPoints[1];
 						queuedLinkedAnimationIndex = linkedAnimationIndex;
-						currentAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
+						m_currentlyPlayingAnimation.addEventListener(Event.ENTER_FRAME, TryChangingToQueuedAnimation);
 						return true;
 					}
 				}
@@ -586,6 +613,7 @@
 			{
 				m_currentlyPlayingAnimation = m_charAnimations[m_currentAnimationIndex];
 				displayArea.addChild(m_charAnimations[m_currentAnimationIndex]);
+				CheckCurrentAnimationForTransitionLinks();
 			}
 		}
 		

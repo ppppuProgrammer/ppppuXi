@@ -8,9 +8,9 @@ package
    public class Version 
    {
       
-      public static const VERSION:String = "0.3.3";
-	  public static const BUILDNUMBER:String = "99"
-	  public static const BUILDDATE:String = "9/16/2016 8:03 PM";
+      public static const VERSION:String = "0.3.4";
+	  public static const BUILDNUMBER:String = "109"
+	  public static const BUILDDATE:String = "12/23/2016 8:15 PM";
       
    }
    

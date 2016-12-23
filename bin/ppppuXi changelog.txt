@@ -1,5 +1,9 @@
 - ppppuXi Changelog -
 
+beta v0.3.4 RC 8 December 23, 2016
+* Added a button for animations transitions. It will appear when an animation has a linked scene that it can switch to.
+* Changed how the mods list file is parsed so it will deduce which line ending is used. This fixes an issue where Mac and Linux users would be unable to run the flash without forcing the only line ending accepted in previous program versions (which was CR LF).
+
 beta v0.3.3 RC 7 September 16, 2016
 * Included a log reading program to ease user log reporting by allowing them direct access to the log contents.
 * Moved where the log and setting save files are stored. They are now stored in the localhost subdirectory of the Flash player's shared object folder. Move your old settings to the localhost folder if you want to keep your old settings.
