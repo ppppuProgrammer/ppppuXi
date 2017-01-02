@@ -567,7 +567,7 @@ package
 			var addedMod:Boolean = false;
 			if (mod == null)
 			{
-				logger.warn(modClassName+ " is not a ppppuXi mod!");
+				logger.warn(modClassName + " is not a ppppuXi mod!");
 				return addedMod;
 			}
 			
@@ -608,11 +608,12 @@ package
 				var animationMod:AnimationMod = mod as AnimationMod;
 				if (animationMod != null)
 				{
-					logger.info("Processing Animation Mod: " + modClassName);
+					//logger.info("Processing Animation Mod: " + modClassName);
 					var targetCharacter:String = animationMod.GetTargetCharacterName();
 					characterManager.AddAnimationsToCharacter(targetCharacter, 
 						animationMod.GetAnimationContainer());
 					addedMod = true;
+					logger.info("Added animations to " + targetCharacter + " from " + modClassName);
 				}
 				else
 				{
@@ -629,7 +630,7 @@ package
 				var music:MusicMod = mod as MusicMod;
 				if (music)
 				{
-					logger.info("Processing Music Mod: " + modClassName);
+					//logger.info("Processing Music Mod: " + modClassName);
 					if (musicPlayer.AddMusic(music.GetMusicData(), music.GetName(), music.GetDisplayInformation(), music.GetStartLoopTime(), music.GetEndLoopTime(), music.GetStartTime()))
 					{
 						addedMod = true;
@@ -652,6 +653,10 @@ package
 								
 							}
 						}	
+					}
+					else
+					{
+						logger.info("Failed to add music: " + music.GetName());
 					}
 				}
 				else

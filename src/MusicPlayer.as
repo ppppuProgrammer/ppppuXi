@@ -230,9 +230,12 @@
 		//public function StopMusic(currentFrame:uint):void
 		public function StopMusic():void
 		{
-			if (m_currentlyPlayingMusicId > -1)
+			if (m_currentlyPlayingMusicId > -1 )
 			{
-				m_mainSoundChannel.stop();
+				if (m_mainSoundChannel != null)
+				{
+					m_mainSoundChannel.stop();
+				}
 				m_musicCollection[m_currentlyPlayingMusicId].Stop();
 				m_mainSoundChannel = null;
 			}

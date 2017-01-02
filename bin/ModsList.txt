@@ -34,6 +34,7 @@ ACHAR_Piranhagirls.swf
 ARCH_StarterMusicPack.swf
 
 #Music mods
+#mp3 files are also accepted but will be unable to have seamless looping set up like music mods can.
 #M_CMCTheme.swf
 
 #Animation mods

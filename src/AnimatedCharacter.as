@@ -225,7 +225,7 @@
 					}
 					else
 					{
-						failMessage += " " + animationName+"(Wasn't valid movieclip or animation with same name was already added";
+						failMessage += " " + animationName+"(Wasn't valid movieclip or animation with same name was already added)";
 					}
 					//animationCollection.removeChild(m_charAnimations[animationIndex]);
 				}

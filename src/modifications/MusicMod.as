@@ -27,6 +27,20 @@ package modifications
 		{
 			modType = Mod.MOD_MUSIC;
 		}
+		/*Used to create a music mod when a mp3 is loaded into the program. Limited in the fact
+		 * that seamless loop points can not be set.*/
+		public static function CreateMusicModFromMP3(sound:Sound, musicName:String):MusicMod
+		{
+			var musicMod:MusicMod = null;
+			if (sound && musicName)
+			{
+				musicMod = new MusicMod();
+				musicMod.sourceSound = sound;
+				musicMod.musicName = musicName;
+				musicMod.displayInfo = musicName.substring(0, musicName.lastIndexOf("."));
+			}
+			return musicMod;
+		}
 		override protected function FirstFrame(e:Event):void
 		{
 			super.FirstFrame(e);

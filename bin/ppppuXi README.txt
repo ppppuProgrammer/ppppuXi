@@ -1,4 +1,4 @@
-- ppppuX interactive (ppppuXi) Version 0.3.4 RC8 Read Me -
+﻿- ppppuX interactive (ppppuXi) Version 0.3.5 RC9 Read Me -
 
 -- Preface --
 ppppuXi is a modified version of minus 8's ppppu flash animation designed to facilitate adding new assets, such as characters and music, which are added through the use of "mod" swf files. The mod system is intended to allow greater customization of ppppu, encourage new content creation, and decouple content from the main program which was causing issues as more and mroe characters were being added. Included in this zip is ppppuXi.swf, the main flash program that should be run by the flash player, and various mods, the 2 original characters done by minus8 and a majority of the others being character mods that were created by GeneralScot, and MusicPack.swf, an archive containing various music that have been included in ppppu edits made by GeneralScot. Also included is a helper program, Xi Log Reader.swf, which will load the log file for ppppuXi and output it onto your screen.
@@ -30,6 +30,8 @@ Example 1: If the mod "M_testMod.swf" ("C:\ppppuXi\M_testMod.swf") is in the sam
 Example 2: If the mod "M_testMod.swf" is contained within a "MusicMods" folder ("C:\ppppuXi\MusicMods\M_testMod.swf") that's in the same folder that ppppuXi.swf ("C:\ppppuXi\ppppuXi.swf") is in, edit modsList.txt to contain "MusicMods\M_testMod.swf". 
 
 Mods are loaded and processed in order from top to bottom and load order does matter. Animation mods should be listed after Character mods as they will not be loaded if the character they are meant for were not loaded at the time the animation mod is processed. Also the listed placement in modsList.txt for Archive mods should be done with care as they could contain animations that rely on a specific character to be loaded already. Consult the readme or whatever information is available for an archive mod to be aware of what content is within it so you can edit your modsList accordingly.
+
+Also as of version 0.3.5, mp3 files can be loaded the same way you would add a mod and added to the music player as if a music mod was loaded. Music added via mp3 will not have the option to have seamless looping set up though.
 
 -- Creating mods --
 If you are interested in creating a mod of your own, you can find the guide on creating them at ppppuProgrammer.tumblr.com/modsGuide. There you can find information on creating them, mod requirements and specifications, tips for the various mod types, and the source files necessary for mod creation.

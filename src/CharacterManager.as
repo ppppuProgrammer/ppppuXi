@@ -241,6 +241,9 @@
 		public function InitializeSettingsForCharacter(charId:int, settings:Object):void
 		{
 			var animLockObject:Object = settings.animationLocked;
+			
+			if (animLockObject["null"] != null) { delete animLockObject["null"]; }
+			
 			var character:AnimatedCharacter = m_Characters[charId];
 			var lockedAnimationCount:int = 0;
 			
@@ -390,8 +393,15 @@
 		
 		public function SetLockOnAnimationForCurrentCharacter(targetIndex:int, lock:Boolean):Boolean
 		{
-			m_currentCharacter.SetLockOnAnimation(targetIndex, lock);
-			return m_currentCharacter.GetAnimationLockedStatus(targetIndex);
+			//Have to translate targetIndex to the proper animation id target
+			var currCharacterAnimationIds:Vector.<int> = m_currentCharacter.GetAnimationIdTargets();
+			var animationId:int = -1;
+			if (targetIndex <= currCharacterAnimationIds.length && targetIndex > -1)
+			{
+				animationId = currCharacterAnimationIds[targetIndex];
+			}
+			m_currentCharacter.SetLockOnAnimation(animationId, lock);
+			return m_currentCharacter.GetAnimationLockedStatus(animationId);
 		}
 		
 		[inline]

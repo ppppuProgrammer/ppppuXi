@@ -1,5 +1,10 @@
 - ppppuXi Changelog -
 
+beta v0.3.5 RC 9 January 1, 2017
+* Fixed error that would occur when an animation transition happens with the music off at the moment of the switch.
+* mp3 files can now be added to the music player. To add an mp3, edit ModsList.txt to include a path to the mp3 you wish to be loaded. Music added in this way will be unable to have seamless looping without edits made to the mp3 file.
+* Fixed issue that occured when adding animations in which the 2nd to last addition being an end link animation and the last addition being a normal animation would make locking the last animation impossible.
+
 beta v0.3.4 RC 8 December 23, 2016
 * Added a button for animations transitions. It will appear when an animation has a linked scene that it can switch to.
 * Changed how the mods list file is parsed so it will deduce which line ending is used. This fixes an issue where Mac and Linux users would be unable to run the flash without forcing the only line ending accepted in previous program versions (which was CR LF).
