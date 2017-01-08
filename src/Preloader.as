@@ -297,12 +297,9 @@ package
 		{
 			var listText:String = e.target.content[0] as String;
 			//var modsToLoad:Array = [];
-			//By default, assume the line ending used is CR LF (Windows)
-			var txtFilelineEnding:String="\r\n";
-			//Check for the line ending used in the mods list file and then split the contents of it based on the ending.
-			if (listText.indexOf("\r") != -1 && listText.indexOf("\n") == -1) { txtFilelineEnding = "\r"; } //CR
-		else if	(listText.indexOf("\r") == -1 && listText.indexOf("\n") != -1){txtFilelineEnding = "\n";} //LF
-			var rawSplitStrings:Array = listText.split(txtFilelineEnding);
+			//Will split the list's contents by the 3 EOL styles, /r/n, /r, and /n
+			var endOfLineRegEx:RegExp = /\r\n|\r|\n/;
+			var rawSplitStrings:Array = listText.split(endOfLineRegEx);
 			//Feed the mods to load array into the modLoader
 			for (var i:int = 0, l:int = rawSplitStrings.length; i < l; ++i)
 			{
