@@ -202,6 +202,8 @@
 					var animation:DisplayObject = new animationClass();
 					if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames))
 					{
+						animation.name = animationCollection.getChildAt(0).name;
+						trace(animation.name);
 						(animation as MovieClip).stop();
 						if (isLinkedEndAnimation == false)
 						{
@@ -251,6 +253,7 @@
 			var animation:MovieClip = new animationClass();
 			if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames)) 
 			{
+				animation.name = initialAnimation.name;
 				(animation as MovieClip).stop();
 				//add animation
 				m_charAnimations[animationIndex] = animation as MovieClip;
@@ -544,6 +547,13 @@
 				//displayArea.addChild(animation);
 				//animation.nextFrame();
 				animation.gotoAndPlay(animationFrame);
+				if (animation.name.charAt(0) == "$")
+				{
+					for (var i:int = 0, l:int = animation.numChildren; i < l; ++i)
+					{
+						(animation.getChildAt(i) as MovieClip).gotoAndPlay(animationFrame);
+					}
+				}
 				//animation.play();
 			}
 			
@@ -604,7 +614,15 @@
 			
 			if (displayArea.numChildren == 1) 
 			{ 
-				(displayArea.getChildAt(0) as MovieClip).stop();  
+				var displayedAnimation:MovieClip = displayArea.getChildAt(0) as MovieClip;
+				displayedAnimation.stop();
+				if (displayedAnimation.name.charAt(0) == "$")
+				{
+					for (var i:int = 0, l:int = displayedAnimation.numChildren; i < l; ++i)
+					{
+						(displayedAnimation.getChildAt(i) as MovieClip).stop();
+					}
+				}
 				displayArea.removeChildAt(0); 
 				m_currentlyPlayingAnimation = null;
 			}
