@@ -477,6 +477,17 @@
 			return m_characterLocks[charIndex];
 		}
 		
+		//Returns the group that a character belongs to.
+		public function GetGroupNameForCharacter(charId:int):String
+		{
+			var groupName:String = null;
+			if (charId > -1 && charId < GetTotalNumOfCharacters())
+			{
+				groupName = m_Characters[charId].GetGroup();
+			}
+			return groupName;
+		}
+		
 		[inline]
 		public function GetCharacterNameById(charId:int):String
 		{

@@ -55,6 +55,10 @@ package
 		//private const appDirectory:String = root.loaderInfo.loaderURL;
 		public function Preloader() 
 		{
+			CONFIG::debug
+			{
+				MemoryTracker.stage = this.stage;
+			}
 			//Initialize the logger for the program.
 			var logWriter:LogWriter = new LogWriter("ppppuXi_Log");
 			if (Capabilities.isDebugger)
@@ -209,7 +213,8 @@ package
 			logger.info("Finished loading all mods");
 			//loaderInfo.removeEventListener(ProgressEvent.PROGRESS, Progress);
 			//loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, IOError);
-			
+			swfPreloader.unload();
+			modsListLoader.unload();
 			// TODO hide loader
 			removeChildren();
 			Startup();
@@ -260,6 +265,7 @@ package
 				mod = (e.target.content.rawContent as Mod);
 			}
 			
+				MemoryTracker.track(mod, getQualifiedClassName(mod));
 			if (mod == null)
 			{
 				logger.warn(e.target.url + " is not a ppppuXi mod. Content loaded type is " + getQualifiedClassName(e.target.content.rawContent));
@@ -291,6 +297,7 @@ package
 					logger.warn(getQualifiedClassName(mod) +"(" + e.target.url +")" + " is not a valid mod (Super class is " + classType + ")");
 				}
 			}
+			mod = null;
 		}
 		
 		private function ReadModsList(e:LoaderEvent):void

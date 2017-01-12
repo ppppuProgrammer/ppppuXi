@@ -10,7 +10,7 @@ package modifications
 	 * is expected. In order to add more animations for the character, the flash document for the character must be modified.
 	 * @author 
 	 */
-	public class AnimatedCharacterMod extends Mod  implements IModdable
+	public class AnimatedCharacterMod extends Mod implements IModdable
 	{
 		//The character instance that will be extracted from the mod and added into the character manager.
 		//protected var characterPayload:AnimatedCharacter;
@@ -25,8 +25,10 @@ package modifications
 		
 		protected var m_menuIcon:Sprite;
 		protected var m_preferredMusicName:String = "Beep Block Skyway";
+		//The name of the character added by the mod. There can't be multiple characters added with the same name. 
 		protected var m_characterName:String;
-		
+		//The name of the group this mod is in. This is for animation mods that add animations for the same character, visual wise (example: Peach and PeachP (polished)), without the issues caused by character name collisions.
+		protected var m_characterGroup:String;
 		
 		
 		public function AnimatedCharacterMod() 
@@ -39,16 +41,20 @@ package modifications
 			if (initialAnimationContainer != null)
 			{
 				initialAnimationContainer.stop();
-				if (m_menuIcon != null)
-				{
-					m_menuIcon.name = getQualifiedClassName(m_menuIcon);
-				}
-				//A movie clip containing 1 children is one that typically has movie clips contained in each frame and that initialAnimationContainer is not an animation itself.
-				//If there are more children then it's likely that the initialAnimationContainer itself is  an animation and is the only one.
-				//if (initialAnimationContainer.numChildren == 1)	{ characterPayload.AddAnimationsFromMovieClip(initialAnimationContainer); }
-				//else { characterPayload.AddAnimation(initialAnimationContainer);}
-				//characterPayload.SetBackgroundColorsToDefault();
-				//characterPayload.InitializeAfterLoad();
+			}
+		}
+		
+		//Function that makes sure all the data of the mod is set up. Primarily used for backwards compatibility with older versions of the mod.
+		public function ValidateData():void
+		{
+			if (m_menuIcon != null)
+			{
+				m_menuIcon.name = getQualifiedClassName(m_menuIcon);
+			}
+			if (m_characterGroup == null || m_characterGroup == "")
+			{
+				//For compatibility purposes with older mods, group name is set to the character name.
+				m_characterGroup = m_characterName;
 			}
 		}
 		
@@ -63,18 +69,20 @@ package modifications
 			icon: m_menuIcon,
 			perferredMusic: m_preferredMusicName,
 			name: m_characterName,
-			animation: initialAnimationContainer};
+			group: m_characterGroup,
+			animation: initialAnimationContainer };
 			return data;
 		}
 		
 		public function OutputModDetails():String
 		{
-			var output:String = "Character Name: " + m_characterName + ", Preferred Music: " + m_preferredMusicName;
+			var output:String = "Character Name: " + m_characterName + ", Group Name: " + m_characterGroup + ", Preferred Music: " + m_preferredMusicName;
 			return output;
 		}
 		
 		public override function Dispose():void
 		{
+			super.Dispose();
 			if (initialAnimationContainer != null)
 			{
 				initialAnimationContainer.stopAllMovieClips();
@@ -96,6 +104,7 @@ package modifications
 			m_menuIcon = null;
 			m_preferredMusicName = null;
 			m_characterName = null;
+			m_characterGroup = null;
 		}
 		
 		protected function CreateColorTransformFromHex(colorValue:uint, alpha:uint = 255):ColorTransform

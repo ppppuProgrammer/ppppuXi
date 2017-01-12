@@ -195,10 +195,16 @@ package
 			SetupHelpMovieClip();
 			
 			var bbsMusicMod:M_BeepBlockSkyway = new M_BeepBlockSkyway();
+			CONFIG::debug
+			{
+				MemoryTracker.track(bbsMusicMod, getQualifiedClassName(bbsMusicMod));
+			}
 			addChild(bbsMusicMod);
 			removeChild(bbsMusicMod);
 			ProcessMod(bbsMusicMod);
-			
+			bbsMusicMod.Dispose();
+			bbsMusicMod = null;
+
 			if (startupMods != null)
 			{
 				for (var i:int = 0, l:int = startupMods.length; i < l; ++i)
@@ -208,15 +214,20 @@ package
 						var successfulModAdd:Boolean = ProcessMod(startupMods[i]);
 						if (successfulModAdd == false)
 						{
-							logger.warn("Mod that could not be added: " + +startupMods[i].UrlLoadedFrom);
+							logger.warn("Mod that could not be added: " + startupMods[i].UrlLoadedFrom);
 						}
 					}
 					catch (e:Error)
 					{
 						logger.error("Failed to load " + getQualifiedClassName(startupMods[i]) + "\nCall stack:\n" + e.getStackTrace());
 					}
+					finally
+					{
+						startupMods[i] = null;
+					}
 				}
 			}
+			startupMods = null;
 			//Load the settings for all loaded characters
 			logger.info("Applying settings to added characters");
 			InitializeSettingsForCharactersLoadedAtStartup();
@@ -269,6 +280,10 @@ package
 				characterManager.SwitchToCharacter(characterId);
 			}
 			logger.info("Finished initialization.");
+			CONFIG::debug
+			{
+				MemoryTracker.gcAndCheck();
+			}
 			System.pauseForGCIfCollectionImminent(0);
 
 			mainStage.play();
@@ -439,6 +454,10 @@ package
 				
 				if(animationFrame == 1 || skippedCharacterSwitchFrame == true) //Add character clip
 				{
+					CONFIG::debug
+					{
+						MemoryTracker.gcAndCheck();
+					}
 					if(characterManager.AreCharacterSwitchesAllowed())
 					{
 						/* The first run frame should not have the character switch logic run.
@@ -545,7 +564,7 @@ package
 		
 		/*MODIFICATION SYSTEM RELATED FUNCTIONS*/
 		
-		private function FinishedLoadingSWF(e:LoaderEvent):void
+		/*private function FinishedLoadingSWF(e:LoaderEvent):void
 		{
 			var mod:Mod = (e.target.content.rawContent as Mod);
 			//Add the mod to the stage so the first frame function can get started, allowing the content to be ready to be used.
@@ -557,7 +576,7 @@ package
 			//remove the mod file.
 			removeChild(mod);
 			mod = null;
-		}
+		}*/
 		
 		/*Processes a mod and then adds it into ppppu. Returns true if mod was successfully added and false if a problem was encounter
 		and the mod could not be added.*/
@@ -576,6 +595,7 @@ package
 			if (modType == Mod.MOD_ANIMATEDCHARACTER)
 			{
 				var animCharacterMod:AnimatedCharacterMod = mod as AnimatedCharacterMod;
+				animCharacterMod.ValidateData();
 				if (animCharacterMod)
 				{
 					var characterData:Object = animCharacterMod.GetCharacterData();
@@ -609,11 +629,24 @@ package
 				if (animationMod != null)
 				{
 					//logger.info("Processing Animation Mod: " + modClassName);
-					var targetCharacter:String = animationMod.GetTargetCharacterName();
-					characterManager.AddAnimationsToCharacter(targetCharacter, 
+					
+					var targetCharacterGroup:String = animationMod.GetTargetCharacterName();
+					var modifiedCharactersString:String = "";
+					var targetCharacter:String;
+					for (var x:int = 0, y:int = characterManager.GetTotalNumOfCharacters(); x < y; ++x)
+					{
+						targetCharacter = characterManager.GetCharacterNameById(x);
+						//Check if the character belongs to the targetted group
+						if (characterManager.GetGroupNameForCharacter(x) == targetCharacterGroup)
+						{
+							characterManager.AddAnimationsToCharacter(targetCharacter, 
 						animationMod.GetAnimationContainer());
+							modifiedCharactersString += (modifiedCharactersString.length == 0 ? targetCharacter : ", " + targetCharacter);
+						}
+					}
+					
 					addedMod = true;
-					logger.info("Added animations to " + targetCharacter + " from " + modClassName);
+					logger.info("Added animations to group {0} ({1}) from {2}", targetCharacterGroup, modifiedCharactersString, modClassName);
 				}
 				else
 				{

@@ -57,7 +57,10 @@ package modifications
 		
 		public override function Dispose():void
 		{
+			super.Dispose();
 			sourceSound = null;
+			displayInfo = null;
+			musicName = null;
 		}
 		
 		public function GetMusicData():Sound

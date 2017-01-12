@@ -27,6 +27,7 @@ package
 			var ppppuApp:AppCore = new AppCore();
 			addChild(ppppuApp);
 			ppppuApp.Initialize(loadedModsContent);
+			loadedModsContent = null;
 		}
 		
 		public function SetModsContent(mods:Array):void

@@ -31,6 +31,7 @@ package modifications
 
 		public override function Dispose():void
 		{
+			super.Dispose();
 			//Call the dispose function of all the mods in the list
 			for (var i:int = 0; i < modsList.length; i++) 
 			{

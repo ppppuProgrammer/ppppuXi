@@ -9,7 +9,7 @@ package modifications
 	{
 		//The movie clip for an single animation or for multiple animations, each in a frame of the container.
 		protected var animationContainer:MovieClip=null;
-		//The character this mod is intended for.
+		//The character group this mod is intended for.
 		protected var targetCharacterName:String = null;
 		
 		//protected var 
@@ -29,12 +29,13 @@ package modifications
 		
 		public function OutputModDetails():String
 		{
-			var output:String = "Target character: " + (targetCharacterName != null && targetCharacterName.length > 0 ? targetCharacterName : "None targetted");
+			var output:String = "Target character group: " + (targetCharacterName != null && targetCharacterName.length > 0 ? targetCharacterName : "None targetted");
 			return output;
 		}
 		
 		override public function Dispose():void 
 		{
+			super.Dispose();
 			if (animationContainer != null)
 			{
 				animationContainer.stopAllMovieClips();
@@ -45,6 +46,7 @@ package modifications
 				}
 				animationContainer = null;
 			}
+			targetCharacterName = null;
 		}
 		
 	}

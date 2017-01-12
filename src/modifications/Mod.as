@@ -54,7 +54,7 @@ package modifications
 		public function Mod() 
 		{
 			InitiateModData();
-			this.addEventListener(Event.ADDED_TO_STAGE, FirstFrame);
+			this.addEventListener(Event.ADDED_TO_STAGE, FirstFrame, false, 0, true);
 		}
 		//Mod archive has a problem calling this on its modlist contents when the function is protected, so it's public until a true fix is found.
 		//public function OutputModDetails():String { return ""; }
@@ -92,7 +92,7 @@ package modifications
 			return versionText;
 		}
 		//Abstract function meant to be overwritten for the needs of any Mod subclasses
-		public function Dispose():void {  }
+		public function Dispose():void { modData = null; _urlLoadedFrom = null; }
 		public function GetStringOfModType():String
 		{
 			if (modType >= 0 && modType < modTypeStringDictionary.length)

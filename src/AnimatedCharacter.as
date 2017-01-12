@@ -21,7 +21,8 @@
 	{
 		//The name of the character
 		protected var m_name:String = null;
-		
+		//The group this character belongs to.
+		protected var m_group:String = null;
 		/*The vector that contains all animation movieclips for the character. Also referred to as the animation collection*/
 		protected var m_charAnimations:Vector.<MovieClip> = new Vector.<MovieClip>();
 		//animation labels are used to tell which animations are linked.
@@ -97,6 +98,7 @@
 			m_menuIcon = characterData.icon;
 			m_preferredMusicName = characterData.perferredMusic;
 			m_name = characterData.name;
+			m_group = characterData.group;
 			
 			//Create the logger object that's used by this class to output messages.
 			//Need to remove all invalid characters from the name or the logger will throw an error
@@ -135,7 +137,10 @@
 		
 		public function IsValidCharacter():Boolean	{return (m_name != null && m_menuIcon != null && m_charAnimations.length > 0);}
 		
-		public function GetName():String	{return m_name;}
+		public function GetName():String	{ return m_name; }
+		
+		public function GetGroup():String	{ return m_group; }
+		
 		public function GetIcon():Sprite	{ return m_menuIcon; }
 		
 		public function GetPreferredMusicName():String	{return m_preferredMusicName;}
@@ -235,7 +240,7 @@
 				logger.warn(failMessage);
 			}
 			//Allow the movie clip to be garbage collected
-			animationCollection.removeChildren();
+			//animationCollection.removeChildren();
 			animationCollection = null;
 			UpdateIdTargets();
 		}
@@ -292,7 +297,6 @@
 		{
 			return m_randomizePlayAnim;
 		}
-		
 		/*public function OnAccessibleAnimationCheck():void
 		{
 			//Check that animation index has an accessible animation id associated with it.
@@ -490,6 +494,7 @@
 		
 		private function TryChangingToQueuedAnimation(e:Event):void
 		{
+			trace("Yep, running TryChangingToQueuedAnimation");
 			if (e.target.currentFrame == this.frameToTransitionToLinkedAnimation)
 			{
 				this.ChangeAnimationIndexToPlay(queuedLinkedAnimationIndex);
