@@ -21,10 +21,17 @@ package modifications
 		{
 			var output:String = "\tArchive contents: ";
 			var mod:Mod;
+			var modClassName:String;
 			for (var i:int = 0, l:int = modsList.length; i < l; ++i)
 			{
 				mod = modsList[i];
-				output += "\n\tMod Name: " +  getQualifiedClassName(mod) + ", Type: " + mod.GetStringOfModType() + (("OutputModDetails" in mod) ? ", " +  (mod["OutputModDetails"]()) : "");
+				modClassName = getQualifiedClassName(mod);
+				/*The multiple classes in 1 .as file trick causes the class name to be $0::(class). So check if double colons are in the mod's class name and if they're found, remove them and the characters preceding them.*/
+				if (modClassName.lastIndexOf("::") > -1)
+				{
+					modClassName = modClassName.substr(modClassName.lastIndexOf(":") + 1);
+				}
+				output += "\n\tMod Name: " +  modClassName + ", Type: " + mod.GetStringOfModType() + (("OutputModDetails" in mod) ? ", " +  (mod["OutputModDetails"]()) : "");
 			}
 			return output;
 		}

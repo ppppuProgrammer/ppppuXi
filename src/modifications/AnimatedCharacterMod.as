@@ -76,6 +76,7 @@ package modifications
 		
 		public function OutputModDetails():String
 		{
+			ValidateData();
 			var output:String = "Character Name: " + m_characterName + ", Group Name: " + m_characterGroup + ", Preferred Music: " + m_preferredMusicName;
 			return output;
 		}

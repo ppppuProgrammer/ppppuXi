@@ -1,5 +1,11 @@
 - ppppuXi Changelog -
 
+v1.0 January 15, 2017
+* Mod creators can designate a movieclip in the Animation Collection to be a Intermediate Container. An Intermediate Containers is a movie clip that contain multiple movieclips as children that are to be played simultaneously. This allows for changes to the children movieclips such as movement, color changes, sound additions and more effects without modifying the original animation movieclip. An Intermediate Container and its children must all have the same time length and any labels for assigning scene linkage (for transitions) must be placed in the Intermediate Container. To have Xi treat the animation as an Intermediate Container you must select the movieclip in the animation collection and give that instance of the animation a name that starts with "$". For more detailed information on this please read SmLse46's Mod Guide.
+* Animation mods now target a character group instead of a single character.
+* AnimatedCharacter mods can designate a character group to be a part of. Any characters that are part of the specified group targeted by an animation mod will have animations from the mod added to them.
+
+
 beta v0.3.5 RC 9 January 1, 2017
 * Fixed error that would occur when an animation transition happens with the music off at the moment of the switch.
 * mp3 files can now be added to the music player. To add an mp3, edit ModsList.txt to include a path to the mp3 you wish to be loaded. Music added in this way will be unable to have seamless looping without edits made to the mp3 file.

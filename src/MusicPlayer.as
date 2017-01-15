@@ -301,35 +301,37 @@
 			return m_musicCollection[m_currentlyPlayingMusicId].GetMusicInfo();
 		}
 		//Debug functions
-		public function DEBUG_GoToMusicLastSection(currentTimeIntoAnimation:Number):void
+		CONFIG::debug
 		{
-			if(m_currentlyPlayingMusicId > -1)
+			public function DEBUG_GoToMusicLastSection(currentTimeIntoAnimation:Number):void
 			{
-				var bgm:Music = m_musicCollection[m_currentlyPlayingMusicId];
-				var musicPlayTime:Number = bgm.GetLoopEnd() - bgm.GetMusicStartTime();
-				var playheadPosition:Number = musicPlayTime - (MUSICSEGMENTTIMEMILLI * 2);
-				//trace("playhead's base position " + playheadPosition);
-				//bgm.SetPlayheadPosition(playheadPosition);
-				//trace("music position jumping to " + musicPlayTime);
-				//Round down the playhead position to the last frame.
-				var musicPositionInAnimation:Number = playheadPosition % MUSICSEGMENTTIMEMILLI;
-				//trace("time animation has completed " + currentTimeIntoAnimation);
-				//trace(musicPositionInAnimation);
-				
-				
-				if (musicPositionInAnimation <= currentTimeIntoAnimation)
+				if(m_currentlyPlayingMusicId > -1)
 				{
-					trace((currentTimeIntoAnimation - musicPositionInAnimation));
-					bgm.SetPlayheadPosition(bgm.GetMusicStartTime() + playheadPosition + (currentTimeIntoAnimation - musicPositionInAnimation));
+					var bgm:Music = m_musicCollection[m_currentlyPlayingMusicId];
+					var musicPlayTime:Number = bgm.GetLoopEnd() - bgm.GetMusicStartTime();
+					var playheadPosition:Number = musicPlayTime - (MUSICSEGMENTTIMEMILLI * 2);
+					//trace("playhead's base position " + playheadPosition);
+					//bgm.SetPlayheadPosition(playheadPosition);
+					//trace("music position jumping to " + musicPlayTime);
+					//Round down the playhead position to the last frame.
+					var musicPositionInAnimation:Number = playheadPosition % MUSICSEGMENTTIMEMILLI;
+					//trace("time animation has completed " + currentTimeIntoAnimation);
+					//trace(musicPositionInAnimation);
+					
+					
+					if (musicPositionInAnimation <= currentTimeIntoAnimation)
+					{
+						trace((currentTimeIntoAnimation - musicPositionInAnimation));
+						bgm.SetPlayheadPosition(bgm.GetMusicStartTime() + playheadPosition + (currentTimeIntoAnimation - musicPositionInAnimation));
+					}
+					else
+					{
+						bgm.SetPlayheadPosition(bgm.GetMusicStartTime() + (Math.round(playheadPosition / MUSICSEGMENTTIMEMILLI) * MUSICSEGMENTTIMEMILLI) + currentTimeIntoAnimation);
+					}
+					//trace(bgm.GetPlayheadPosition());
+					//trace(m_mainSoundChannel.position);
 				}
-				else
-				{
-					bgm.SetPlayheadPosition(bgm.GetMusicStartTime() + (Math.round(playheadPosition / MUSICSEGMENTTIMEMILLI) * MUSICSEGMENTTIMEMILLI) + currentTimeIntoAnimation);
-				}
-				//trace(bgm.GetPlayheadPosition());
-				//trace(m_mainSoundChannel.position);
 			}
-			
 		}
 	}
 }

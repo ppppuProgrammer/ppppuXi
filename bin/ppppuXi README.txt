@@ -1,4 +1,4 @@
-﻿- ppppuX interactive (ppppuXi) Version 0.3.5 RC9 Read Me -
+﻿- ppppuX interactive (ppppuXi) Version 1.0 Read Me -
 
 -- Preface --
 ppppuXi is a modified version of minus 8's ppppu flash animation designed to facilitate adding new assets, such as characters and music, which are added through the use of "mod" swf files. The mod system is intended to allow greater customization of ppppu, encourage new content creation, and decouple content from the main program which was causing issues as more and mroe characters were being added. Included in this zip is ppppuXi.swf, the main flash program that should be run by the flash player, and various mods, the 2 original characters done by minus8 and a majority of the others being character mods that were created by GeneralScot, and MusicPack.swf, an archive containing various music that have been included in ppppu edits made by GeneralScot. Also included is a helper program, Xi Log Reader.swf, which will load the log file for ppppuXi and output it onto your screen.

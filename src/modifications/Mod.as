@@ -79,8 +79,8 @@ package modifications
 				startupError.appendText("Mod Type: " + GetStringOfModType() + "\n");
 				startupError.appendText("Version: " + this.GetModVersion() + "\n");
 				("OutputModDetails" in this) ? startupError.appendText("Content Information : \n" + this["OutputModDetails"]()) : null;
-				startupError.width = 600;
-				startupError.height = 600;
+				startupError.width = 480;
+				startupError.height = 720;
 				this.addChild(startupError);
 			}
 		}

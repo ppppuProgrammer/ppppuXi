@@ -1102,7 +1102,10 @@ package
 			keypressFunctionLookup[keyBindings.Activate.main] = keypressFunctionLookup[keyBindings.Activate.alt] = KeyPress_ActivateAnimationTransition;
 			
 			//Debug test key functions
-			//keypressFunctionLookup[Keyboard.END] = KeyPressDEBUG_GotoLastSectionForMusic;
+			CONFIG::debug
+			{
+				keypressFunctionLookup[Keyboard.END] = KeyPressDEBUG_GotoLastSectionForMusic;
+			}
 			
 		}
 		private function KeyPress_RandomChangeAnimation(keycode:int):void
@@ -1233,10 +1236,13 @@ package
 		{
 			characterManager.ActivateAnimationChange();
 		}
-		/*private function KeyPressDEBUG_GotoLastSectionForMusic(keycode:int):void
+		CONFIG::debug
 		{
-			musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
-		}*/
+			private function KeyPressDEBUG_GotoLastSectionForMusic(keycode:int):void
+			{
+				musicPlayer.DEBUG_GoToMusicLastSection(GetCompletionTimeForAnimation());
+			}
+		}
 		
 	}
 }
