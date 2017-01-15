@@ -195,10 +195,6 @@ package
 			SetupHelpMovieClip();
 			
 			var bbsMusicMod:M_BeepBlockSkyway = new M_BeepBlockSkyway();
-			CONFIG::debug
-			{
-				MemoryTracker.track(bbsMusicMod, getQualifiedClassName(bbsMusicMod));
-			}
 			addChild(bbsMusicMod);
 			removeChild(bbsMusicMod);
 			ProcessMod(bbsMusicMod);
@@ -280,10 +276,6 @@ package
 				characterManager.SwitchToCharacter(characterId);
 			}
 			logger.info("Finished initialization.");
-			CONFIG::debug
-			{
-				MemoryTracker.gcAndCheck();
-			}
 			System.pauseForGCIfCollectionImminent(0);
 
 			mainStage.play();
@@ -454,10 +446,6 @@ package
 				
 				if(animationFrame == 1 || skippedCharacterSwitchFrame == true) //Add character clip
 				{
-					CONFIG::debug
-					{
-						MemoryTracker.gcAndCheck();
-					}
 					if(characterManager.AreCharacterSwitchesAllowed())
 					{
 						/* The first run frame should not have the character switch logic run.
