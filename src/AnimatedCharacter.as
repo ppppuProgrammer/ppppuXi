@@ -80,6 +80,8 @@
 		//The frame that the fade to black transition should be started on.
 		protected var fadeToBlackFrame:int = -1;
 		
+		//Keeps track of all animations that were indicated to be a nested animation (an animation that contains multiple children movieclips, each of which are 120 frame animations)
+		protected var nestedAnimationsIdList:Vector.<int> = new Vector.<int>();
 		
 		
 		private static const animationAddFailedMessage:String = "Failed to add animations:";
@@ -207,6 +209,8 @@
 					var animation:DisplayObject = new animationClass();
 					if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames))
 					{
+						animation.name = animationCollection.getChildAt(0).name;
+						//trace(animation.name);
 						(animation as MovieClip).stop();
 						if (isLinkedEndAnimation == false)
 						{
@@ -221,10 +225,29 @@
 							m_charAnimations[animationIndex] = animation/*animationCollection.getChildAt(0)*/ as MovieClip;
 							m_animationLabel[animationIndex] = label; //add label
 							//No need to worry about the animation's lock since linked end animations are unaccessible by normal means anyway.
-						}
+						}	
 						else
 						{
 							failMessage += " " + animationName + "(endlink missing label)";
+						}
+						
+						//If animation was added then do a check to see if it's intended to be a nested animation
+						if (m_charAnimations.indexOf(animation) != -1 && animation.name.charAt(0) == "$")
+						{
+							try
+							{
+								//Try to stop all the children in the animation. If this fails, then the nested animation is either a regular animation or was not set up properly.
+								for (var x:int = 0, y:int = (animation as MovieClip).numChildren; x < y; ++x)
+								{
+									((animation as MovieClip).getChildAt(x) as MovieClip).stop();
+								}
+								nestedAnimationsIdList[nestedAnimationsIdList.length] = animationIndex;
+							}
+							catch (e:Error)
+							{
+								//Catch the error and log it. Also the animation will now be considered a regular animation, not a nested one.
+								logger.error("Error while trying to play animation {0}, which is not a proper nested animation. In your flash authoring program, either remove the \"$\" from  {0}'s name ({1}) within the animation container to indicate that it's a regular animation or correct the mistakes of the nested animation.\nError Information: " + "\n" + e.getStackTrace(), getQualifiedClassName(animation), animation.name);
+							}
 						}
 						//m_charAnimations[animationIndex].stop();
 					}
@@ -256,12 +279,30 @@
 			var animation:MovieClip = new animationClass();
 			if (animation && (animation as MovieClip).totalFrames > 1 && !(animationName in m_animationNames)) 
 			{
+				animation.name = initialAnimation.name;
 				(animation as MovieClip).stop();
 				//add animation
 				m_charAnimations[animationIndex] = animation as MovieClip;
 				m_animationLabel[animationIndex] = null; //add label
 				m_lockedAnimation[m_lockedAnimation.length] = false;
 				m_animationNames[animationName] = animationIndex;
+				if (animation.name.charAt(0) == "$")
+				{	
+					try
+					{
+						//Try to stop all the children in the animation. If this fails, then the nested animation is either a regular animation or was not set up properly.
+						for (var i:int = 0, l:int = animation.numChildren; i < l; ++i)
+						{
+							(animation.getChildAt(i) as MovieClip).stop();
+						}
+						nestedAnimationsIdList[nestedAnimationsIdList.length] = animationIndex;
+					}
+					catch (e:Error)
+					{
+						//Catch the error and log it. Also the animation will now be considered a regular animation, not a nested one.
+						logger.error("Error while trying to play animation {0}, which is not a proper nested animation. In your flash authoring program, either remove the \"$\" from  {0}'s name ({1}) within the animation container to indicate that it's a regular animation or correct the mistakes of the nested animation.\nError Information: " + "\n" + e.getStackTrace(), getQualifiedClassName(animation), animation.name);
+					}
+				}
 			}
 			else
 			{
@@ -549,6 +590,13 @@
 				//displayArea.addChild(animation);
 				//animation.nextFrame();
 				animation.gotoAndPlay(animationFrame);
+				if (nestedAnimationsIdList.indexOf(m_currentAnimationIndex) != -1)
+				{
+					for (var i:int = 0, l:int = animation.numChildren; i < l; ++i)
+					{
+						(animation.getChildAt(i) as MovieClip).gotoAndPlay(animationFrame);
+					}
+				}
 				//animation.play();
 			}
 			
@@ -609,7 +657,8 @@
 			
 			if (displayArea.numChildren == 1) 
 			{ 
-				(displayArea.getChildAt(0) as MovieClip).stop();  
+				var displayedAnimation:MovieClip = displayArea.getChildAt(0) as MovieClip;
+				displayedAnimation.stop();
 				displayArea.removeChildAt(0); 
 				m_currentlyPlayingAnimation = null;
 			}
