@@ -9,6 +9,8 @@ package
 	import flash.events.ProgressEvent;
 	import flash.events.UncaughtErrorEvent;
 	import flash.media.Sound;
+	import flash.media.SoundMixer;
+	import flash.media.SoundTransform;
 	import flash.system.System;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
@@ -55,6 +57,8 @@ package
 		//private const appDirectory:String = root.loaderInfo.loaderURL;
 		public function Preloader() 
 		{
+			//Prevent any sounds from being played globally. Done so any loaded mods with sounds embed in timeline will not be heard.
+			SoundMixer.soundTransform = new SoundTransform(0);
 			//Initialize the logger for the program.
 			var logWriter:LogWriter = new LogWriter("ppppuXi_Log");
 			if (Capabilities.isDebugger)

@@ -35,6 +35,8 @@ package
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextFieldType;
+	import flash.media.SoundTransform;
+	import flash.media.SoundMixer;
 	import mx.logging.*;
 	/**
 	 * Responsible for managing all the various aspects of ppppuNX (and interactive). 
@@ -278,6 +280,8 @@ package
 			logger.info("Finished initialization.");
 			System.pauseForGCIfCollectionImminent(0);
 
+			//Allow sounds to be played again (the sound mixer was silenced in the preloader)
+			SoundMixer.soundTransform = new SoundTransform(1);
 			mainStage.play();
 		}
 		
