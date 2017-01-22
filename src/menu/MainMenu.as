@@ -273,7 +273,7 @@ package menu
 		
 		/*Animation Menu Handlers (Mouse input)*/
 		//{
-		//e - Event sent if a button was clicked to select an animation
+		//e - Event sent if an animation button (except for random animation) was clicked to select an animation
 		//relativeListIndex - The index of the animation list the user wishes to select with keyboard.
 		//-2 means to pick no animation, -1 means to select a random animation, 0 and greater pick a value that is
 		//relativeListIndex's value + the animation list's scrollbar offset and that is used to determine which accessible animation to use
@@ -342,11 +342,22 @@ package menu
 					}
 					else
 					{
-						userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), characterManager.GetNameOfAnimationByIdForCharacter(characterMenu.GetSelectedIndex(), index));
+						userSettings.UpdateSettingForCharacter_SelectedAnimation(characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), characterManager.GetNameOfAnimationByIndexForCharacter(characterMenu.GetSelectedIndex(), index));
 					}
+					//Update the random animation button to no longer be selected.
+					animationMenu.SetSelectOnRandomAnimationButton(false);
+				}
+				else
+				{
+					//See if the random animation button needs to be reselected.
+					if (characterManager.AreAnimationsRandomlyPickedForCurrentCharacter())
+					{
+						animationMenu.SetSelectOnRandomAnimationButton(true);
+					}
+					
 				}
 				//Update the random animation button to no longer be selected.
-				animationMenu.SetSelectOnRandomAnimationButton(false);
+				//animationMenu.SetSelectOnRandomAnimationButton(false);
 			}
 		}
 		
@@ -400,7 +411,7 @@ package menu
 				animationMenu.ChangeLockOnItem(index, newLock);
 			}
 			userSettings.UpdateSettingForCharacter_AnimationLock(
-				characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), characterManager.GetNameOfAnimationByIdForCharacter(characterMenu.GetSelectedIndex(), index), newLock);
+				characterManager.GetCharacterNameById(characterMenu.GetSelectedIndex()), characterManager.GetNameOfAnimationByIndexForCharacter(characterMenu.GetSelectedIndex(), index), newLock);
 			
 		}
 		

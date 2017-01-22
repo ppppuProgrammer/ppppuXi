@@ -354,39 +354,47 @@
 			if(m_randomizePlayAnim || forceRandomization == true)
 			{
 				//Randomly select a number out of the number of accessible animations
-				var accessibleAnimationCount:int = GetNumberOfAccessibleAnimations();
-				var randomAnimIndex:int = Math.floor(Math.random() * accessibleAnimationCount);
-				
-				if((accessibleAnimationCount - GetNumberOfLockedAnimations()) > 2)
+				//var accessibleAnimationCount:int = GetNumberOfAccessibleAnimations();
+				var randomAccessibleAnimId:int = RandomlySelectAnimationId();
+				var trueAnimationIndex:int = m_idTargets[randomAccessibleAnimId];
+				if((GetNumberOfAccessibleAnimations() - GetNumberOfLockedAnimations()) > 2)
 				{
-					while(randomAnimIndex == m_currentAnimationIndex || GetAnimationLockedStatus(randomAnimIndex))
+					while(trueAnimationIndex == m_currentAnimationIndex || GetAnimationLockedStatus(randomAccessibleAnimId))
 					{
-						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
+						randomAccessibleAnimId = RandomlySelectAnimationId();
+						trueAnimationIndex = m_idTargets[randomAccessibleAnimId];
 					}
 				}
 				else
 				{
-					while(GetAnimationLockedStatus(randomAnimIndex))
+					while(GetAnimationLockedStatus(randomAccessibleAnimId))
 					{
-						randomAnimIndex = Math.floor(Math.random() * accessibleAnimationCount);
+						randomAccessibleAnimId = RandomlySelectAnimationId();
+						trueAnimationIndex = m_idTargets[randomAccessibleAnimId];
 					}
 				}
-				m_currentAnimationIndex = m_idTargets[randomAnimIndex];
+				m_currentAnimationIndex = trueAnimationIndex;
 				
 				//ChangeAnimationIndexToPlay(randomAnimIndex);
 			}
 		}
 		
+		[inline]
+		private function RandomlySelectAnimationId():int
+		{
+			return Math.floor(Math.random() * GetNumberOfAccessibleAnimations());
+		}
+		
 		public function SetLockOnAnimation(animId:int, lockValue:Boolean):void
 		{
 			var indexForId:int = m_idTargets.indexOf(animId);
-			logger.debug("Trying to set lock on animation {0} (id {1}) to {2}",GetNameOfAnimationById(animId),  animId, lockValue);
+			logger.debug("Trying to set lock on animation {0} (id {1}) to {2}",GetNameOfAnimationByIndex(indexForId),  animId, lockValue);
 			/*Conditions that will not have a set locked:
 			 * 1) index for id [id target] is -1 (animation id did not belong to an accessible animation). 
 			 * 2) if lockValue is true: setting the lock on the given animation will lead to all animations being locked.*/
 			if( indexForId == -1 || (lockValue == true && GetNumberOfLockedAnimations() + 1 >= GetNumberOfAccessibleAnimations()) )
 			{
-				logger.debug("Could not change lock on animation {0} (id {1})", GetNameOfAnimationById(animId),  animId);
+				logger.debug("Could not change lock on animation {0} (id {1})", GetNameOfAnimationByIndex(indexForId),  animId);
 				return;
 			}
 			m_lockedAnimation[indexForId] = lockValue;
@@ -625,12 +633,10 @@
 			
 		}
 		
-		public function GetAnimationLockedStatus(animIndex:int):Boolean
+		//Checks if an accessible animation is locked or unlocked.
+		public function GetAnimationLockedStatus(accessibleId:int):Boolean
 		{
-			var idTarget:int = GetIdTargetForIndex(animIndex);
-			if (idTarget == -1) { return false; }
-			else
-				return m_lockedAnimation[idTarget];
+			return m_lockedAnimation[accessibleId];
 		}
 		
 		public function GetAnimationLocks():Vector.<Boolean>
@@ -689,11 +695,12 @@
 			}
 		}
 		
-		public function GetNameOfAnimationById(animationId:int):String
+		public function GetNameOfAnimationByIndex(animationIndex:int):String
 		{
+			var accessibleId:int = m_idTargets[animationIndex];
 			for (var name:String in m_animationNames) 
 			{
-				if (m_animationNames[name] == animationId)
+				if (m_animationNames[name] == accessibleId)
 				{
 					return name;
 				}

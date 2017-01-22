@@ -1,5 +1,8 @@
 - ppppuXi Changelog -
 
+v1.0.2 January 21, 2017
+* Corrected behavior involving a character having locked animations being randomly selected if said character has linked scenes. This fix should also stop instances in which  locks on an animation were not saved/loaded. 
+
 v1.0.1 January 17, 2017
 * Mods added with sounds in the timeline of an animation will no longer have these sounds play during startup.
 

@@ -280,8 +280,6 @@ package
 			logger.info("Finished initialization.");
 			System.pauseForGCIfCollectionImminent(0);
 
-			//Allow sounds to be played again (the sound mixer was silenced in the preloader)
-			SoundMixer.soundTransform = new SoundTransform(1);
 			mainStage.play();
 		}
 		
@@ -393,6 +391,8 @@ package
 					ChangeBackgroundVisibility(userSettings.showBackground);
 					SetBackLight(userSettings.backlightOn);
 					PlayBackgroundAnimations();
+					//Allow sounds to be played again (the sound mixer was silenced in the preloader)
+					SoundMixer.soundTransform = new SoundTransform(1);
 					mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation()));
 					lastUpdateTime = getTimer();
 				}

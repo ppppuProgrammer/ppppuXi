@@ -277,7 +277,7 @@
 				for (var i:int = 0; i < accessibleAnimationsCount; i++) 
 				{
 					character.SetLockOnAnimation(i, false);
-					settings.animationLocked[character.GetNameOfAnimationById(i)] = false;
+					settings.animationLocked[character.GetNameOfAnimationByIndex(i)] = false;
 				}
 			}
 			else
@@ -295,7 +295,7 @@
 			}
 			var animSelect:int = character.GetIdOfAnimationName(settings.animationSelect);
 			
-			if (animSelect < 0 || character.GetAnimationLockedStatus(animSelect) == true)
+			if (animSelect < 0 || character.GetAnimationLockedStatus(character.GetAnimationIdTargets().indexOf(animSelect)) == true)
 			{
 				//No id was found or the animation was locked, so go random instead.
 				character.SetRandomizeAnimation(true);
@@ -376,7 +376,7 @@
 		{
 			var currChar:AnimatedCharacter = m_currentCharacter;
 			if (CheckIfTransitionLockIsActive() || currChar.GetTotalNumberOfAnimations() < characterAnimIndex || 
-				currChar.GetAnimationLockedStatus(characterAnimIndex))
+				currChar.GetAnimationLockedStatus(currChar.GetAnimationIdTargets().indexOf(characterAnimIndex)))
 			{
 				return false;
 			}
@@ -401,7 +401,7 @@
 				animationId = currCharacterAnimationIds[targetIndex];
 			}
 			m_currentCharacter.SetLockOnAnimation(animationId, lock);
-			return m_currentCharacter.GetAnimationLockedStatus(animationId);
+			return m_currentCharacter.GetAnimationLockedStatus(targetIndex);
 		}
 		
 		[inline]
@@ -521,9 +521,9 @@
 			return m_Characters[charId].GetIdOfAnimationName(animationName);
 		}
 		
-		public function GetNameOfAnimationByIdForCharacter(charId:int, animationId:int):String
+		public function GetNameOfAnimationByIndexForCharacter(charId:int, animationIndex:int):String
 		{
-			return m_Characters[charId].GetNameOfAnimationById(animationId);
+			return m_Characters[charId].GetNameOfAnimationByIndex(animationIndex);
 		}
 		
 		public function ChangeFrameOfCurrentAnimation(frame:int):void
