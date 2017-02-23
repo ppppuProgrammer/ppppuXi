@@ -399,6 +399,21 @@
 			}
 			m_lockedAnimation[indexForId] = lockValue;
 		}
+		//Same as SetLockOnAnimation but searches for an animation by its name, not its id number.
+		public function SetLockOnAnimationByName(animName:String, lockValue:Boolean):void
+		{
+			var indexForId:int = m_idTargets.indexOf(GetIdOfAnimationName(animName));
+			logger.debug("Trying to set lock on animation {0} (id {1}) to {2}",animName,  indexForId, lockValue);
+			/*Conditions that will not have a set locked:
+			 * 1) index for id [id target] is -1 (animation id did not belong to an accessible animation). 
+			 * 2) if lockValue is true: setting the lock on the given animation will lead to all animations being locked.*/
+			if( indexForId == -1 || (lockValue == true && GetNumberOfLockedAnimations() + 1 >= GetNumberOfAccessibleAnimations()) )
+			{
+				logger.debug("Could not change lock on animation {0} (id {1})", animName,  indexForId);
+				return;
+			}
+			m_lockedAnimation[indexForId] = lockValue;
+		}
 		
 		public function GetTotalNumberOfAnimations():int
 		{
@@ -697,6 +712,10 @@
 		
 		public function GetNameOfAnimationByIndex(animationIndex:int):String
 		{
+			if (animationIndex == -1)
+			{
+				return "";
+			}
 			var accessibleId:int = m_idTargets[animationIndex];
 			for (var name:String in m_animationNames) 
 			{

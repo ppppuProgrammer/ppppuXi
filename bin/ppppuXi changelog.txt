@@ -1,5 +1,9 @@
 - ppppuXi Changelog -
 
+v1.0.3 Febuary 22, 2017
+* Fixed error that was silently occuring when loading character settings during startup.
+* A character mod can now have its animations added to a character whose name is the same as the group name that the mod is in. To enable this behavior, set the property "ACHAR_tryToAddAnimationsToGroupFirst" for the modData object in the constructor of the character mod. A Boolean value (true/false) is expected.
+
 v1.0.2 January 21, 2017
 * Corrected behavior involving a character having locked animations being randomly selected if said character has linked scenes. This fix should also stop instances in which  locks on an animation were not saved/loaded. 
 

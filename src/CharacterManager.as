@@ -270,6 +270,7 @@
 					++lockedAnimationCount;
 				}
 			}
+			//var animationName:String;
 			if (lockedAnimationCount >= accessibleAnimationsCount /*&& settings.animationLocked*/)
 			{
 				logger.warn("All animations for " + character.GetName() + " were locked. Unlocking all their animations.");
@@ -285,7 +286,7 @@
 				for (var animationName:String in animLockObject)
 				{
 					var animId:int = character.GetIdOfAnimationName(animationName);
-					character.SetLockOnAnimation(animId, animLockObject[animationName]);
+					character.SetLockOnAnimationByName(animationName, animLockObject[animationName]);
 				}
 			}
 			m_characterLocks[charId] = settings.locked;

@@ -29,7 +29,8 @@ package modifications
 		protected var m_characterName:String;
 		//The name of the group this mod is in. This is for animation mods that add animations for the same character, visual wise (example: Peach and PeachP (polished)), without the issues caused by character name collisions.
 		protected var m_characterGroup:String;
-		
+		//Controls if the animations of this character mod are to be added to the character with the name indicated by the character group instead of being added as a seperate character. Requires the character group is not the same as the character name. Reason for using this: Consider a scenario in which there are 2 character mods for the same character (by name); This allows the user to load either character mod standalone without one being reliant on the other, as is the case when one of the mods is an Animation mod. 
+		//modData.ACHAR_tryToAddAnimationsToGroupFirst:Boolean = false;
 		
 		public function AnimatedCharacterMod() 
 		{

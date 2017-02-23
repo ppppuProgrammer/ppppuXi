@@ -593,21 +593,35 @@ package
 					var characterData:Object = animCharacterMod.GetCharacterData();
 					var character:AnimatedCharacter = new AnimatedCharacter(characterData);
 
-					/*To avoid a situation where character isn't added then their icon fails to be added, first a character
+					var treatingCharModAsAnimMod:Boolean = ("ACHAR_tryToAddAnimationsToGroupFirst" in animCharacterMod.modData) ? animCharacterMod.modData.ACHAR_tryToAddAnimationsToGroupFirst : false;
+					
+					//Character group must be different from character name and a character with the name of the group must be added already.
+					var foundTargettedCharacter:Boolean = ((characterData.group != characterData.name) && (characterManager.GetCharacterIdByName(characterData.group) > -1));
+					//Going to add this mod's animations to the character noted by group
+					if (treatingCharModAsAnimMod && foundTargettedCharacter)
+					{
+						characterManager.AddAnimationsToCharacter(characterData.group, characterData.animation);
+						addedMod = true;
+						logger.info("Successfully added animations from Character \"{0}\" to Character \"{1}\"", character.GetName(),characterData.group);
+					}
+					else //Adding the mod as a new character
+					{
+						/*To avoid a situation where character isn't added then their icon fails to be added, first a character
 					 * is verified if they can be added then the icon is added. If both these tasks are completed successfully then
 					 * the character is added.*/
-					var characterCanBeAdded:Boolean = characterManager.CheckIfCharacterCanBeAdded(character);
-					if (characterCanBeAdded == true)
-					{
-						mainMenu.AddIconToCharacterMenu(characterData.icon);
-						var addedCharacterId:int = characterManager.AddCharacter(character);
-						addedMod = true;
-						logger.info("Successfully added character: " +  character.GetName());
-						if(totalRunFrames > 0)	{TryToLoadCharacterSettings(addedCharacterId);}
-					}
-					else
-					{
-						logger.warn("Failed to add character: " + character.GetName());
+						var characterCanBeAdded:Boolean = characterManager.CheckIfCharacterCanBeAdded(character);
+						if (characterCanBeAdded == true)
+						{
+							mainMenu.AddIconToCharacterMenu(characterData.icon);
+							var addedCharacterId:int = characterManager.AddCharacter(character);
+							addedMod = true;
+							logger.info("Successfully added character: " +  character.GetName());
+							if(totalRunFrames > 0)	{TryToLoadCharacterSettings(addedCharacterId);}
+						}
+						else
+						{
+							logger.warn("Failed to add character: " + character.GetName());
+						}
 					}
 				}
 				else
@@ -638,7 +652,16 @@ package
 					}
 					
 					addedMod = true;
-					logger.info("Added animations to group {0} ({1}) from {2}", targetCharacterGroup, modifiedCharactersString, modClassName);
+					if (modifiedCharactersString.length == 0) 
+					{ 
+						//There were no characters in the group to add animations to 
+						logger.info("Group \"{0}\" had no characters to add animations from {1}", targetCharacterGroup, modClassName);
+					}
+					else
+					{
+						modifiedCharactersString = "Characters: " + modifiedCharactersString;
+						logger.info("Added animations to group \"{0}\" ({1}) from {2}", targetCharacterGroup, modifiedCharactersString, modClassName);
+					}
 				}
 				else
 				{
