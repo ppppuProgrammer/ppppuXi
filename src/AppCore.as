@@ -1221,21 +1221,23 @@ package
 		}
 		private function KeyPress_Music(keycode:int):void
 		{
-			var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
+			mainMenu.ToggleMusicPlayback();
+			/*var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
 			mainMenu.UpdateMusicEnabledButtonForMusicMenu(musicEnabled);
 			userSettings.playMusic = musicEnabled;
 			var displayText:String = musicPlayer.PlayMusic( -2, GetCompletionTimeForAnimation());
-			mainMenu.ChangeMusicMenuDisplayedInfo(displayText);
+			mainMenu.ChangeMusicMenuDisplayedInfo(displayText);*/
 		}
 		private function KeyPress_CharacterPreferredMusic(keycode:int):void
 		{
-			var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
+			mainMenu.ChangeToCharacterPreferredMusic();
+			/*var musicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
 			if (musicId > -1)
 			{
 				var musicDisplayInfo:String = musicPlayer.PlayMusic(musicId, GetCompletionTimeForAnimation());
 				mainMenu.ChangeMusicMenuDisplayedInfo(musicDisplayInfo);
 				userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
-			}
+			}*/
 		}
 		private function KeyPress_NextHelpPage(keycode:int):void
 		{
@@ -1251,13 +1253,15 @@ package
 		}
 		private function KeyPress_ChangeToPrevMusic(keycode:int):void
 		{
-			mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(GetCompletionTimeForAnimation()));
-			userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+			mainMenu.SelectPreviousMusic();
+			/*mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToPrevMusic(GetCompletionTimeForAnimation()));
+			userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();*/
 		}
 		private function KeyPress_ChangeToNextMusic(keycode:int):void
 		{
-			mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(GetCompletionTimeForAnimation()));
-			userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+			mainMenu.SelectNextMusic();
+			/*mainMenu.ChangeMusicMenuDisplayedInfo(musicPlayer.ChangeToNextMusic(GetCompletionTimeForAnimation()));
+			userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();*/
 		}
 		private function KeyPress_ActivateAnimationTransition(keycode:int):void
 		{

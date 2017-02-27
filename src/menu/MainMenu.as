@@ -186,11 +186,12 @@ package menu
 		
 		private function ClickHandler(e:Event):void
 		{
-			var displayText:String;
+			//var displayText:String;
 			switch(e.currentTarget.name)
 			{
 				case "Preferred Music Button":
-					var preferredMusicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
+					ChangeToCharacterPreferredMusic();
+					/*var preferredMusicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
 					if (preferredMusicId > -1)
 					{
 						displayText = musicPlayer.PlayMusic(preferredMusicId, currentTimeForAnimation);
@@ -199,21 +200,27 @@ package menu
 					else
 					{
 						displayText = null;
-					}
+					}*/
 					break;
 				case "Music Toggle Button":
+					ToggleMusicPlayback();
+					/*if (characterManager.CheckIfTransitionLockIsActive() == true)
+					{
 					var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
 					musicMenu.UpdateMusicEnabledButton(musicEnabled);
 					userSettings.playMusic = musicEnabled;
-					displayText = musicPlayer.PlayMusic(-2, currentTimeForAnimation); 
+					displayText = musicPlayer.PlayMusic( -2, currentTimeForAnimation); 
+					}*/
 					break;
 				case "Next Music Button":
-					displayText = musicPlayer.ChangeToNextMusic(currentTimeForAnimation);
-					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					SelectNextMusic();
+					/*displayText = musicPlayer.ChangeToNextMusic(currentTimeForAnimation);
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();*/
 					break;
 				case "Previous Music Button":
-					displayText = musicPlayer.ChangeToPrevMusic(currentTimeForAnimation);
-					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+					SelectPreviousMusic();
+					/*displayText = musicPlayer.ChangeToPrevMusic(currentTimeForAnimation);
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();*/
 					break;
 				case "Animation Transition Button":
 					characterManager.ActivateAnimationChange();
@@ -222,7 +229,7 @@ package menu
 			//Unlike the other event handlers DO NOT STOP PROPAGATION. This will cause select events to not
 			//be dispatch as certain elements, such as list items, will not receive the click event necessary
 			//to cause the dispatch.
-			ChangeMusicMenuDisplayedInfo(displayText);
+			//ChangeMusicMenuDisplayedInfo(displayText);
 		}
 		//}
 		
@@ -537,6 +544,65 @@ package menu
 		public function UpdateMusicEnabledButtonForMusicMenu(enabled:Boolean):void
 		{
 			musicMenu.UpdateMusicEnabledButton(enabled);
+		}
+		
+		[inline]
+		public function ToggleMusicPlayback():void
+		{
+			if (characterManager.CheckIfTransitionLockIsActive() == false)
+			{
+				var displayText:String;
+				var musicEnabled:Boolean = musicPlayer.SetIfMusicIsEnabled(!musicPlayer.IsMusicPlaying());
+				musicMenu.UpdateMusicEnabledButton(musicEnabled);
+				userSettings.playMusic = musicEnabled;
+				displayText = musicPlayer.PlayMusic( -2, currentTimeForAnimation); 
+				ChangeMusicMenuDisplayedInfo(displayText);
+			}
+		}
+		
+		[inline]
+		public function ChangeToCharacterPreferredMusic():void
+		{
+			if (characterManager.CheckIfTransitionLockIsActive() == false)
+			{
+				var displayText:String;
+				var preferredMusicId:int = musicPlayer.GetMusicIdByName(characterManager.GetPreferredMusicForCurrentCharacter());
+				if (preferredMusicId > -1)
+				{
+					
+					displayText = musicPlayer.PlayMusic(preferredMusicId, currentTimeForAnimation);
+					userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+				}
+				else
+				{
+					displayText = null;
+				}
+				ChangeMusicMenuDisplayedInfo(displayText);
+			}
+		}
+		
+		[inline]
+		public function SelectNextMusic():void
+		{
+			if (characterManager.CheckIfTransitionLockIsActive() == false)
+			{
+				var displayText:String;
+				displayText = musicPlayer.ChangeToNextMusic(currentTimeForAnimation);
+				userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+				ChangeMusicMenuDisplayedInfo(displayText);
+			}
+		}
+		
+		[inline]
+		public function SelectPreviousMusic():void
+		{
+			if (characterManager.CheckIfTransitionLockIsActive() == false)
+			{
+				var displayText:String;
+				displayText = musicPlayer.ChangeToPrevMusic(currentTimeForAnimation);
+				userSettings.globalSongTitle = musicPlayer.GetNameOfCurrentMusic();
+				ChangeMusicMenuDisplayedInfo(displayText);
+			}
 		}
 		//}
 	}

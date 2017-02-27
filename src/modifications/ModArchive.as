@@ -1,6 +1,7 @@
 package modifications 
 {
 	import flash.utils.getQualifiedClassName;
+	import flash.events.Event;
 	/**
 	 * A ppppuMod subclass that is used as an archive that contains various ppppuMods that actually contain data to be added 
 	 * to the ppppu program
@@ -52,7 +53,17 @@ package modifications
 		/*FirstFrame should be defined by the subclass of the ModArchive. In the body for the function, the various mods that
 		are to be added should be created and pushed (or added however you want) into the modsList vector and then 
 		added to the mod archive's display list.*/
-		//protected function FirstFrame(e:Event):void;
+		override protected function FirstFrame(e:Event):void
+		{
+			for (var i:int = 0; i < modsList.length; i++) 
+			{
+				this.addChild(modsList[i]);
+				//this.removeChild(modsList[i]);
+			}
+			this.removeChildren();
+			super.FirstFrame(e);
+		}
+		
 	}
 
 }

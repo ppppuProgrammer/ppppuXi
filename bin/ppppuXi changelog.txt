@@ -1,5 +1,9 @@
 - ppppuXi Changelog -
 
+v1.0.4 Febuary 27, 2017
+* Code fix: Implemented missing function for the ModArchive base class to allow their contained child mods to do their initialization process.
+* Bug fix: Fixed bug that happens if a music change (enabling it or changing to a character's preferred music) during an transition animation would allow music to play and then double up when the transition animation ended.
+
 v1.0.3 Febuary 22, 2017
 * Fixed error that was silently occuring when loading character settings during startup.
 * A character mod can now have its animations added to a character whose name is the same as the group name that the mod is in. To enable this behavior, set the property "ACHAR_tryToAddAnimationsToGroupFirst" for the modData object in the constructor of the character mod. A Boolean value (true/false) is expected.
